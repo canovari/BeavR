@@ -154,7 +154,7 @@ struct PostDetailView: View {
                 UIApplication.shared.open(url)
             }
         case "instagram":
-            if let url = URL(string: "https://instagram.com/\(contact.value)") {
+            if let url = instagramURL(from: contact.value) {
                 UIApplication.shared.open(url)
             }
         case "facebook":
@@ -181,6 +181,25 @@ struct PostDetailView: View {
         case "email": return "envelope.fill"
         default: return "person.crop.circle"
         }
+    }
+
+    private func instagramURL(from value: String) -> URL? {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        if let url = URL(string: trimmed), let scheme = url.scheme, !scheme.isEmpty {
+            return url
+        }
+
+        let lower = trimmed.lowercased()
+        if lower.hasPrefix("instagram.com") || lower.hasPrefix("www.instagram.com") ||
+            lower.hasPrefix("instagr.am") || lower.hasPrefix("www.instagr.am") {
+            return URL(string: "https://\(trimmed)")
+        }
+
+        let handle = ContactInfo.sanitizedValue(for: "instagram", rawValue: trimmed)
+        guard !handle.isEmpty else { return nil }
+        return URL(string: "https://instagram.com/\(handle)")
     }
 
 }

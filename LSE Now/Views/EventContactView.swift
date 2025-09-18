@@ -29,6 +29,10 @@ struct EventContactView: View {
                         .keyboardType(.emailAddress)
                         .autocapitalization(.none)
                         .textInputAutocapitalization(.never)
+                } else if selectedType == "Instagram" {
+                    TextField("Instagram username (e.g. @society)", text: $value)
+                        .autocapitalization(.none)
+                        .textInputAutocapitalization(.never)
                 } else {
                     TextField("Paste link to the account or post", text: $value)
                         .autocapitalization(.none)
@@ -41,16 +45,21 @@ struct EventContactView: View {
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
                 Button("Save") {
-                    contact = ContactInfo(type: selectedType, value: value)
+                    let sanitized = ContactInfo.sanitizedValue(for: selectedType, rawValue: value)
+                    contact = ContactInfo(type: selectedType, value: sanitized)
                     dismiss()   // 👈 closes and goes back automatically
                 }
             }
         }
         .onAppear {
             if let c = contact {
-                selectedType = c.type
-                value = c.value
+                selectedType = normalizedType(c.type)
+                value = ContactInfo.displayValue(for: selectedType, storedValue: c.value)
             }
         }
+    }
+
+    private func normalizedType(_ incoming: String) -> String {
+        types.first(where: { $0.lowercased() == incoming.lowercased() }) ?? incoming
     }
 }
