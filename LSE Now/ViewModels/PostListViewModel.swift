@@ -8,30 +8,61 @@ class PostListViewModel: ObservableObject {
     private var allPosts: [Post] = []
     private var expiryTimer: Timer?
     private let expiryCheckInterval: TimeInterval = 60
+    private var refreshTask: Task<Void, Never>?
+    private let session: URLSession
+
+    private static let minimumUserRefreshDelay: TimeInterval = 1
+
+    init(session: URLSession = .shared) {
+        self.session = session
+    }
 
     deinit {
         expiryTimer?.invalidate()
+        refreshTask?.cancel()
     }
 
     func fetchPosts(enforceMinimumDelay: Bool = false) {
-        Task {
-            await refreshPosts(enforceMinimumDelay: enforceMinimumDelay)
-        }
+        guard !isLoading else { return }
+        let minimumDelay = enforceMinimumDelay ? Self.minimumUserRefreshDelay : nil
+        startBackgroundRefresh(minimumDelay: minimumDelay)
     }
 
     func refreshPosts(enforceMinimumDelay: Bool = false) async {
-        guard !isLoading else { return }
+        let minimumDelay = enforceMinimumDelay ? Self.minimumUserRefreshDelay : nil
+        refreshTask?.cancel()
+        refreshTask = nil
+        await performRefresh(minimumDelay: minimumDelay, clearsBackgroundTask: false)
+    }
+
+    private func startBackgroundRefresh(minimumDelay: TimeInterval?) {
+        if let existingTask = refreshTask, !existingTask.isCancelled {
+            return
+        }
+
+        refreshTask?.cancel()
+        refreshTask = Task {
+            await performRefresh(minimumDelay: minimumDelay, clearsBackgroundTask: true)
+        }
+    }
+
+    private func performRefresh(minimumDelay: TimeInterval?, clearsBackgroundTask: Bool) async {
         guard let url = URL(string: "https://www.canovari.com/api/events.php") else { return }
 
         isLoading = true
-        defer { isLoading = false }
+        let refreshStart = Date()
+        defer {
+            isLoading = false
+            if clearsBackgroundTask {
+                refreshTask = nil
+            }
+        }
 
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        let refreshStart = Date()
 
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            let (data, _) = try await session.data(from: url)
 
             if let raw = String(data: data, encoding: .utf8) {
                 print("📥 Raw API response:", raw)
@@ -39,11 +70,10 @@ class PostListViewModel: ObservableObject {
 
             let decodedPosts = try decoder.decode([Post].self, from: data)
 
-            if enforceMinimumDelay {
-                let minimumDuration: TimeInterval = 1
+            if let minimumDelay {
                 let elapsed = Date().timeIntervalSince(refreshStart)
-                if elapsed < minimumDuration {
-                    let remaining = minimumDuration - elapsed
+                if elapsed < minimumDelay {
+                    let remaining = minimumDelay - elapsed
                     let nanoseconds = UInt64(remaining * 1_000_000_000)
                     if nanoseconds > 0 {
                         try await Task.sleep(nanoseconds: nanoseconds)
@@ -57,7 +87,6 @@ class PostListViewModel: ObservableObject {
             print("📦 Active posts after expiry filter:", posts.count)
             startExpiryTimer()
         } catch is CancellationError {
-            // Refresh was cancelled (e.g. user navigated away); no need to log.
             return
         } catch let urlError as URLError {
             if urlError.code == .cancelled {
