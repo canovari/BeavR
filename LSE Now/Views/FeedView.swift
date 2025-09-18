@@ -6,21 +6,31 @@ struct FeedView: View {
     @State private var showFilterSheet = false
     @State private var selectedCategory: String? = nil
     @State private var selectedDate: Date? = nil
+    @State private var searchText: String = ""
     
     // Single animation driver for all live indicators
     @State private var blink = false
     
     var filteredPosts: [Post] {
-        vm.posts
+        let trimmedSearch = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        return vm.posts
             .filter { post in
-                var include = true
-                if let category = selectedCategory, !category.isEmpty {
-                    include = include && (post.category == category)
+                if let category = selectedCategory, !category.isEmpty, post.category != category {
+                    return false
                 }
-                if let date = selectedDate {
-                    include = include && Calendar.current.isDate(post.startTime, inSameDayAs: date)
+
+                if let date = selectedDate, !Calendar.current.isDate(post.startTime, inSameDayAs: date) {
+                    return false
                 }
-                return include
+
+                guard !trimmedSearch.isEmpty else { return true }
+
+                let keyword = trimmedSearch.lowercased()
+                let titleMatch = post.title.lowercased().contains(keyword)
+                let organizerMatch = post.organization?.lowercased().contains(keyword) ?? false
+
+                return titleMatch || organizerMatch
             }
             .sorted(by: { $0.startTime < $1.startTime })
     }
@@ -79,6 +89,7 @@ struct FeedView: View {
                 }
             }
             .navigationTitle("Feed")
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search events")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
