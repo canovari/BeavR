@@ -20,8 +20,8 @@ struct MapView: View {
         return vm.posts.filter { post in
             guard let _ = post.latitude, let _ = post.longitude else { return false }
 
-            // hide if ended
-            if let end = post.endTime, end <= now { return false }
+            // hide if expired based on end time or start time window
+            if post.isExpired(referenceDate: now) { return false }
 
             // show only if start time within next 16h
             return post.startTime <= cutoff
