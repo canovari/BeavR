@@ -67,11 +67,15 @@ struct PostDetailView: View {
 
                 // --- Map Preview
                 if let lat = post.latitude, let lon = post.longitude {
-                    Map(coordinateRegion: .constant(MKCoordinateRegion(
-                        center: CLLocationCoordinate2D(latitude: lat, longitude: lon),
+                    let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+                    let region = MKCoordinateRegion(
+                        center: coordinate,
                         span: MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
-                    )), annotationItems: [CLLocationCoordinate2D(latitude: lat, longitude: lon)]) { coord in
-                        MapMarker(coordinate: coord, tint: .red)
+                    )
+
+                    Map(initialPosition: .region(region)) {
+                        Marker(post.title, coordinate: coordinate)
+                            .tint(.red)
                     }
                     .frame(height: 200)
                     .cornerRadius(12)
@@ -202,9 +206,4 @@ struct PostDetailView: View {
         return URL(string: "https://instagram.com/\(handle)")
     }
 
-}
-
-// MARK: - Identifiable helper
-extension CLLocationCoordinate2D: Identifiable {
-    public var id: String { "\(latitude),\(longitude)" }
 }

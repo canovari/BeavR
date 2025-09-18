@@ -59,27 +59,33 @@ struct AddEventView: View {
                     DatePicker("End Time", selection: $endTime, displayedComponents: .hourAndMinute)
                 }
 
-                // Location (no autocomplete)
-                TextField("Location", text: $locationQuery)
-                    .modifier(ValidationHighlight(isInvalid: invalidFields.contains("location")))
-                    .focused($focusedField, equals: "location")
-
-                // Map Pin
+                // Location & Map Pin
                 NavigationLink {
-                    ConfirmEventSpotView { coordinate in
+                    ConfirmEventSpotView(
+                        initialCoordinate: pickedCoordinate,
+                        locationText: $locationQuery
+                    ) { coordinate in
                         pickedCoordinate = coordinate
                     }
                 } label: {
                     HStack {
                         Text("Map Pin")
-                        if pickedCoordinate != nil {
-                            Spacer()
+                        Spacer()
+                        if !locationQuery.isEmpty {
+                            Text(locationQuery)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.trailing)
+                                .lineLimit(2)
+                                .font(.callout)
+                        } else if pickedCoordinate != nil {
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundColor(.green)
                         }
                     }
                 }
-                .modifier(ValidationHighlight(isInvalid: invalidFields.contains("mapPin")))
+                .modifier(ValidationHighlight(
+                    isInvalid: invalidFields.contains("mapPin") || invalidFields.contains("location")
+                ))
 
                 // Category
                 NavigationLink {
