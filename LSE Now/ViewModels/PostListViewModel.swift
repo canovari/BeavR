@@ -9,6 +9,30 @@ class PostListViewModel: ObservableObject {
     private var expiryTimer: Timer?
     private let expiryCheckInterval: TimeInterval = 60
 
+    private let eventsEndpoint = URL(string: "https://www.canovari.com/api/events.php")!
+    private lazy var urlSession: URLSession = {
+        let configuration = URLSessionConfiguration.default
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        configuration.waitsForConnectivity = true
+        configuration.timeoutIntervalForRequest = 15
+        configuration.timeoutIntervalForResource = 30
+        return URLSession(configuration: configuration)
+    }()
+
+    private enum FetchError: LocalizedError {
+        case invalidResponse
+        case invalidStatus(Int)
+
+        var errorDescription: String? {
+            switch self {
+            case .invalidResponse:
+                return "Invalid response from the server."
+            case .invalidStatus(let code):
+                return "Server responded with status code \(code)."
+            }
+        }
+    }
+
     deinit {
         expiryTimer?.invalidate()
     }
@@ -21,7 +45,6 @@ class PostListViewModel: ObservableObject {
 
     func refreshPosts() async {
         guard !isLoading else { return }
-        guard let url = URL(string: "https://www.canovari.com/api/events.php") else { return }
 
         isLoading = true
         defer { isLoading = false }
@@ -30,25 +53,59 @@ class PostListViewModel: ObservableObject {
         decoder.dateDecodingStrategy = .iso8601
 
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
-
-            if let raw = String(data: data, encoding: .utf8) {
-                print("📥 Raw API response:", raw)
-            }
-
-            let decodedPosts = try decoder.decode([Post].self, from: data)
+            let decodedPosts = try await fetchRemotePosts(using: decoder)
 
             print("✅ Decoded posts count:", decodedPosts.count)
             allPosts = decodedPosts
             applyExpiryPolicy()
             print("📦 Active posts after expiry filter:", posts.count)
             startExpiryTimer()
+        } catch let fetchError as FetchError {
+            print("❌ Network error:", fetchError.localizedDescription)
         } catch let urlError as URLError {
-            print("❌ Network error:", urlError.localizedDescription)
+            if urlError.code == .cancelled {
+                print("⚠️ Network request was cancelled.")
+            } else {
+                print("❌ Network error:", urlError.localizedDescription)
+            }
         } catch let decodingError as DecodingError {
             print("❌ Decoding error:", decodingError)
+        } catch is CancellationError {
+            print("⚠️ Refresh task was cancelled")
         } catch {
             print("❌ Unexpected error:", error.localizedDescription)
+        }
+    }
+
+    private func fetchRemotePosts(using decoder: JSONDecoder, retryOnCancellation: Bool = true) async throws -> [Post] {
+        var request = URLRequest(url: eventsEndpoint)
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+        request.timeoutInterval = 15
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+        do {
+            let (data, response) = try await urlSession.data(for: request, delegate: nil)
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw FetchError.invalidResponse
+            }
+
+            guard (200..<300).contains(httpResponse.statusCode) else {
+                throw FetchError.invalidStatus(httpResponse.statusCode)
+            }
+
+            if let raw = String(data: data, encoding: .utf8) {
+                print("📥 Raw API response:", raw)
+            }
+
+            return try decoder.decode([Post].self, from: data)
+        } catch let urlError as URLError where urlError.code == .cancelled && retryOnCancellation {
+            print("⚠️ Request cancelled mid-refresh. Retrying once...")
+            try Task.checkCancellation()
+            try await Task.sleep(nanoseconds: 200_000_000)
+            return try await fetchRemotePosts(using: decoder, retryOnCancellation: false)
+        } catch {
+            throw error
         }
     }
 
