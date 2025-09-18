@@ -1,0 +1,643 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		9AE9E16D2E7B34B9005D3827 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9AE9E1572E7B34B7005D3827 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9AE9E15E2E7B34B7005D3827;
+			remoteInfo = "LSE Now";
+		};
+		9AE9E1772E7B34B9005D3827 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9AE9E1572E7B34B7005D3827 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9AE9E15E2E7B34B7005D3827;
+			remoteInfo = "LSE Now";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		9AE9E15F2E7B34B7005D3827 /* LSE Now.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "LSE Now.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9AE9E16C2E7B34B9005D3827 /* LSE NowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "LSE NowTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9AE9E1762E7B34B9005D3827 /* LSE NowUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "LSE NowUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		9AE9E19B2E7B352F005D3827 /* Exceptions for "LSE Now" folder in "LSE Now" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Assets.xcassets,
+				LSE_NowApp.swift,
+				Models/ContactInfo.swift,
+				Models/Post.swift,
+				Models/User.swift,
+				Networking/APIService.swift,
+				Services/LocationSearchCompleter.swift,
+				ViewModels/PostListViewModel.swift,
+				Views/AddEventView.swift,
+				Views/CategorySelectionView.swift,
+				Views/ConfirmEventSpotView.swift,
+				Views/ContactView.swift,
+				Views/ContentView.swift,
+				Views/EventCardView.swift,
+				Views/EventContactView.swift,
+				Views/ExploreView.swift,
+				Views/FeedView.swift,
+				Views/HelpView.swift,
+				Views/LaunchView.swift,
+				Views/MainTabView.swift,
+				Views/MapView.swift,
+				Views/NewEventView.swift,
+				Views/PostDetailView.swift,
+				Views/PostListView.swift,
+				Views/PostRowView.swift,
+				Views/ProfileView.swift,
+				Views/SubmissionConfirmationView.swift,
+			);
+			target = 9AE9E15E2E7B34B7005D3827 /* LSE Now */;
+		};
+		9AE9E19C2E7B352F005D3827 /* Exceptions for "LSE Now" folder in "LSE NowUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Assets.xcassets,
+				LSE_NowApp.swift,
+			);
+			target = 9AE9E1752E7B34B9005D3827 /* LSE NowUITests */;
+		};
+		9AE9E1B22E7B375C005D3827 /* Exceptions for "LSE Now" folder in "LSE NowTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Models/ContactInfo.swift,
+				Models/Post.swift,
+				Models/User.swift,
+				Networking/APIService.swift,
+				Services/LocationSearchCompleter.swift,
+				ViewModels/PostListViewModel.swift,
+				Views/AddEventView.swift,
+				Views/CategorySelectionView.swift,
+				Views/ConfirmEventSpotView.swift,
+				Views/ContactView.swift,
+				Views/ContentView.swift,
+				Views/EventCardView.swift,
+				Views/EventContactView.swift,
+				Views/ExploreView.swift,
+				Views/FeedView.swift,
+				Views/HelpView.swift,
+				Views/LaunchView.swift,
+				Views/MainTabView.swift,
+				Views/MapView.swift,
+				Views/NewEventView.swift,
+				Views/PostDetailView.swift,
+				Views/PostListView.swift,
+				Views/PostRowView.swift,
+				Views/ProfileView.swift,
+				Views/SubmissionConfirmationView.swift,
+			);
+			target = 9AE9E16B2E7B34B9005D3827 /* LSE NowTests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		9AE9E16F2E7B34B9005D3827 /* LSE NowTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "LSE NowTests";
+			sourceTree = "<group>";
+		};
+		9AE9E1792E7B34B9005D3827 /* LSE NowUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "LSE NowUITests";
+			sourceTree = "<group>";
+		};
+		9AE9E1972E7B352F005D3827 /* LSE Now */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				9AE9E19B2E7B352F005D3827 /* Exceptions for "LSE Now" folder in "LSE Now" target */,
+				9AE9E1B22E7B375C005D3827 /* Exceptions for "LSE Now" folder in "LSE NowTests" target */,
+				9AE9E19C2E7B352F005D3827 /* Exceptions for "LSE Now" folder in "LSE NowUITests" target */,
+			);
+			path = "LSE Now";
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		9AE9E15C2E7B34B7005D3827 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9AE9E1692E7B34B9005D3827 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9AE9E1732E7B34B9005D3827 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		9AE9E1562E7B34B7005D3827 = {
+			isa = PBXGroup;
+			children = (
+				9AE9E1972E7B352F005D3827 /* LSE Now */,
+				9AE9E16F2E7B34B9005D3827 /* LSE NowTests */,
+				9AE9E1792E7B34B9005D3827 /* LSE NowUITests */,
+				9AE9E1602E7B34B7005D3827 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		9AE9E1602E7B34B7005D3827 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9AE9E15F2E7B34B7005D3827 /* LSE Now.app */,
+				9AE9E16C2E7B34B9005D3827 /* LSE NowTests.xctest */,
+				9AE9E1762E7B34B9005D3827 /* LSE NowUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		9AE9E15E2E7B34B7005D3827 /* LSE Now */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9AE9E1802E7B34B9005D3827 /* Build configuration list for PBXNativeTarget "LSE Now" */;
+			buildPhases = (
+				9AE9E15B2E7B34B7005D3827 /* Sources */,
+				9AE9E15C2E7B34B7005D3827 /* Frameworks */,
+				9AE9E15D2E7B34B7005D3827 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "LSE Now";
+			packageProductDependencies = (
+			);
+			productName = "LSE Now";
+			productReference = 9AE9E15F2E7B34B7005D3827 /* LSE Now.app */;
+			productType = "com.apple.product-type.application";
+		};
+		9AE9E16B2E7B34B9005D3827 /* LSE NowTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9AE9E1832E7B34B9005D3827 /* Build configuration list for PBXNativeTarget "LSE NowTests" */;
+			buildPhases = (
+				9AE9E1682E7B34B9005D3827 /* Sources */,
+				9AE9E1692E7B34B9005D3827 /* Frameworks */,
+				9AE9E16A2E7B34B9005D3827 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9AE9E16E2E7B34B9005D3827 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				9AE9E16F2E7B34B9005D3827 /* LSE NowTests */,
+			);
+			name = "LSE NowTests";
+			packageProductDependencies = (
+			);
+			productName = "LSE NowTests";
+			productReference = 9AE9E16C2E7B34B9005D3827 /* LSE NowTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		9AE9E1752E7B34B9005D3827 /* LSE NowUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9AE9E1862E7B34B9005D3827 /* Build configuration list for PBXNativeTarget "LSE NowUITests" */;
+			buildPhases = (
+				9AE9E1722E7B34B9005D3827 /* Sources */,
+				9AE9E1732E7B34B9005D3827 /* Frameworks */,
+				9AE9E1742E7B34B9005D3827 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9AE9E1782E7B34B9005D3827 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				9AE9E1792E7B34B9005D3827 /* LSE NowUITests */,
+				9AE9E1972E7B352F005D3827 /* LSE Now */,
+			);
+			name = "LSE NowUITests";
+			packageProductDependencies = (
+			);
+			productName = "LSE NowUITests";
+			productReference = 9AE9E1762E7B34B9005D3827 /* LSE NowUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9AE9E1572E7B34B7005D3827 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1630;
+				LastUpgradeCheck = 1630;
+				TargetAttributes = {
+					9AE9E15E2E7B34B7005D3827 = {
+						CreatedOnToolsVersion = 16.3;
+					};
+					9AE9E16B2E7B34B9005D3827 = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = 9AE9E15E2E7B34B7005D3827;
+					};
+					9AE9E1752E7B34B9005D3827 = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = 9AE9E15E2E7B34B7005D3827;
+					};
+				};
+			};
+			buildConfigurationList = 9AE9E15A2E7B34B7005D3827 /* Build configuration list for PBXProject "LSE Now" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 9AE9E1562E7B34B7005D3827;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 9AE9E1602E7B34B7005D3827 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				9AE9E15E2E7B34B7005D3827 /* LSE Now */,
+				9AE9E16B2E7B34B9005D3827 /* LSE NowTests */,
+				9AE9E1752E7B34B9005D3827 /* LSE NowUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		9AE9E15D2E7B34B7005D3827 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9AE9E16A2E7B34B9005D3827 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9AE9E1742E7B34B9005D3827 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9AE9E15B2E7B34B7005D3827 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9AE9E1682E7B34B9005D3827 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9AE9E1722E7B34B9005D3827 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		9AE9E16E2E7B34B9005D3827 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9AE9E15E2E7B34B7005D3827 /* LSE Now */;
+			targetProxy = 9AE9E16D2E7B34B9005D3827 /* PBXContainerItemProxy */;
+		};
+		9AE9E1782E7B34B9005D3827 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9AE9E15E2E7B34B7005D3827 /* LSE Now */;
+			targetProxy = 9AE9E1772E7B34B9005D3827 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		9AE9E17E2E7B34B9005D3827 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = WL8UVSQD3L;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		9AE9E17F2E7B34B9005D3827 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = WL8UVSQD3L;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		9AE9E1812E7B34B9005D3827 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = WL8UVSQD3L;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "pietro.LSE-Now";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		9AE9E1822E7B34B9005D3827 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = WL8UVSQD3L;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "pietro.LSE-Now";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		9AE9E1842E7B34B9005D3827 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = WL8UVSQD3L;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "pietro.LSE-NowTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LSE Now.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LSE Now";
+			};
+			name = Debug;
+		};
+		9AE9E1852E7B34B9005D3827 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = WL8UVSQD3L;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "pietro.LSE-NowTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LSE Now.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LSE Now";
+			};
+			name = Release;
+		};
+		9AE9E1872E7B34B9005D3827 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = WL8UVSQD3L;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "pietro.LSE-NowUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "LSE Now";
+			};
+			name = Debug;
+		};
+		9AE9E1882E7B34B9005D3827 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = WL8UVSQD3L;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "pietro.LSE-NowUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "LSE Now";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		9AE9E15A2E7B34B7005D3827 /* Build configuration list for PBXProject "LSE Now" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9AE9E17E2E7B34B9005D3827 /* Debug */,
+				9AE9E17F2E7B34B9005D3827 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9AE9E1802E7B34B9005D3827 /* Build configuration list for PBXNativeTarget "LSE Now" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9AE9E1812E7B34B9005D3827 /* Debug */,
+				9AE9E1822E7B34B9005D3827 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9AE9E1832E7B34B9005D3827 /* Build configuration list for PBXNativeTarget "LSE NowTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9AE9E1842E7B34B9005D3827 /* Debug */,
+				9AE9E1852E7B34B9005D3827 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9AE9E1862E7B34B9005D3827 /* Build configuration list for PBXNativeTarget "LSE NowUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9AE9E1872E7B34B9005D3827 /* Debug */,
+				9AE9E1882E7B34B9005D3827 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 9AE9E1572E7B34B7005D3827 /* Project object */;
+}
