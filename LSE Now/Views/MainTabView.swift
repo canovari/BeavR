@@ -1,8 +1,20 @@
 import SwiftUI
+import UIKit
 
 struct MainTabView: View {
-    @StateObject var viewModel: PostListViewModel
+    @StateObject private var viewModel: PostListViewModel
     @State private var selection = 0
+
+    init(viewModel: PostListViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor.systemGroupedBackground
+
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
+    }
 
     var body: some View {
         TabView(selection: $selection) {
