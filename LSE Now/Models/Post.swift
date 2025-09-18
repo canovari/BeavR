@@ -23,4 +23,35 @@ struct Post: Identifiable, Codable, Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
+
+    func isExpired(referenceDate: Date = Date()) -> Bool {
+        guard endTime == nil else { return false }
+        let expiryCutoff = startTime.addingTimeInterval(2 * 3600)
+        return referenceDate >= expiryCutoff
+    }
+
+    func updatingStatusForExpiry(referenceDate: Date = Date()) -> Post {
+        guard isExpired(referenceDate: referenceDate) else { return self }
+        if status?.lowercased() == "expired" { return self }
+        return Post(
+            id: id,
+            title: title,
+            startTime: startTime,
+            endTime: endTime,
+            location: location,
+            description: description,
+            organization: organization,
+            category: category,
+            imageUrl: imageUrl,
+            status: "expired",
+            latitude: latitude,
+            longitude: longitude,
+            contact: contact
+        )
+    }
+
+    var resolvedStatus: String {
+        if isExpired() { return "expired" }
+        return status ?? "pending"
+    }
 }
