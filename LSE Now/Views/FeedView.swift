@@ -7,7 +7,7 @@ struct FeedView: View {
     @State private var selectedCategory: String? = nil
     @State private var selectedDate: Date? = nil
     
-    // Single animation driver for all LIVE badges
+    // Single animation driver for all live indicators
     @State private var blink = false
     
     var filteredPosts: [Post] {
@@ -47,40 +47,14 @@ struct FeedView: View {
                                                 .foregroundColor(.secondary)
                                         }
                                         
-                                        Text(dateOrLiveLabel(for: post))
+                                        dateOrLiveView(for: post)
                                             .font(.subheadline)
-                                            .foregroundColor(Color("LSERed"))
                                     }
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .padding()
                                     .background(Color(.systemBackground))
                                     .cornerRadius(12)
                                     .shadow(radius: 1)
-                                    
-                                    // LIVE badge (if event is ongoing)
-                                    if eventIsOngoing(post: post) {
-                                        HStack(spacing: 4) {
-                                            Circle()
-                                                .fill(Color.white)
-                                                .frame(width: 6, height: 6)
-                                                .overlay(
-                                                    Circle()
-                                                        .fill(Color.red)
-                                                        .frame(width: 6, height: 6)
-                                                        .opacity(blink ? 0.2 : 1) // ✅ only opacity animates
-                                                )
-                                            
-                                            Text("LIVE")
-                                                .font(.caption2)
-                                                .bold()
-                                                .foregroundColor(.white)
-                                        }
-                                        .padding(.horizontal, 6)
-                                        .padding(.vertical, 2)
-                                        .background(Color.red)
-                                        .cornerRadius(4)
-                                        .padding([.top, .trailing], 8)
-                                    }
                                 }
                             }
                             .buttonStyle(PlainButtonStyle())
@@ -122,9 +96,10 @@ struct FeedView: View {
             }
             .onAppear {
                 // Start blinking loop
-                withAnimation(.linear(duration: 1).repeatForever(autoreverses: true)) {
-                    blink.toggle()
-                }
+                blink = true
+            }
+            .onDisappear {
+                blink = false
             }
         }
     }
@@ -132,20 +107,42 @@ struct FeedView: View {
     // MARK: - Helpers
     private func eventIsOngoing(post: Post) -> Bool {
         let now = Date()
-        let hasStarted = now >= post.startTime
-        let notEnded = post.endTime == nil || post.endTime! > now
-        return hasStarted && notEnded
+        guard now >= post.startTime else { return false }
+        return !post.isExpired(referenceDate: now)
     }
-    
-    private func dateOrLiveLabel(for post: Post) -> String {
+
+    @ViewBuilder
+    private func dateOrLiveView(for post: Post) -> some View {
         if eventIsOngoing(post: post) {
-            let minutes = Int(Date().timeIntervalSince(post.startTime) / 60)
-            if minutes < 1 {
-                return "Started just now"
+            HStack(spacing: 6) {
+                ZStack {
+                    Circle()
+                        .fill(Color.red.opacity(0.2))
+                        .frame(width: 14, height: 14)
+                        .scaleEffect(blink ? 1.2 : 0.8)
+                        .opacity(blink ? 0.2 : 0.8)
+
+                    Circle()
+                        .fill(Color.red)
+                        .frame(width: 8, height: 8)
+                }
+                .animation(.easeInOut(duration: 1).repeatForever(autoreverses: true), value: blink)
+
+                Text(liveStatusText(for: post))
+                    .foregroundColor(Color("LSERed"))
             }
-            return "Started \(minutes)m ago"
+        } else {
+            Text(formattedDate(for: post.startTime))
+                .foregroundColor(Color("LSERed"))
         }
-        return formattedDate(for: post.startTime)
+    }
+
+    private func liveStatusText(for post: Post) -> String {
+        let minutes = Int(Date().timeIntervalSince(post.startTime) / 60)
+        if minutes < 1 {
+            return "Started just now"
+        }
+        return "Started \(minutes)m ago"
     }
     
     private func formattedDate(for date: Date) -> String {
