@@ -82,7 +82,7 @@ struct ConfirmEventSpotView: View {
             }
 
             ZStack {
-                Map(coordinateRegion: $region)
+                Map(coordinateRegion: regionBinding)
                     .frame(height: 360)
                     .cornerRadius(12)
                     .shadow(radius: 3)
@@ -126,13 +126,24 @@ struct ConfirmEventSpotView: View {
                 reverseGeocode(for: coord)
             }
         }
-        .onChange(of: EquatableCoordinate(region.center)) { newCenter in
-            regionCenterChanged(to: newCenter.coordinate)
-        }
         .onDisappear {
             geocodeWorkItem?.cancel()
             geocoder.cancelGeocode()
         }
+    }
+
+    private var regionBinding: Binding<MKCoordinateRegion> {
+        Binding(
+            get: { region },
+            set: { newRegion in
+                let previousCenter = region.center
+                region = newRegion
+                guard coordinatesChanged(from: previousCenter, to: newRegion.center) else {
+                    return
+                }
+                regionCenterChanged(to: newRegion.center)
+            }
+        )
     }
 
     private func searchForAddress() {
@@ -262,16 +273,8 @@ struct ConfirmEventSpotView: View {
     }
 }
 
-private struct EquatableCoordinate: Equatable {
-    let latitude: CLLocationDegrees
-    let longitude: CLLocationDegrees
-
-    init(_ coordinate: CLLocationCoordinate2D) {
-        self.latitude = coordinate.latitude
-        self.longitude = coordinate.longitude
-    }
-
-    var coordinate: CLLocationCoordinate2D {
-        CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-    }
+private func coordinatesChanged(from oldCenter: CLLocationCoordinate2D, to newCenter: CLLocationCoordinate2D) -> Bool {
+    let threshold = 1e-6
+    return abs(oldCenter.latitude - newCenter.latitude) > threshold ||
+        abs(oldCenter.longitude - newCenter.longitude) > threshold
 }
