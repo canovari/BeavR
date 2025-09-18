@@ -1,5 +1,6 @@
 import SwiftUI
 import MapKit
+import UIKit
 
 struct PostDetailView: View {
     let post: Post
@@ -36,24 +37,7 @@ struct PostDetailView: View {
 
                 // --- Organization
                 if let org = post.organization, !org.isEmpty {
-                    Text("by \(org)")
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                }
-
-                // --- Contact
-                if let contact = post.contact {
-                    Button {
-                        handleContact(contact)
-                    } label: {
-                        HStack {
-                            Image(systemName: contactIcon(for: contact.type))
-                                .foregroundColor(Color("LSERed"))
-                            Text("\(contact.type): \(contact.value)")
-                                .foregroundColor(.blue)
-                                .underline()
-                        }
-                    }
+                    organizationView(name: org, contact: post.contact)
                 }
 
                 Divider()
@@ -67,9 +51,7 @@ struct PostDetailView: View {
 
                 // --- Description (plain text)
                 if let desc = post.description, !desc.isEmpty {
-                    Text(desc)
-                        .font(.body)
-                        .fixedSize(horizontal: false, vertical: true)
+                    descriptionView(for: desc)
                 }
 
                 // --- Get Directions (moved here)
@@ -102,6 +84,53 @@ struct PostDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
+    @ViewBuilder
+    private func organizationView(name: String, contact: ContactInfo?) -> some View {
+        if let contact {
+            Button {
+                handleContact(contact)
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: contactIcon(for: contact.type))
+                        .foregroundColor(Color("LSERed"))
+                    Text("by \(name)")
+                        .font(.headline)
+                        .foregroundColor(.blue)
+                        .underline()
+                    Spacer()
+                }
+            }
+            .buttonStyle(.plain)
+        } else {
+            Text("by \(name)")
+                .font(.headline)
+                .foregroundColor(.primary)
+        }
+    }
+
+    @ViewBuilder
+    private func descriptionView(for text: String) -> some View {
+        Text(attributedDescription(from: text))
+            .font(.body)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private func attributedDescription(from text: String) -> AttributedString {
+        let attributed = NSMutableAttributedString(string: text)
+
+        if let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) {
+            let range = NSRange(location: 0, length: attributed.length)
+            detector.enumerateMatches(in: text, options: [], range: range) { match, _, _ in
+                guard let match, let url = match.url else { return }
+                attributed.addAttribute(.link, value: url, range: match.range)
+                attributed.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: match.range)
+                attributed.addAttribute(.foregroundColor, value: UIColor.systemBlue, range: match.range)
+            }
+        }
+
+        return AttributedString(attributed)
+    }
+
     // MARK: - Open Apple Maps
     private func openInMaps(latitude: Double, longitude: Double, name: String) {
         let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
@@ -125,7 +154,7 @@ struct PostDetailView: View {
                 UIApplication.shared.open(url)
             }
         case "instagram":
-            if let url = URL(string: "https://instagram.com/\(contact.value)") {
+            if let url = instagramURL(from: contact.value) {
                 UIApplication.shared.open(url)
             }
         case "facebook":
@@ -152,6 +181,25 @@ struct PostDetailView: View {
         case "email": return "envelope.fill"
         default: return "person.crop.circle"
         }
+    }
+
+    private func instagramURL(from value: String) -> URL? {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        if let url = URL(string: trimmed), let scheme = url.scheme, !scheme.isEmpty {
+            return url
+        }
+
+        let lower = trimmed.lowercased()
+        if lower.hasPrefix("instagram.com") || lower.hasPrefix("www.instagram.com") ||
+            lower.hasPrefix("instagr.am") || lower.hasPrefix("www.instagr.am") {
+            return URL(string: "https://\(trimmed)")
+        }
+
+        let handle = ContactInfo.sanitizedValue(for: "instagram", rawValue: trimmed)
+        guard !handle.isEmpty else { return nil }
+        return URL(string: "https://instagram.com/\(handle)")
     }
 
 }

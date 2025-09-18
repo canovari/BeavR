@@ -107,7 +107,7 @@ struct AddEventView: View {
                         Text("Contact")
                         Spacer()
                         if let c = contact {
-                            Text("\(c.type): \(c.value)")
+                            Text("\(c.type): \(c.displayValue)")
                                 .foregroundColor(.secondary)
                                 .lineLimit(1)
                         } else {
