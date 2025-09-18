@@ -88,6 +88,14 @@ struct FeedView: View {
                     }
                     .padding()
                 }
+                .refreshable {
+                    await vm.refreshPosts(enforceMinimumDelay: true)
+                }
+
+                if vm.posts.isEmpty && vm.isLoading {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                }
             }
             .navigationTitle("Feed")
             .toolbar {

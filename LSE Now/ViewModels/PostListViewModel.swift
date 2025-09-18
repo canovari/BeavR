@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 class PostListViewModel: ObservableObject {
     @Published var posts: [Post] = []
     @Published var isLoading: Bool = false
@@ -12,44 +13,62 @@ class PostListViewModel: ObservableObject {
         expiryTimer?.invalidate()
     }
 
-    func fetchPosts() {
-        isLoading = true
+    func fetchPosts(enforceMinimumDelay: Bool = false) {
+        Task {
+            await refreshPosts(enforceMinimumDelay: enforceMinimumDelay)
+        }
+    }
+
+    func refreshPosts(enforceMinimumDelay: Bool = false) async {
+        guard !isLoading else { return }
         guard let url = URL(string: "https://www.canovari.com/api/events.php") else { return }
+
+        isLoading = true
+        defer { isLoading = false }
+
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
+        let refreshStart = Date()
 
-        URLSession.shared.dataTask(with: url) { data, _, error in
-            DispatchQueue.main.async {
-                self.isLoading = false
-            }
-            if let error = error {
-                print("❌ Network error:", error.localizedDescription)
-                return
-            }
-            guard let data = data else {
-                print("❌ No data received")
-                return
-            }
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
 
-            // Debug raw response
             if let raw = String(data: data, encoding: .utf8) {
                 print("📥 Raw API response:", raw)
             }
 
-            do {
-                let decodedPosts = try decoder.decode([Post].self, from: data)
+            let decodedPosts = try decoder.decode([Post].self, from: data)
 
-                DispatchQueue.main.async {
-                    print("✅ Decoded posts count:", decodedPosts.count)
-                    self.allPosts = decodedPosts
-                    self.applyExpiryPolicy()
-                    print("📦 Active posts after expiry filter:", self.posts.count)
-                    self.startExpiryTimer()
+            if enforceMinimumDelay {
+                let minimumDuration: TimeInterval = 1
+                let elapsed = Date().timeIntervalSince(refreshStart)
+                if elapsed < minimumDuration {
+                    let remaining = minimumDuration - elapsed
+                    let nanoseconds = UInt64(remaining * 1_000_000_000)
+                    if nanoseconds > 0 {
+                        try await Task.sleep(nanoseconds: nanoseconds)
+                    }
                 }
-            } catch {
-                print("❌ Decoding error:", error)
             }
-        }.resume()
+
+            print("✅ Decoded posts count:", decodedPosts.count)
+            allPosts = decodedPosts
+            applyExpiryPolicy()
+            print("📦 Active posts after expiry filter:", posts.count)
+            startExpiryTimer()
+        } catch is CancellationError {
+            // Refresh was cancelled (e.g. user navigated away); no need to log.
+            return
+        } catch let urlError as URLError {
+            if urlError.code == .cancelled {
+                return
+            }
+            print("❌ Network error:", urlError.localizedDescription)
+        } catch let decodingError as DecodingError {
+            print("❌ Decoding error:", decodingError)
+        } catch {
+            print("❌ Unexpected error:", error.localizedDescription)
+        }
     }
 
     private func applyExpiryPolicy(referenceDate: Date = Date()) {
