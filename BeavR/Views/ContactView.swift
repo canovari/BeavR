@@ -1,6 +1,6 @@
 //
 //  ContactView.swift
-//  LSE Now
+//  BeavR
 //
 //  Created by Pietro Canovari on 9/17/25.
 //

@@ -12,29 +12,29 @@
 			containerPortal = 9AE9E1572E7B34B7005D3827 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 9AE9E15E2E7B34B7005D3827;
-			remoteInfo = "LSE Now";
+			remoteInfo = "BeavR";
 		};
 		9AE9E1772E7B34B9005D3827 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 9AE9E1572E7B34B7005D3827 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 9AE9E15E2E7B34B7005D3827;
-			remoteInfo = "LSE Now";
+			remoteInfo = "BeavR";
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		9AE9E15F2E7B34B7005D3827 /* LSE Now.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "LSE Now.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		9AE9E16C2E7B34B9005D3827 /* LSE NowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "LSE NowTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		9AE9E1762E7B34B9005D3827 /* LSE NowUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "LSE NowUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9AE9E15F2E7B34B7005D3827 /* BeavR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "BeavR.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9AE9E16C2E7B34B9005D3827 /* BeavRTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "BeavRTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9AE9E1762E7B34B9005D3827 /* BeavRUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "BeavRUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		9AE9E19B2E7B352F005D3827 /* Exceptions for "LSE Now" folder in "LSE Now" target */ = {
+		9AE9E19B2E7B352F005D3827 /* Exceptions for "BeavR" folder in "BeavR" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Assets.xcassets,
-				LSE_NowApp.swift,
+				BeavRApp.swift,
 				Models/ContactInfo.swift,
 				Models/Post.swift,
 				Models/User.swift,
@@ -61,17 +61,17 @@
 				Views/ProfileView.swift,
 				Views/SubmissionConfirmationView.swift,
 			);
-			target = 9AE9E15E2E7B34B7005D3827 /* LSE Now */;
+			target = 9AE9E15E2E7B34B7005D3827 /* BeavR */;
 		};
-		9AE9E19C2E7B352F005D3827 /* Exceptions for "LSE Now" folder in "LSE NowUITests" target */ = {
+		9AE9E19C2E7B352F005D3827 /* Exceptions for "BeavR" folder in "BeavRUITests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Assets.xcassets,
-				LSE_NowApp.swift,
+				BeavRApp.swift,
 			);
-			target = 9AE9E1752E7B34B9005D3827 /* LSE NowUITests */;
+			target = 9AE9E1752E7B34B9005D3827 /* BeavRUITests */;
 		};
-		9AE9E1B22E7B375C005D3827 /* Exceptions for "LSE Now" folder in "LSE NowTests" target */ = {
+		9AE9E1B22E7B375C005D3827 /* Exceptions for "BeavR" folder in "BeavRTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Models/ContactInfo.swift,
@@ -100,29 +100,29 @@
 				Views/ProfileView.swift,
 				Views/SubmissionConfirmationView.swift,
 			);
-			target = 9AE9E16B2E7B34B9005D3827 /* LSE NowTests */;
+			target = 9AE9E16B2E7B34B9005D3827 /* BeavRTests */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		9AE9E16F2E7B34B9005D3827 /* LSE NowTests */ = {
+		9AE9E16F2E7B34B9005D3827 /* BeavRTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "LSE NowTests";
+			path = "BeavRTests";
 			sourceTree = "<group>";
 		};
-		9AE9E1792E7B34B9005D3827 /* LSE NowUITests */ = {
+		9AE9E1792E7B34B9005D3827 /* BeavRUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "LSE NowUITests";
+			path = "BeavRUITests";
 			sourceTree = "<group>";
 		};
-		9AE9E1972E7B352F005D3827 /* LSE Now */ = {
+		9AE9E1972E7B352F005D3827 /* BeavR */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				9AE9E19B2E7B352F005D3827 /* Exceptions for "LSE Now" folder in "LSE Now" target */,
-				9AE9E1B22E7B375C005D3827 /* Exceptions for "LSE Now" folder in "LSE NowTests" target */,
-				9AE9E19C2E7B352F005D3827 /* Exceptions for "LSE Now" folder in "LSE NowUITests" target */,
+				9AE9E19B2E7B352F005D3827 /* Exceptions for "BeavR" folder in "BeavR" target */,
+				9AE9E1B22E7B375C005D3827 /* Exceptions for "BeavR" folder in "BeavRTests" target */,
+				9AE9E19C2E7B352F005D3827 /* Exceptions for "BeavR" folder in "BeavRUITests" target */,
 			);
-			path = "LSE Now";
+			path = "BeavR";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -155,9 +155,9 @@
 		9AE9E1562E7B34B7005D3827 = {
 			isa = PBXGroup;
 			children = (
-				9AE9E1972E7B352F005D3827 /* LSE Now */,
-				9AE9E16F2E7B34B9005D3827 /* LSE NowTests */,
-				9AE9E1792E7B34B9005D3827 /* LSE NowUITests */,
+				9AE9E1972E7B352F005D3827 /* BeavR */,
+				9AE9E16F2E7B34B9005D3827 /* BeavRTests */,
+				9AE9E1792E7B34B9005D3827 /* BeavRUITests */,
 				9AE9E1602E7B34B7005D3827 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -165,9 +165,9 @@
 		9AE9E1602E7B34B7005D3827 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				9AE9E15F2E7B34B7005D3827 /* LSE Now.app */,
-				9AE9E16C2E7B34B9005D3827 /* LSE NowTests.xctest */,
-				9AE9E1762E7B34B9005D3827 /* LSE NowUITests.xctest */,
+				9AE9E15F2E7B34B7005D3827 /* BeavR.app */,
+				9AE9E16C2E7B34B9005D3827 /* BeavRTests.xctest */,
+				9AE9E1762E7B34B9005D3827 /* BeavRUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -175,9 +175,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		9AE9E15E2E7B34B7005D3827 /* LSE Now */ = {
+		9AE9E15E2E7B34B7005D3827 /* BeavR */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 9AE9E1802E7B34B9005D3827 /* Build configuration list for PBXNativeTarget "LSE Now" */;
+			buildConfigurationList = 9AE9E1802E7B34B9005D3827 /* Build configuration list for PBXNativeTarget "BeavR" */;
 			buildPhases = (
 				9AE9E15B2E7B34B7005D3827 /* Sources */,
 				9AE9E15C2E7B34B7005D3827 /* Frameworks */,
@@ -187,16 +187,16 @@
 			);
 			dependencies = (
 			);
-			name = "LSE Now";
+			name = "BeavR";
 			packageProductDependencies = (
 			);
-			productName = "LSE Now";
-			productReference = 9AE9E15F2E7B34B7005D3827 /* LSE Now.app */;
+			productName = "BeavR";
+			productReference = 9AE9E15F2E7B34B7005D3827 /* BeavR.app */;
 			productType = "com.apple.product-type.application";
 		};
-		9AE9E16B2E7B34B9005D3827 /* LSE NowTests */ = {
+		9AE9E16B2E7B34B9005D3827 /* BeavRTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 9AE9E1832E7B34B9005D3827 /* Build configuration list for PBXNativeTarget "LSE NowTests" */;
+			buildConfigurationList = 9AE9E1832E7B34B9005D3827 /* Build configuration list for PBXNativeTarget "BeavRTests" */;
 			buildPhases = (
 				9AE9E1682E7B34B9005D3827 /* Sources */,
 				9AE9E1692E7B34B9005D3827 /* Frameworks */,
@@ -208,18 +208,18 @@
 				9AE9E16E2E7B34B9005D3827 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				9AE9E16F2E7B34B9005D3827 /* LSE NowTests */,
+				9AE9E16F2E7B34B9005D3827 /* BeavRTests */,
 			);
-			name = "LSE NowTests";
+			name = "BeavRTests";
 			packageProductDependencies = (
 			);
-			productName = "LSE NowTests";
-			productReference = 9AE9E16C2E7B34B9005D3827 /* LSE NowTests.xctest */;
+			productName = "BeavRTests";
+			productReference = 9AE9E16C2E7B34B9005D3827 /* BeavRTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		9AE9E1752E7B34B9005D3827 /* LSE NowUITests */ = {
+		9AE9E1752E7B34B9005D3827 /* BeavRUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 9AE9E1862E7B34B9005D3827 /* Build configuration list for PBXNativeTarget "LSE NowUITests" */;
+			buildConfigurationList = 9AE9E1862E7B34B9005D3827 /* Build configuration list for PBXNativeTarget "BeavRUITests" */;
 			buildPhases = (
 				9AE9E1722E7B34B9005D3827 /* Sources */,
 				9AE9E1732E7B34B9005D3827 /* Frameworks */,
@@ -231,14 +231,14 @@
 				9AE9E1782E7B34B9005D3827 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				9AE9E1792E7B34B9005D3827 /* LSE NowUITests */,
-				9AE9E1972E7B352F005D3827 /* LSE Now */,
+				9AE9E1792E7B34B9005D3827 /* BeavRUITests */,
+				9AE9E1972E7B352F005D3827 /* BeavR */,
 			);
-			name = "LSE NowUITests";
+			name = "BeavRUITests";
 			packageProductDependencies = (
 			);
-			productName = "LSE NowUITests";
-			productReference = 9AE9E1762E7B34B9005D3827 /* LSE NowUITests.xctest */;
+			productName = "BeavRUITests";
+			productReference = 9AE9E1762E7B34B9005D3827 /* BeavRUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -264,7 +264,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 9AE9E15A2E7B34B7005D3827 /* Build configuration list for PBXProject "LSE Now" */;
+			buildConfigurationList = 9AE9E15A2E7B34B7005D3827 /* Build configuration list for PBXProject "BeavR" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -278,9 +278,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				9AE9E15E2E7B34B7005D3827 /* LSE Now */,
-				9AE9E16B2E7B34B9005D3827 /* LSE NowTests */,
-				9AE9E1752E7B34B9005D3827 /* LSE NowUITests */,
+				9AE9E15E2E7B34B7005D3827 /* BeavR */,
+				9AE9E16B2E7B34B9005D3827 /* BeavRTests */,
+				9AE9E1752E7B34B9005D3827 /* BeavRUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -336,12 +336,12 @@
 /* Begin PBXTargetDependency section */
 		9AE9E16E2E7B34B9005D3827 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 9AE9E15E2E7B34B7005D3827 /* LSE Now */;
+			target = 9AE9E15E2E7B34B7005D3827 /* BeavR */;
 			targetProxy = 9AE9E16D2E7B34B9005D3827 /* PBXContainerItemProxy */;
 		};
 		9AE9E1782E7B34B9005D3827 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 9AE9E15E2E7B34B7005D3827 /* LSE Now */;
+			target = 9AE9E15E2E7B34B7005D3827 /* BeavR */;
 			targetProxy = 9AE9E1772E7B34B9005D3827 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -541,7 +541,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LSE Now.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LSE Now";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BeavR.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BeavR";
 			};
 			name = Debug;
 		};
@@ -560,7 +560,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LSE Now.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LSE Now";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BeavR.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BeavR";
 			};
 			name = Release;
 		};
@@ -577,7 +577,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "LSE Now";
+				TEST_TARGET_NAME = "BeavR";
 			};
 			name = Debug;
 		};
@@ -594,14 +594,14 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "LSE Now";
+				TEST_TARGET_NAME = "BeavR";
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		9AE9E15A2E7B34B7005D3827 /* Build configuration list for PBXProject "LSE Now" */ = {
+		9AE9E15A2E7B34B7005D3827 /* Build configuration list for PBXProject "BeavR" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9AE9E17E2E7B34B9005D3827 /* Debug */,
@@ -610,7 +610,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		9AE9E1802E7B34B9005D3827 /* Build configuration list for PBXNativeTarget "LSE Now" */ = {
+		9AE9E1802E7B34B9005D3827 /* Build configuration list for PBXNativeTarget "BeavR" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9AE9E1812E7B34B9005D3827 /* Debug */,
@@ -619,7 +619,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		9AE9E1832E7B34B9005D3827 /* Build configuration list for PBXNativeTarget "LSE NowTests" */ = {
+		9AE9E1832E7B34B9005D3827 /* Build configuration list for PBXNativeTarget "BeavRTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9AE9E1842E7B34B9005D3827 /* Debug */,
@@ -628,7 +628,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		9AE9E1862E7B34B9005D3827 /* Build configuration list for PBXNativeTarget "LSE NowUITests" */ = {
+		9AE9E1862E7B34B9005D3827 /* Build configuration list for PBXNativeTarget "BeavRUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9AE9E1872E7B34B9005D3827 /* Debug */,

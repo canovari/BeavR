@@ -1,13 +1,13 @@
 //
-//  LSE_NowUITests.swift
-//  LSE NowUITests
+//  BeavRUITests.swift
+//  BeavRUITests
 //
 //  Created by Pietro Canovari on 9/17/25.
 //
 
 import XCTest
 
-final class LSE_NowUITests: XCTestCase {
+final class BeavRUITests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.

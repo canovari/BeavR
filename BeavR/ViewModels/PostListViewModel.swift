@@ -7,6 +7,7 @@ class PostListViewModel: ObservableObject {
 
     private var allPosts: [Post] = []
     private var expiryTimer: Timer?
+    private var cancellationRetryTask: Task<Void, Never>?
     private let expiryCheckInterval: TimeInterval = 60
 
     private let eventsEndpoint = URL(string: "https://www.canovari.com/api/events.php")!
@@ -34,6 +35,7 @@ class PostListViewModel: ObservableObject {
     }
 
     deinit {
+        cancellationRetryTask?.cancel()
         expiryTimer?.invalidate()
     }
 
@@ -43,7 +45,7 @@ class PostListViewModel: ObservableObject {
         }
     }
 
-    func refreshPosts() async {
+    func refreshPosts(allowRetryAfterCancellation: Bool = true) async {
         guard !isLoading else { return }
 
         isLoading = true
@@ -72,6 +74,9 @@ class PostListViewModel: ObservableObject {
             print("❌ Decoding error:", decodingError)
         } catch is CancellationError {
             print("⚠️ Refresh task was cancelled")
+            if allowRetryAfterCancellation {
+                scheduleRetryAfterCancellation()
+            }
         } catch {
             print("❌ Unexpected error:", error.localizedDescription)
         }
@@ -100,12 +105,28 @@ class PostListViewModel: ObservableObject {
 
             return try decoder.decode([Post].self, from: data)
         } catch let urlError as URLError where urlError.code == .cancelled && retryOnCancellation {
+            if Task.isCancelled {
+                throw CancellationError()
+            }
+
             print("⚠️ Request cancelled mid-refresh. Retrying once...")
-            try Task.checkCancellation()
             try await Task.sleep(nanoseconds: 200_000_000)
             return try await fetchRemotePosts(using: decoder, retryOnCancellation: false)
         } catch {
             throw error
+        }
+    }
+
+    private func scheduleRetryAfterCancellation() {
+        print("🔄 Scheduling retry after cancellation...")
+        cancellationRetryTask?.cancel()
+
+        cancellationRetryTask = Task.detached(priority: nil) { [weak self] in
+            try? await Task.sleep(nanoseconds: 300_000_000)
+
+            guard let self = self else { return }
+
+            await self.refreshPosts(allowRetryAfterCancellation: false)
         }
     }
 
