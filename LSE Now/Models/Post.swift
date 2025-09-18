@@ -25,9 +25,16 @@ struct Post: Identifiable, Codable, Hashable {
     }
 
     func isExpired(referenceDate: Date = Date()) -> Bool {
-        guard endTime == nil else { return false }
         let expiryCutoff = startTime.addingTimeInterval(2 * 3600)
-        return referenceDate >= expiryCutoff
+        if referenceDate >= expiryCutoff {
+            return true
+        }
+
+        if let endTime, referenceDate >= endTime {
+            return true
+        }
+
+        return false
     }
 
     func updatingStatusForExpiry(referenceDate: Date = Date()) -> Post {
