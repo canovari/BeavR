@@ -89,6 +89,13 @@ struct FeedView: View {
                     .padding()
                 }
                 .refreshable {
+                    do {
+                        try await Task.sleep(nanoseconds: 1_000_000_000)
+                    } catch {
+                        return
+                    }
+
+                    guard !Task.isCancelled else { return }
                     await vm.refreshPosts()
                 }
 

@@ -1,13 +1,13 @@
 //
-//  LSE_NowUITestsLaunchTests.swift
-//  LSE NowUITests
+//  BeavRUITestsLaunchTests.swift
+//  BeavRUITests
 //
 //  Created by Pietro Canovari on 9/17/25.
 //
 
 import XCTest
 
-final class LSE_NowUITestsLaunchTests: XCTestCase {
+final class BeavRUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

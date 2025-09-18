@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct LSE_NowApp: App {
+struct BeavRApp: App {
     var body: some Scene {
         WindowGroup {
             LaunchView()
