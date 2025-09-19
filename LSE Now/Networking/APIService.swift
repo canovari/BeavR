@@ -13,6 +13,11 @@ final class APIService {
     private let baseURL = URL(string: "https://www.canovari.com/api")!
     private let urlSession: URLSession
 
+    enum MessageFolder: String {
+        case received
+        case sent
+    }
+
     init(session: URLSession = .shared) {
         self.urlSession = session
     }
@@ -129,6 +134,72 @@ final class APIService {
         _ = try await perform(request: request)
     }
 
+    func fetchPins() async throws -> [WhiteboardPin] {
+        let endpoint = baseURL.appendingPathComponent("pins.php")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+        let data = try await perform(request: request)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode([WhiteboardPin].self, from: data)
+    }
+
+    func createPin(request: CreatePinRequest, token: String) async throws -> WhiteboardPin {
+        let endpoint = baseURL.appendingPathComponent("pins.php")
+        var urlRequest = URLRequest(url: endpoint)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
+        urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let encoder = JSONEncoder()
+        urlRequest.httpBody = try encoder.encode(request)
+
+        let data = try await perform(request: urlRequest)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode(WhiteboardPin.self, from: data)
+    }
+
+    func sendPinReply(payload: PinReplyPayload, token: String) async throws -> WhiteboardMessage {
+        let endpoint = baseURL.appendingPathComponent("messages.php")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let encoder = JSONEncoder()
+        request.httpBody = try encoder.encode(payload)
+
+        let data = try await perform(request: request)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let response = try decoder.decode(SendMessageResponse.self, from: data)
+        return response.message
+    }
+
+    func fetchMessages(folder: MessageFolder, token: String) async throws -> [WhiteboardMessage] {
+        var components = URLComponents(url: baseURL.appendingPathComponent("messages.php"), resolvingAgainstBaseURL: false)
+        components?.queryItems = [URLQueryItem(name: "box", value: folder.rawValue)]
+
+        guard let url = components?.url else {
+            throw APIServiceError.invalidResponse
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let data = try await perform(request: request)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode([WhiteboardMessage].self, from: data)
+    }
+
     private func perform(request: URLRequest) async throws -> Data {
         let (data, response) = try await urlSession.data(for: request)
 
@@ -189,6 +260,25 @@ private struct CancelEventPayload: Encodable {
 
 private struct ErrorResponse: Decodable {
     let error: String
+}
+
+struct CreatePinRequest: Encodable {
+    let emoji: String
+    let text: String
+    let author: String?
+    let gridRow: Int
+    let gridCol: Int
+}
+
+struct PinReplyPayload: Encodable {
+    let pinId: Int
+    let message: String
+    let author: String?
+}
+
+private struct SendMessageResponse: Decodable {
+    let success: Bool
+    let message: WhiteboardMessage
 }
 
 enum APIServiceError: LocalizedError {

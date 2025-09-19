@@ -26,9 +26,9 @@ struct MainTabView: View {
                 .tag(1)
                 .tabItem { Label("Feed", systemImage: "list.bullet.rectangle") }
 
-            ExploreView()
+            WhiteboardView()
                 .tag(2)
-                .tabItem { Label("Explore", systemImage: "sparkles") }
+                .tabItem { Label("Whiteboard", systemImage: "square.grid.3x3.fill") }
 
             NewEventView()
                 .tag(3)

@@ -15,9 +15,9 @@ struct ContentView: View {
                     Label("Map", systemImage: "map")
                 }
             
-            ExploreView()
+            WhiteboardView()
                 .tabItem {
-                    Label("Explore", systemImage: "magnifyingglass")
+                    Label("Whiteboard", systemImage: "square.grid.3x3.fill")
                 }
         }
         .onAppear {
