@@ -5,10 +5,13 @@ struct MapView: View {
     @ObservedObject var vm: PostListViewModel
     @EnvironmentObject private var locationManager: LocationManager
 
-    @State private var region = MKCoordinateRegion(
-        center: CLLocationCoordinate2D(latitude: 51.5145, longitude: -0.1160), // LSE
-        span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
-    )
+    private enum Constants {
+        static let initialCoordinate = CLLocationCoordinate2D(latitude: 51.5145, longitude: -0.1160)
+        static let defaultSpan = MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+        static let defaultRegion = MKCoordinateRegion(center: initialCoordinate, span: defaultSpan)
+    }
+
+    @State private var region = Constants.defaultRegion
 
     @State private var shakeToggle = false
     @State private var timer: Timer?
@@ -51,6 +54,18 @@ struct MapView: View {
         return annotations
     }
 
+    @available(iOS 17.0, *)
+    private var cameraPositionBinding: Binding<MapCameraPosition> {
+        Binding(
+            get: { .region(region) },
+            set: { newValue in
+                if case .region(let newRegion) = newValue {
+                    region = newRegion
+                }
+            }
+        )
+    }
+
     var body: some View {
         NavigationStack {
             Map(coordinateRegion: $region, annotationItems: mapItems) { item in
@@ -73,7 +88,7 @@ struct MapView: View {
             .onDisappear { stopTimer() }
             .onReceive(locationManager.$location) { location in
                 guard !hasCenteredOnUser, let coordinate = location?.coordinate else { return }
-                region.center = coordinate
+                recenterCamera(on: coordinate)
                 hasCenteredOnUser = true
             }
             .navigationDestination(for: Post.self) { post in
