@@ -13,6 +13,7 @@ struct Post: Identifiable, Codable, Hashable {
     let status: String?
     let latitude: Double?
     let longitude: Double?
+    let creator: String?
     let contact: ContactInfo?   // ✅ Reference only, don’t redeclare
 
     // ✅ Hashable + Equatable by id
@@ -53,7 +54,8 @@ struct Post: Identifiable, Codable, Hashable {
             status: "expired",
             latitude: latitude,
             longitude: longitude,
-            contact: contact
+            contact: contact,
+            creator: creator
         )
     }
 
