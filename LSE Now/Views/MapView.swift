@@ -1,8 +1,10 @@
 import SwiftUI
 import MapKit
+import Combine
 
 struct MapView: View {
     @ObservedObject var vm: PostListViewModel
+    @EnvironmentObject private var locationManager: LocationManager
 
     @State private var cameraPosition = MapCameraPosition.region(
         MKCoordinateRegion(
@@ -10,6 +12,8 @@ struct MapView: View {
             span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
         )
     )
+    @State private var userTrackingMode: MapUserTrackingMode = .follow
+    @State private var hasCenteredOnUser = false
 
     @State private var shakeToggle = false
     @State private var timer: Timer?
@@ -35,9 +39,23 @@ struct MapView: View {
         postsWithCoords.sorted { $0.startTime < $1.startTime }
     }
 
+    private var isLocationAuthorized: Bool {
+        switch locationManager.authorizationStatus {
+        case .authorizedWhenInUse, .authorizedAlways:
+            return true
+        default:
+            return false
+        }
+    }
+
     var body: some View {
         NavigationStack {
-            Map(position: $cameraPosition) {
+            Map(
+                position: $cameraPosition,
+                interactionModes: .all,
+                showsUserLocation: isLocationAuthorized,
+                userTrackingMode: $userTrackingMode
+            ) {
                 ForEach(sortedPosts) { post in
                     if let coordinate = coordinate(for: post) {
                         Annotation(post.title, coordinate: coordinate) {
@@ -50,10 +68,28 @@ struct MapView: View {
             .onAppear {
                 vm.fetchPosts()
                 startTimer()
+                locationManager.refreshLocation()
             }
             .onDisappear { stopTimer() }
             .navigationDestination(for: Post.self) { post in
                 PostDetailView(post: post)
+            }
+        }
+        .onReceive(locationManager.$latestLocation.compactMap { $0 }) { location in
+            guard !hasCenteredOnUser else { return }
+            let region = MKCoordinateRegion(
+                center: location.coordinate,
+                span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+            )
+            withAnimation {
+                cameraPosition = .region(region)
+                userTrackingMode = .follow
+            }
+            hasCenteredOnUser = true
+        }
+        .onChange(of: locationManager.authorizationStatus) { status in
+            if status == .authorizedWhenInUse || status == .authorizedAlways {
+                locationManager.refreshLocation()
             }
         }
     }

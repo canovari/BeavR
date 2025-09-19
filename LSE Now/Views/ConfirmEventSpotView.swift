@@ -1,6 +1,7 @@
 import SwiftUI
 import MapKit
 import CoreLocation
+import Combine
 
 struct ConfirmEventSpotView: View {
     @Binding var locationText: String
@@ -9,6 +10,8 @@ struct ConfirmEventSpotView: View {
     @State private var geocodeWorkItem: DispatchWorkItem?
     @State private var shouldSkipNextReverseGeocode = false
     @State private var isGeocoding = false
+    @State private var trackingMode: MapUserTrackingMode = .follow
+    @State private var hasCenteredOnUser = false
     @FocusState private var isAddressFieldFocused: Bool
 
     private let geocoder = CLGeocoder()
@@ -16,6 +19,9 @@ struct ConfirmEventSpotView: View {
     let onConfirm: (CLLocationCoordinate2D) -> Void
 
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject private var locationManager: LocationManager
+
+    private let defaultSpan = MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
 
     init(initialCoordinate: CLLocationCoordinate2D? = nil,
          locationText: Binding<String>,
@@ -34,6 +40,15 @@ struct ConfirmEventSpotView: View {
                 center: CLLocationCoordinate2D(latitude: 51.5145, longitude: -0.1160),
                 span: MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
             ))
+        }
+    }
+
+    private var isLocationAuthorized: Bool {
+        switch locationManager.authorizationStatus {
+        case .authorizedWhenInUse, .authorizedAlways:
+            return true
+        default:
+            return false
         }
     }
 
@@ -82,7 +97,12 @@ struct ConfirmEventSpotView: View {
             }
 
             ZStack {
-                Map(coordinateRegion: $region)
+                Map(
+                    coordinateRegion: $region,
+                    interactionModes: .all,
+                    showsUserLocation: isLocationAuthorized,
+                    userTrackingMode: $trackingMode
+                )
                     .frame(height: 360)
                     .cornerRadius(12)
                     .shadow(radius: 3)
@@ -122,8 +142,14 @@ struct ConfirmEventSpotView: View {
         .navigationTitle("Map Pin")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
+            locationManager.refreshLocation()
+
             if let coord = initialCoordinate, locationText.isEmpty {
                 reverseGeocode(for: coord)
+            }
+
+            if initialCoordinate == nil {
+                centerOnUserIfAvailable(shouldReverseGeocode: locationText.isEmpty)
             }
         }
         .onChange(of: region.center.latitude) { _ in
@@ -135,6 +161,35 @@ struct ConfirmEventSpotView: View {
         .onDisappear {
             geocodeWorkItem?.cancel()
             geocoder.cancelGeocode()
+        }
+        .onReceive(locationManager.$latestLocation.compactMap { $0 }) { location in
+            guard initialCoordinate == nil, !hasCenteredOnUser else { return }
+            centerMap(on: location.coordinate, shouldReverseGeocode: locationText.isEmpty)
+            hasCenteredOnUser = true
+        }
+        .onChange(of: locationManager.authorizationStatus) { status in
+            if status == .authorizedWhenInUse || status == .authorizedAlways {
+                locationManager.refreshLocation()
+            }
+        }
+    }
+
+    private func centerOnUserIfAvailable(shouldReverseGeocode: Bool) {
+        guard let coordinate = locationManager.latestLocation?.coordinate else { return }
+        centerMap(on: coordinate, shouldReverseGeocode: shouldReverseGeocode)
+        hasCenteredOnUser = true
+    }
+
+    private func centerMap(on coordinate: CLLocationCoordinate2D, shouldReverseGeocode: Bool) {
+        shouldSkipNextReverseGeocode = true
+
+        withAnimation {
+            region = MKCoordinateRegion(center: coordinate, span: defaultSpan)
+            trackingMode = .follow
+        }
+
+        if shouldReverseGeocode {
+            reverseGeocode(for: coordinate)
         }
     }
 
