@@ -11,7 +11,7 @@ struct LaunchView: View {
             if finished {
                 if authViewModel.isLoggedIn {
                     MainTabView(viewModel: viewModel) // pass loaded VM forward
-                        .environmentObject(authViewModel)
+                        .environmentObject(authViewModel) // ✅ inject authViewModel
                 } else {
                     LoginFlowView(viewModel: authViewModel)
                 }
