@@ -156,7 +156,7 @@ struct ConfirmEventSpotView: View {
             .cornerRadius(12)
             .shadow(radius: 3)
             .onMapCameraChange { context in
-                guard let newRegion = context.region else { return }
+                guard let newRegion = context.region as MKCoordinateRegion? else { return }
                 region = newRegion
                 regionCenterChanged(to: newRegion.center)
             }
