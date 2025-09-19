@@ -305,6 +305,8 @@ witch locationManager.authorizationStatus {
                 self.sendLocationUpdate(using: location)
             }
         }
+        RunLoop.main.add(timer, forMode: .common)
+        uploadTimer = timer
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
