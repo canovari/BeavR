@@ -12,7 +12,6 @@ struct MapView: View {
     )
 
     @State private var cameraPosition = MapCameraPosition.region(MapView.defaultRegion)
-    @State private var legacyRegion = MapView.defaultRegion
     @State private var hasCenteredOnUser = false
 
     @State private var shakeToggle = false
@@ -54,10 +53,6 @@ struct MapView: View {
         }
     }
 
-    private var legacyAnnotatedPosts: [LegacyAnnotatedPost] {
-        annotatedPosts.map { LegacyAnnotatedPost(post: $0.post, coordinate: $0.coordinate) }
-    }
-
     var body: some View {
         NavigationStack {
             mapLayer
@@ -80,12 +75,11 @@ struct MapView: View {
             )
             withAnimation {
                 cameraPosition = .region(region)
-                legacyRegion = region
             }
             hasCenteredOnUser = true
         }
-        .onChange(of: locationManager.authorizationStatus) { status in
-            if status == .authorizedWhenInUse || status == .authorizedAlways {
+        .onChange(of: locationManager.authorizationStatus) { _, newStatus in
+            if newStatus == .authorizedWhenInUse || newStatus == .authorizedAlways {
                 locationManager.refreshLocation()
             }
         }
@@ -93,56 +87,38 @@ struct MapView: View {
 
     @ViewBuilder
     private var mapLayer: some View {
-        if #available(iOS 17.0, *) {
-            MapReader { proxy in
-                Map(position: $cameraPosition, interactionModes: .all) {
-                    ForEach(annotatedPosts, id: \.post.id) { entry in
-                        let post = entry.post
-                        let coordinate = entry.coordinate
-                        let now = Date()
-                        let hasStarted = now >= post.startTime
-                        let isUnder1Hour = !hasStarted && now.distance(to: post.startTime) < 3600
-                        let timeText = timeLabel(for: post.startTime, endTime: post.endTime)
-                        let zIndexValue = zIndexFor(post: post)
-
-                        Annotation(post.title, coordinate: coordinate) {
-                            PostAnnotationView(
-                                post: post,
-                                timeLabel: timeText,
-                                isUnder1Hour: isUnder1Hour,
-                                hasStarted: hasStarted,
-                                shakeToggle: shakeToggle,
-                                zIndexValue: zIndexValue
-                            )
-                        }
-                    }
-                }
-                .onAppear {
-                    updateUserLocationVisibility(using: proxy)
-                }
-                .onChange(of: isLocationAuthorized) { _ in
-                    updateUserLocationVisibility(using: proxy)
-                }
+        Map(position: $cameraPosition, interactionModes: .all) {
+            if isLocationAuthorized {
+                UserAnnotation()
             }
-        } else {
-            LegacyPostMap(
-                region: $legacyRegion,
-                showsUserLocation: isLocationAuthorized,
-                entries: legacyAnnotatedPosts,
-                shakeToggle: shakeToggle,
-                timeLabel: { start, end in
-                    timeLabel(for: start, endTime: end)
-                },
-                zIndexProvider: { post in
-                    zIndexFor(post: post)
-                }
-            )
-        }
-    }
 
-    @available(iOS 17.0, *)
-    private func updateUserLocationVisibility(using proxy: MapProxy) {
-        proxy.showsUserLocation = isLocationAuthorized
+            ForEach(annotatedPosts, id: \.post.id) { entry in
+                let post = entry.post
+                let coordinate = entry.coordinate
+                let now = Date()
+                let hasStarted = now >= post.startTime
+                let isUnder1Hour = !hasStarted && now.distance(to: post.startTime) < 3600
+                let timeText = timeLabel(for: post.startTime, endTime: post.endTime)
+                let zIndexValue = zIndexFor(post: post)
+
+                Annotation(post.title, coordinate: coordinate) {
+                    PostAnnotationView(
+                        post: post,
+                        timeLabel: timeText,
+                        isUnder1Hour: isUnder1Hour,
+                        hasStarted: hasStarted,
+                        shakeToggle: shakeToggle,
+                        zIndexValue: zIndexValue
+                    )
+                }
+                .annotationTitles(.hidden)
+            }
+        }
+        .mapControls {
+            if isLocationAuthorized {
+                MapUserLocationButton()
+            }
+        }
     }
 
     private func coordinate(for post: Post) -> CLLocationCoordinate2D? {
@@ -188,54 +164,6 @@ struct MapView: View {
             return start.formatted(.dateTime.weekday(.abbreviated))
         }
     }
-}
-
-private struct LegacyPostMap: View {
-    @Binding var region: MKCoordinateRegion
-    let showsUserLocation: Bool
-    let entries: [LegacyAnnotatedPost]
-    let shakeToggle: Bool
-    let timeLabel: (Date, Date?) -> String
-    let zIndexProvider: (Post) -> Double
-
-    var body: some View {
-        Map(
-            coordinateRegion: $region,
-            interactionModes: .all,
-            showsUserLocation: showsUserLocation,
-            userTrackingMode: .constant(.none),
-            annotationItems: entries
-        ) { entry in
-            MapAnnotation(coordinate: entry.coordinate) {
-                let post = entry.post
-                let now = Date()
-                let hasStarted = now >= post.startTime
-                let isUnder1Hour = !hasStarted && now.distance(to: post.startTime) < 3600
-                let timeText = timeLabel(post.startTime, post.endTime)
-                let zIndexValue = zIndexProvider(post)
-
-                NavigationLink(value: post) {
-                    PostAnnotationView(
-                        post: post,
-                        timeLabel: timeText,
-                        isUnder1Hour: isUnder1Hour,
-                        hasStarted: hasStarted,
-                        shakeToggle: shakeToggle,
-                        zIndexValue: zIndexValue
-                    )
-                }
-                .buttonStyle(.plain)
-                .zIndex(zIndexValue)
-            }
-        }
-    }
-}
-
-private struct LegacyAnnotatedPost: Identifiable {
-    let post: Post
-    let coordinate: CLLocationCoordinate2D
-
-    var id: Post.ID { post.id }
 }
 
 private struct PostAnnotationView: View {

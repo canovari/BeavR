@@ -89,8 +89,8 @@ struct ConfirmEventSpotView: View {
             centerMap(on: location.coordinate, shouldReverseGeocode: locationText.isEmpty)
             hasCenteredOnUser = true
         }
-        .onChange(of: locationManager.authorizationStatus) { status in
-            if status == .authorizedWhenInUse || status == .authorizedAlways {
+        .onChange(of: locationManager.authorizationStatus) { _, newStatus in
+            if newStatus == .authorizedWhenInUse || newStatus == .authorizedAlways {
                 locationManager.refreshLocation()
             }
         }
@@ -147,11 +147,11 @@ struct ConfirmEventSpotView: View {
 
     private var mapContent: some View {
         ZStack {
-            Map(
-                position: $cameraPosition,
-                interactionModes: .all,
-                showsUserLocation: isLocationAuthorized
-            )
+            Map(position: $cameraPosition, interactionModes: .all) {
+                if isLocationAuthorized {
+                    UserAnnotation()
+                }
+            }
             .frame(height: 360)
             .cornerRadius(12)
             .shadow(radius: 3)
@@ -159,6 +159,11 @@ struct ConfirmEventSpotView: View {
                 guard let newRegion = context.region else { return }
                 region = newRegion
                 regionCenterChanged(to: newRegion.center)
+            }
+            .mapControls {
+                if isLocationAuthorized {
+                    MapUserLocationButton()
+                }
             }
 
             Circle()
@@ -351,23 +356,5 @@ struct ConfirmEventSpotView: View {
 
     private func fallbackAddress(for coordinate: CLLocationCoordinate2D) -> String {
         String(format: "Lat %.5f, Lon %.5f", coordinate.latitude, coordinate.longitude)
-    }
-}
-
-private struct LegacyDraggableConfirmMap: View {
-    @Binding var region: MKCoordinateRegion
-    let showsUserLocation: Bool
-    let onRegionChange: (MKCoordinateRegion) -> Void
-
-    var body: some View {
-        Map(
-            coordinateRegion: $region,
-            interactionModes: .all,
-            showsUserLocation: showsUserLocation,
-            userTrackingMode: .constant(.none)
-        )
-        .onChange(of: region) { newValue in
-            onRegionChange(newValue)
-        }
     }
 }
