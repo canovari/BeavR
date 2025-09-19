@@ -60,7 +60,7 @@ struct MapView: View {
                         eventAnnotation(for: post)
                     }
                 case .userLocation:
-                    MapAnnotation(coordinate: item.coordinate) {
+                    return MapAnnotation(coordinate: item.coordinate) {
                         UserLocationAnnotationView()
                     }
                 }
