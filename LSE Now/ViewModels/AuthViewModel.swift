@@ -2,7 +2,7 @@ import Foundation
 
 @MainActor
 final class AuthViewModel: ObservableObject {
-    enum Step {
+    enum Step: Equatable {
         case emailEntry
         case codeEntry
     }
@@ -14,13 +14,20 @@ final class AuthViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var infoMessage: String?
     @Published private(set) var token: String?
+    @Published private(set) var loggedInEmail: String?
+    @Published private(set) var resendSecondsRemaining: Int = 0
 
     var isLoggedIn: Bool {
         token != nil
     }
 
+    var canResendCode: Bool {
+        !isLoading && resendSecondsRemaining == 0
+    }
+
     private let apiService: APIService
     private let tokenStorage: TokenStorage
+    private var resendTimer: Timer?
 
     init(apiService: APIService = .shared, tokenStorage: TokenStorage = .shared) {
         self.apiService = apiService
@@ -29,17 +36,28 @@ final class AuthViewModel: ObservableObject {
 
     func loadExistingSession() {
         token = tokenStorage.loadToken()
+        loggedInEmail = tokenStorage.loadEmail()
+
+        if let savedEmail = loggedInEmail {
+            email = savedEmail
+        }
     }
 
     func startOver() {
+        resetResendCooldown()
         email = ""
         code = ""
         step = .emailEntry
+        isLoading = false
         errorMessage = nil
         infoMessage = nil
     }
 
     func requestCode() async {
+        if step == .codeEntry, resendSecondsRemaining > 0 {
+            return
+        }
+
         let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
 
         guard !trimmedEmail.isEmpty else {
@@ -61,7 +79,8 @@ final class AuthViewModel: ObservableObject {
             try await apiService.requestLoginCode(for: trimmedEmail)
             step = .codeEntry
             code = ""
-            infoMessage = "We\'ve sent a 6-digit code to \(trimmedEmail)."
+            infoMessage = "We've sent a 6-digit code to \(trimmedEmail)."
+            startResendCooldown()
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -83,13 +102,53 @@ final class AuthViewModel: ObservableObject {
 
         do {
             let token = try await apiService.verifyLoginCode(email: email, code: trimmedCode)
-            tokenStorage.save(token: token)
+            tokenStorage.save(token: token, email: email)
             self.token = token
+            loggedInEmail = email
             code = ""
+            resetResendCooldown()
         } catch {
             errorMessage = error.localizedDescription
         }
 
         isLoading = false
+    }
+
+    func logout() {
+        tokenStorage.clear()
+        token = nil
+        loggedInEmail = nil
+        startOver()
+    }
+
+    deinit {
+        resendTimer?.invalidate()
+    }
+
+    private func startResendCooldown() {
+        resendTimer?.invalidate()
+        resendSecondsRemaining = 60
+
+        resendTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] timer in
+            guard let self = self else {
+                timer.invalidate()
+                return
+            }
+
+            if self.resendSecondsRemaining > 0 {
+                self.resendSecondsRemaining -= 1
+            }
+
+            if self.resendSecondsRemaining == 0 {
+                timer.invalidate()
+                self.resendTimer = nil
+            }
+        }
+    }
+
+    private func resetResendCooldown() {
+        resendTimer?.invalidate()
+        resendTimer = nil
+        resendSecondsRemaining = 0
     }
 }
