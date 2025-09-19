@@ -5,6 +5,8 @@ require_once __DIR__ . '/../config.php';
 
 header('Content-Type: application/json');
 
+const DEMO_EMAIL = 'demo@lse.ac.uk';
+
 $email = isset($_POST['email']) ? trim((string) $_POST['email']) : '';
 
 if ($email === '') {
@@ -19,12 +21,18 @@ if (!preg_match('/^[A-Za-z0-9._%+-]+@lse\.ac\.uk$/', $email)) {
     exit;
 }
 
-try {
-    $code = (string) random_int(100000, 999999);
-} catch (Throwable $exception) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Unable to generate verification code.']);
-    exit;
+$isDemoAccount = strcasecmp($email, DEMO_EMAIL) === 0;
+
+if ($isDemoAccount) {
+    $code = '000000';
+} else {
+    try {
+        $code = (string) random_int(100000, 999999);
+    } catch (Throwable $exception) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Unable to generate verification code.']);
+        exit;
+    }
 }
 
 $expiry = (new DateTimeImmutable('+5 minutes'))->format('Y-m-d H:i:s');
@@ -49,16 +57,18 @@ try {
     exit;
 }
 
-$subject = 'Your LSE Events Login Code';
-$message = sprintf("Your login code is: %s (valid for 5 minutes).", $code);
-$headers = "From: LSE Events <noreply@canovari.com>\r\n";
+if (!$isDemoAccount) {
+    $subject = 'Your LSE Events Login Code';
+    $message = sprintf("Your login code is: %s (valid for 5 minutes).", $code);
+    $headers = "From: LSE Events <noreply@canovari.com>\r\n";
 
-$mailSent = mail($email, $subject, $message, $headers);
+    $mailSent = mail($email, $subject, $message, $headers);
 
-if (!$mailSent) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Failed to send verification email.']);
-    exit;
+    if (!$mailSent) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to send verification email.']);
+        exit;
+    }
 }
 
 echo json_encode(['success' => true]);
