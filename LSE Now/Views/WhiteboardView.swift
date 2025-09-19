@@ -118,21 +118,33 @@ struct WhiteboardView: View {
         }
     }
 
+    private var gridItems: [GridItem] {
+        Array(repeating: GridItem(.flexible(), spacing: 12), count: columns)
+    }
 
-    private var whiteboardGrid: some View {
-        let gridColumns = Array(repeating: GridItem(.flexible(), spacing: 12), count: columns)
+    private var pinboardGrid: some View {
+        TimelineView(.periodic(from: .now, by: 30)) { timeline in
+            gridBody(referenceDate: timeline.date)
+        }
+    }
 
-        return LazyVGrid(columns: gridColumns, spacing: 12) {
+    @ViewBuilder
+    private func gridBody(referenceDate: Date) -> some View {
+        LazyVGrid(columns: gridItems, spacing: 12) {
             ForEach(0..<(rows * self.columns), id: \.self) { index in
                 let row = index / self.columns
                 let column = index % self.columns
                 let coordinate = WhiteboardCoordinate(row: row, column: column)
 
                 if let pin = viewModel.pin(at: coordinate) {
-                    WhiteboardPinCell(pin: pin, isMine: pin.creatorEmail.caseInsensitiveCompare(authViewModel.loggedInEmail ?? "") == .orderedSame)
-                        .onTapGesture {
-                            selectedPin = pin
-                        }
+                    WhiteboardPinCell(
+                        pin: pin,
+                        isMine: pin.creatorEmail.caseInsensitiveCompare(authViewModel.loggedInEmail ?? "") == .orderedSame,
+                        referenceDate: referenceDate
+                    )
+                    .onTapGesture {
+                        selectedPin = pin
+                    }
                 } else {
                     EmptySlotCell()
                         .onTapGesture {
@@ -171,6 +183,7 @@ struct WhiteboardView: View {
 private struct WhiteboardPinCell: View {
     let pin: WhiteboardPin
     let isMine: Bool
+    let referenceDate: Date
 
     var body: some View {
         ZStack {
