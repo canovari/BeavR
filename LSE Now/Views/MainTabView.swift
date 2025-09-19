@@ -28,7 +28,7 @@ struct MainTabView: View {
 
             WhiteboardView()
                 .tag(2)
-                .tabItem { Label("Whiteboard", systemImage: "square.grid.3x3.fill") }
+                .tabItem { Label("Pinboard", systemImage: "square.grid.3x3.fill") }
 
             NewEventView()
                 .tag(3)
