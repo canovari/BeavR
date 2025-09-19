@@ -51,7 +51,12 @@ struct LoginFlowView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .navigationTitle("Sign In")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItemGroup(placement: .keyboard) { Spacer(); Button("Done") { focusedField = nil } } }
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") { focusedField = nil }
+                }
+            }
             .onAppear { focusField(for: viewModel.step) }
             .onChange(of: viewModel.step) { step in
                 focusField(for: step)
@@ -140,10 +145,16 @@ struct LoginFlowView: View {
             .disabled(viewModel.isLoading)
 
             HStack {
-                Button("Resend code") {
+                Button {
                     Task { await viewModel.requestCode() }
+                } label: {
+                    if viewModel.resendSecondsRemaining > 0 {
+                        Text("Resend in \(viewModel.resendSecondsRemaining)s")
+                    } else {
+                        Text("Resend code")
+                    }
                 }
-                .disabled(viewModel.isLoading)
+                .disabled(!viewModel.canResendCode)
 
                 Spacer()
 

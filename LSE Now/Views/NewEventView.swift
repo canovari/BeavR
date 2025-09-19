@@ -31,9 +31,9 @@ struct NewEventView: View {
                         }
 
                         NavigationLink {
-                            DraftsView()
+                            MyProfileView()
                         } label: {
-                            HubRectButton(icon: "doc.text.fill", title: "Drafts")
+                            HubRectButton(icon: "person.crop.circle.fill", title: "My Profile")
                         }
 
                         NavigationLink {
@@ -106,11 +106,35 @@ struct MyEventsView: View {
     }
 }
 
-struct DraftsView: View {
+struct MyProfileView: View {
+    @EnvironmentObject private var authViewModel: AuthViewModel
+
+    private var emailText: String {
+        let email = authViewModel.loggedInEmail ?? authViewModel.email
+        return email.isEmpty ? "No email on file" : email
+    }
+
     var body: some View {
-        Text("Drafts")
-            .font(.largeTitle)
-            .bold()
+        Form {
+            Section(header: Text("LSE Email")) {
+                Text(emailText)
+                    .font(.body)
+                    .textSelection(.enabled)
+            }
+
+            Section {
+                Button(role: .destructive) {
+                    authViewModel.logout()
+                } label: {
+                    Text("Log Out")
+                        .font(.headline)
+                }
+            } footer: {
+                Text("Logging out will require a new login code next time you open the app.")
+            }
+        }
+        .navigationTitle("My Profile")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
