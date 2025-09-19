@@ -58,93 +58,13 @@ struct ConfirmEventSpotView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Select Event Location")
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                Text("Search for an address or drag the map to drop the pin.")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-
-            HStack(spacing: 8) {
-                TextField("Search for an address", text: $locationText)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .submitLabel(.search)
-                    .autocorrectionDisabled(true)
-                    .textInputAutocapitalization(.words)
-                    .focused($isAddressFieldFocused)
-                    .onSubmit { searchForAddress() }
-
-                Button {
-                    searchForAddress()
-                } label: {
-                    if isGeocoding {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle())
-                    } else {
-                        Image(systemName: "magnifyingglass")
-                    }
-                }
-                .frame(width: 44, height: 44)
-                .background(Color(.systemGray5))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .disabled(locationText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isGeocoding)
-            }
-
-            if let searchError {
-                Text(searchError)
-                    .font(.footnote)
-                    .foregroundColor(.red)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-
-            ZStack {
-                Map(
-                    position: $cameraPosition,
-                    interactionModes: .all,
-                    showsUserLocation: isLocationAuthorized
-                )
-                .frame(height: 360)
-                .cornerRadius(12)
-                .shadow(radius: 3)
-                .onMapCameraChange { context in
-                    guard let newRegion = context.region else { return }
-                    region = newRegion
-                    regionCenterChanged(to: newRegion.center)
-                }
-
-                Circle()
-                    .fill(Color("LSERed"))
-                    .frame(width: 14, height: 14)
-                    .overlay(
-                        Circle().stroke(Color.white, lineWidth: 2)
-                    )
-                    .shadow(radius: 1)
-            }
-
-            if !locationText.isEmpty {
-                Text(locationText)
-                    .font(.footnote)
-                    .foregroundColor(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-
+            headerSection
+            searchSection
+            errorMessage
+            mapContent
+            selectedAddressLabel
             Spacer()
-
-            Button {
-                confirmSelection()
-            } label: {
-                Text("Confirm Location")
-                    .fontWeight(.semibold)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color("LSERed"))
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
-            .disabled(isGeocoding)
+            confirmButton
         }
         .padding()
         .navigationTitle("Map Pin")
@@ -174,6 +94,130 @@ struct ConfirmEventSpotView: View {
                 locationManager.refreshLocation()
             }
         }
+    }
+
+    private var headerSection: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Select Event Location")
+                .font(.title3)
+                .fontWeight(.semibold)
+            Text("Search for an address or drag the map to drop the pin.")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var searchSection: some View {
+        HStack(spacing: 8) {
+            TextField("Search for an address", text: $locationText)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .submitLabel(.search)
+                .autocorrectionDisabled(true)
+                .textInputAutocapitalization(.words)
+                .focused($isAddressFieldFocused)
+                .onSubmit { searchForAddress() }
+
+            Button {
+                searchForAddress()
+            } label: {
+                if isGeocoding {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                } else {
+                    Image(systemName: "magnifyingglass")
+                }
+            }
+            .frame(width: 44, height: 44)
+            .background(Color(.systemGray5))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .disabled(locationText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isGeocoding)
+        }
+    }
+
+    @ViewBuilder
+    private var errorMessage: some View {
+        if let searchError {
+            Text(searchError)
+                .font(.footnote)
+                .foregroundColor(.red)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private var mapContent: some View {
+        ZStack {
+            mapViewLayer
+                .frame(height: 360)
+                .cornerRadius(12)
+                .shadow(radius: 3)
+
+            Circle()
+                .fill(Color("LSERed"))
+                .frame(width: 14, height: 14)
+                .overlay(
+                    Circle().stroke(Color.white, lineWidth: 2)
+                )
+                .shadow(radius: 1)
+        }
+    }
+
+    @ViewBuilder
+    private var mapViewLayer: some View {
+        if #available(iOS 17.0, *) {
+            MapReader { proxy in
+                Map(position: $cameraPosition, interactionModes: .all)
+                    .onAppear {
+                        updateUserLocationVisibility(using: proxy)
+                    }
+                    .onChange(of: isLocationAuthorized) { _ in
+                        updateUserLocationVisibility(using: proxy)
+                    }
+                    .onMapCameraChange { context in
+                        guard let newRegion = context.region else { return }
+                        region = newRegion
+                        regionCenterChanged(to: newRegion.center)
+                    }
+            }
+        } else {
+            LegacyDraggableConfirmMap(
+                region: $region,
+                showsUserLocation: isLocationAuthorized,
+                onRegionChange: { newRegion in
+                    regionCenterChanged(to: newRegion.center)
+                }
+            )
+        }
+    }
+
+    @available(iOS 17.0, *)
+    private func updateUserLocationVisibility(using proxy: MapProxy) {
+        proxy.showsUserLocation = isLocationAuthorized
+    }
+
+    @ViewBuilder
+    private var selectedAddressLabel: some View {
+        if !locationText.isEmpty {
+            Text(locationText)
+                .font(.footnote)
+                .foregroundColor(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private var confirmButton: some View {
+        Button {
+            confirmSelection()
+        } label: {
+            Text("Confirm Location")
+                .fontWeight(.semibold)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color("LSERed"))
+                .foregroundColor(.white)
+                .cornerRadius(10)
+        }
+        .disabled(isGeocoding)
     }
 
     private func centerOnUserIfAvailable(shouldReverseGeocode: Bool) {
@@ -331,5 +375,23 @@ struct ConfirmEventSpotView: View {
 
     private func fallbackAddress(for coordinate: CLLocationCoordinate2D) -> String {
         String(format: "Lat %.5f, Lon %.5f", coordinate.latitude, coordinate.longitude)
+    }
+}
+
+private struct LegacyDraggableConfirmMap: View {
+    @Binding var region: MKCoordinateRegion
+    let showsUserLocation: Bool
+    let onRegionChange: (MKCoordinateRegion) -> Void
+
+    var body: some View {
+        Map(
+            coordinateRegion: $region,
+            interactionModes: .all,
+            showsUserLocation: showsUserLocation,
+            userTrackingMode: .constant(.none)
+        )
+        .onChange(of: region) { newValue in
+            onRegionChange(newValue)
+        }
     }
 }
