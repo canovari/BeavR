@@ -5,22 +5,27 @@
 //  Created by Pietro Canovari on 9/17/25.
 //
 
-
 import Foundation
 
-class APIService {
+final class APIService {
     static let shared = APIService()
-    let baseURL = URL(string: "https://your-backend.lsehub.app")!   // change later
+
+    private let baseURL = URL(string: "https://www.canovari.com/api")!
+    private let urlSession: URLSession
+
+    init(session: URLSession = .shared) {
+        self.urlSession = session
+    }
 
     func fetchPosts(completion: @escaping (Result<[Post], Error>) -> Void) {
-        let url = baseURL.appendingPathComponent("/posts")
-        let task = URLSession.shared.dataTask(with: url) { data, resp, err in
+        let url = baseURL.appendingPathComponent("posts")
+        let task = urlSession.dataTask(with: url) { data, resp, err in
             if let err = err {
                 completion(.failure(err))
                 return
             }
             guard let data = data else {
-                completion(.failure(NSError(domain: "", code:-1, userInfo: nil)))
+                completion(.failure(APIServiceError.invalidResponse))
                 return
             }
             do {
@@ -35,5 +40,167 @@ class APIService {
         task.resume()
     }
 
-    // functions for saving post, login, etc.
+    func requestLoginCode(for email: String) async throws {
+        let endpoint = baseURL.appendingPathComponent("request_code.php")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.setValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        request.httpBody = makeFormBody(["email": email])
+
+        _ = try await perform(request: request)
+    }
+
+    func verifyLoginCode(email: String, code: String) async throws -> String {
+        let endpoint = baseURL.appendingPathComponent("verify_code.php")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.setValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        request.httpBody = makeFormBody(["email": email, "code": code])
+
+        let data = try await perform(request: request)
+        let decoder = JSONDecoder()
+        let response = try decoder.decode(VerifyResponse.self, from: data)
+
+        guard response.success, let token = response.token, !token.isEmpty else {
+            throw APIServiceError.invalidResponse
+        }
+
+        return token
+    }
+
+    func submitEvent(draft: PostDraft, token: String) async throws {
+        let endpoint = baseURL.appendingPathComponent("events.php")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let payload = EventSubmissionPayload(
+            title: draft.title,
+            startTime: draft.startTime,
+            endTime: draft.endTime,
+            location: draft.location,
+            description: draft.description,
+            organization: draft.organization,
+            category: draft.category,
+            contact: draft.contact,
+            latitude: draft.latitude,
+            longitude: draft.longitude,
+            creator: draft.creator
+        )
+
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        request.httpBody = try encoder.encode(payload)
+
+        _ = try await perform(request: request)
+    }
+
+    func fetchMyEvents(token: String) async throws -> [Post] {
+        var components = URLComponents(url: baseURL.appendingPathComponent("events.php"), resolvingAgainstBaseURL: false)
+        components?.queryItems = [URLQueryItem(name: "mine", value: "1")]
+
+        guard let url = components?.url else {
+            throw APIServiceError.invalidResponse
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let data = try await perform(request: request)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode([Post].self, from: data)
+    }
+
+    func cancelEvent(id: Int, token: String) async throws {
+        let endpoint = baseURL.appendingPathComponent("events.php")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "DELETE"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let encoder = JSONEncoder()
+        request.httpBody = try encoder.encode(CancelEventPayload(id: id))
+
+        _ = try await perform(request: request)
+    }
+
+    private func perform(request: URLRequest) async throws -> Data {
+        let (data, response) = try await urlSession.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIServiceError.invalidResponse
+        }
+
+        guard (200..<300).contains(httpResponse.statusCode) else {
+            if let message = decodeErrorMessage(from: data) {
+                throw APIServiceError.serverMessage(message)
+            }
+            throw APIServiceError.serverMessage("The server returned an unexpected error (\(httpResponse.statusCode)).")
+        }
+
+        return data
+    }
+
+    private func makeFormBody(_ parameters: [String: String]) -> Data? {
+        parameters
+            .map { key, value in
+                let encodedKey = key.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? key
+                let encodedValue = value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? value
+                return "\(encodedKey)=\(encodedValue)"
+            }
+            .joined(separator: "&")
+            .data(using: .utf8)
+    }
+
+    private func decodeErrorMessage(from data: Data) -> String? {
+        guard !data.isEmpty else { return nil }
+        let decoder = JSONDecoder()
+        return try? decoder.decode(ErrorResponse.self, from: data).error
+    }
+}
+
+private struct VerifyResponse: Decodable {
+    let success: Bool
+    let token: String?
+}
+
+private struct EventSubmissionPayload: Encodable {
+    let title: String
+    let startTime: Date
+    let endTime: Date?
+    let location: String
+    let description: String
+    let organization: String
+    let category: String
+    let contact: ContactInfo
+    let latitude: Double
+    let longitude: Double
+    let creator: String
+}
+
+private struct CancelEventPayload: Encodable {
+    let id: Int
+}
+
+private struct ErrorResponse: Decodable {
+    let error: String
+}
+
+enum APIServiceError: LocalizedError {
+    case invalidResponse
+    case serverMessage(String)
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidResponse:
+            return "Unexpected response from the server."
+        case .serverMessage(let message):
+            return message
+        }
+    }
 }
