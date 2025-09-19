@@ -113,9 +113,10 @@ struct MyEventsView: View {
         }
         .navigationTitle("My Events")
         .navigationBarTitleDisplayMode(.inline)
-        .task(id: authViewModel.token) { token in
-            guard let token = token else { return }
-            await viewModel.loadEvents(token: token, reason: .initial)
+        .task(id: authViewModel.token) {
+            if let token = authViewModel.token {
+                await viewModel.loadEvents(token: token, reason: .initial)
+            }
         }
         .onChange(of: viewModel.errorMessage) { message in
             alertMessage = message

@@ -17,7 +17,7 @@ struct ContentView: View {
             
             WhiteboardView()
                 .tabItem {
-                    Label("Whiteboard", systemImage: "square.grid.3x3.fill")
+                    Label("Pinboard", systemImage: "square.grid.3x3.fill")
                 }
         }
         .onAppear {
