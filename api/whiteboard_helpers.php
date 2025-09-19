@@ -50,8 +50,45 @@ function findUserByToken(PDO $pdo, string $token): ?array
 
     return [
         'id' => (int) $user['id'],
-        'email' => strtolower((string) $user['email']),
+        'email' => normalizeEmail($user['email'] ?? ''),
     ];
+}
+
+function ensureUtf8String(?string $value): string
+{
+    if ($value === null || $value === '') {
+        return '';
+    }
+
+    $string = (string) $value;
+
+    if (function_exists('mb_detect_encoding')) {
+        $detected = @mb_detect_encoding($string, 'UTF-8', true);
+        if ($detected === 'UTF-8') {
+            return $string;
+        }
+    }
+
+    if (function_exists('mb_convert_encoding')) {
+        $converted = @mb_convert_encoding($string, 'UTF-8', 'UTF-8, ISO-8859-1, Windows-1252');
+        if ($converted !== false) {
+            return $converted;
+        }
+    }
+
+    if (function_exists('iconv')) {
+        $iconv = @iconv('ISO-8859-1', 'UTF-8//IGNORE', $string);
+        if ($iconv !== false) {
+            return $iconv;
+        }
+    }
+
+    $fallback = @utf8_encode($string);
+    if ($fallback !== false) {
+        return $fallback;
+    }
+
+    return preg_replace('/[\x80-\xFF]/', '', $string) ?? $string;
 }
 
 function normalizeOptionalString(mixed $value): ?string
@@ -60,8 +97,15 @@ function normalizeOptionalString(mixed $value): ?string
         return null;
     }
 
-    $trimmed = trim((string) $value);
+    $string = ensureUtf8String((string) $value);
+    $trimmed = trim($string);
     return $trimmed === '' ? null : $trimmed;
+}
+
+function normalizeEmail(mixed $value): string
+{
+    $string = ensureUtf8String((string) $value);
+    return strtolower(trim($string));
 }
 
 function iso8601(mixed $value): ?string
@@ -83,7 +127,7 @@ function decodeMessagePayload(string $stored): array
 {
     $decoded = json_decode($stored, true);
     if (is_array($decoded) && isset($decoded['text'])) {
-        $text = trim((string) ($decoded['text'] ?? ''));
+        $text = trim(ensureUtf8String((string) ($decoded['text'] ?? '')));
         $author = normalizeOptionalString($decoded['author'] ?? null);
 
         return [
@@ -92,8 +136,10 @@ function decodeMessagePayload(string $stored): array
         ];
     }
 
+    $text = trim(ensureUtf8String($stored));
+
     return [
-        'text' => trim($stored),
+        'text' => $text,
         'author' => null,
     ];
 }

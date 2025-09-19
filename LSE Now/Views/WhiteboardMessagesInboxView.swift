@@ -92,7 +92,7 @@ struct MessagesInboxView: View {
         case .received:
             return "No one has replied to your pins yet."
         case .sent:
-            return "You haven\'t sent any whiteboard replies yet."
+            return "You haven\'t sent any pinboard replies yet."
         }
     }
 }
