@@ -56,7 +56,14 @@ final class WhiteboardViewModel: ObservableObject {
         }
     }
 
-    func createPin(emoji: String, text: String, author: String?, at coordinate: WhiteboardCoordinate, token: String) async throws {
+    func createPin(
+        emoji: String,
+        text: String,
+        author: String?,
+        at coordinate: WhiteboardCoordinate,
+        token: String,
+        creatorEmail: String?
+    ) async throws {
         guard !isSubmittingPin else { return }
 
         isSubmittingPin = true
@@ -71,11 +78,31 @@ final class WhiteboardViewModel: ObservableObject {
         )
 
         let newPin = try await apiService.createPin(request: request, token: token)
+        let normalizedCreator = creatorEmail?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+
+        let finalPin: WhiteboardPin
+        if let normalizedCreator, !normalizedCreator.isEmpty {
+            finalPin = WhiteboardPin(
+                id: newPin.id,
+                emoji: newPin.emoji,
+                text: newPin.text,
+                author: newPin.author,
+                creatorEmail: normalizedCreator,
+                gridRow: newPin.gridRow,
+                gridCol: newPin.gridCol,
+                createdAt: newPin.createdAt
+            )
+        } else {
+            finalPin = newPin
+        }
+
         guard WhiteboardGridConfiguration.contains(row: newPin.gridRow, column: newPin.gridCol) else {
             return
         }
         pins.removeAll { $0.gridRow == newPin.gridRow && $0.gridCol == newPin.gridCol }
-        pins.append(newPin)
+        pins.append(finalPin)
         maintainExpirationTimer()
     }
 

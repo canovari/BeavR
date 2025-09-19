@@ -110,16 +110,15 @@ function handlePost(PDO $pdo): void
     $longitude = $payload['longitude'] ?? null;
     $creatorField = isset($payload['creator']) ? trim((string) $payload['creator']) : '';
 
-    if ($title === '' || $startTimeRaw === null || $location === '' || $description === '' ||
-        $organization === '' || $category === '' || !is_array($contact) ||
-        !isset($contact['type'], $contact['value']) || $latitude === null || $longitude === null) {
+    if ($title === '' || $startTimeRaw === null || $endTimeRaw === null || $location === '' || $description === '' ||
+        $organization === '' || $category === '' || $latitude === null || $longitude === null) {
         http_response_code(400);
         echo json_encode(['error' => 'Missing required fields.']);
         return;
     }
 
     $startTime = parseIsoDate($startTimeRaw);
-    $endTime = $endTimeRaw !== null ? parseIsoDate($endTimeRaw) : null;
+    $endTime = parseIsoDate($endTimeRaw);
 
     if ($startTime === null) {
         http_response_code(400);
@@ -127,18 +126,27 @@ function handlePost(PDO $pdo): void
         return;
     }
 
-    if ($endTimeRaw !== null && $endTime === null) {
+    if ($endTime === null) {
         http_response_code(400);
         echo json_encode(['error' => 'Invalid end time.']);
         return;
     }
 
-    $contactType = trim((string) $contact['type']);
-    $contactValue = trim((string) $contact['value']);
-    if ($contactType === '' || $contactValue === '') {
-        http_response_code(400);
-        echo json_encode(['error' => 'Contact details are required.']);
-        return;
+    if ($endTime <= $startTime) {
+        $endTime = $endTime->add(new DateInterval('P1D'));
+    }
+
+    $contactType = null;
+    $contactValue = null;
+
+    if (is_array($contact)) {
+        $contactType = normalizeOptionalString($contact['type'] ?? null);
+        $contactValue = normalizeOptionalString($contact['value'] ?? null);
+
+        if ($contactType === null || $contactValue === null) {
+            $contactType = null;
+            $contactValue = null;
+        }
     }
 
     if (!is_numeric($latitude) || !is_numeric($longitude)) {
@@ -167,7 +175,7 @@ function handlePost(PDO $pdo): void
     $insert->execute([
         ':title' => $title,
         ':start_time' => $startTime->format('Y-m-d H:i:s'),
-        ':end_time' => $endTime?->format('Y-m-d H:i:s'),
+        ':end_time' => $endTime->format('Y-m-d H:i:s'),
         ':location' => $location,
         ':description' => $description,
         ':organization' => $organization,
@@ -253,7 +261,8 @@ function formatEvents(array $rows): array
 
     foreach ($rows as $row) {
         $contact = null;
-        if ($row['contact_type'] !== null && $row['contact_value'] !== null) {
+        if ($row['contact_type'] !== null && $row['contact_value'] !== null &&
+            $row['contact_type'] !== '' && $row['contact_value'] !== '') {
             $contact = [
                 'type' => $row['contact_type'],
                 'value' => $row['contact_value'],

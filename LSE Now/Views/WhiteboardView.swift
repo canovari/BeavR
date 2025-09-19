@@ -21,6 +21,11 @@ struct WhiteboardView: View {
         return token
     }
 
+    private var normalizedLoggedInEmail: String {
+        let rawEmail = authViewModel.loggedInEmail ?? authViewModel.email
+        return rawEmail.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -84,6 +89,7 @@ struct WhiteboardView: View {
                         coordinate: coordinate,
                         token: token
                     )
+                    .environmentObject(authViewModel)
                 } else {
                     MissingSessionView()
                 }
@@ -139,7 +145,7 @@ struct WhiteboardView: View {
                 if let pin = viewModel.pin(at: coordinate) {
                     WhiteboardPinCell(
                         pin: pin,
-                        isMine: pin.creatorEmail.caseInsensitiveCompare(authViewModel.loggedInEmail ?? "") == .orderedSame,
+                        isMine: !normalizedLoggedInEmail.isEmpty && pin.creatorEmail == normalizedLoggedInEmail,
                         referenceDate: referenceDate
                     )
                     .onTapGesture {
@@ -290,10 +296,6 @@ private struct PinDetailSheet: View {
                             .foregroundColor(.primary)
                             .frame(maxWidth: .infinity, alignment: .leading)
 
-                        Label("Posted by \(pin.creatorEmail)", systemImage: "envelope")
-                            .font(.callout)
-                            .foregroundColor(.secondary)
-
                         if let author = pin.author, !author.isEmpty {
                             Label(author, systemImage: "person")
                                 .font(.callout)
@@ -354,6 +356,7 @@ private struct PinDetailSheet: View {
 
 private struct AddPinSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var authViewModel: AuthViewModel
     @ObservedObject var viewModel: WhiteboardViewModel
 
     let coordinate: WhiteboardCoordinate
@@ -428,7 +431,10 @@ private struct AddPinSheet: View {
                     text: trimmedText,
                     author: trimmedAuthor.isEmpty ? nil : trimmedAuthor,
                     at: coordinate,
-                    token: token
+                    token: token,
+                    creatorEmail: (authViewModel.loggedInEmail ?? authViewModel.email)
+                        .trimmingCharacters(in: .whitespacesAndNewlines)
+                        .lowercased()
                 )
                 dismiss()
             } catch {

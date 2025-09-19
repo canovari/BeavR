@@ -160,6 +160,7 @@ final class APIService {
         var request = URLRequest(url: endpoint)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.cachePolicy = .reloadIgnoringLocalCacheData
 
         let data = try await perform(request: request)
         let decoder = JSONDecoder()
@@ -270,12 +271,12 @@ private struct VerifyResponse: Decodable {
 private struct EventSubmissionPayload: Encodable {
     let title: String
     let startTime: Date
-    let endTime: Date?
+    let endTime: Date
     let location: String
     let description: String
     let organization: String
     let category: String
-    let contact: ContactInfo
+    let contact: ContactInfo?
     let latitude: Double
     let longitude: Double
     let creator: String
