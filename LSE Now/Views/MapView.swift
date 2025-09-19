@@ -56,41 +56,13 @@ struct MapView: View {
             Map(coordinateRegion: $region, annotationItems: mapItems) { item in
                 switch item.kind {
                 case .event(let post):
-                    MapAnnotation(coordinate: item.coordinate) {
-                        let hasStarted = Date() >= post.startTime
-                        let isUnder1Hour = !hasStarted && Date().distance(to: post.startTime) < 3600
-
-                        NavigationLink(value: post) {
-                            VStack(spacing: 4) {
-                                Text(post.category?.prefix(1) ?? "📍")
-                                    .font(.title2)
-
-                                Text(timeLabel(for: post.startTime, endTime: post.endTime))
-                                    .font(.caption)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(isUnder1Hour ? .red : .primary)
-                            }
-                            .padding(6)
-                            .background(.ultraThinMaterial)
-                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                            .shadow(radius: 3)
-                            .opacity(hasStarted ? 0.6 : 1.0)
-                            .offset(x: isUnder1Hour && shakeToggle ? -6 : 6)
-                            .animation(
-                                isUnder1Hour
-                                ? .easeInOut(duration: 0.08).repeatCount(5, autoreverses: true)
-                                : .default,
-                                value: shakeToggle
-                            )
-                        }
-                        .buttonStyle(.plain)
+                    return MapAnnotation(coordinate: item.coordinate) {
+                        eventAnnotation(for: post)
                     }
-                    .zIndex(zIndexFor(post: post))
                 case .userLocation:
-                    MapAnnotation(coordinate: item.coordinate) {
+                    return MapAnnotation(coordinate: item.coordinate) {
                         UserLocationAnnotationView()
                     }
-                    .zIndex(Double(sortedPosts.count) + 10)
                 }
             }
             .edgesIgnoringSafeArea(.top)
@@ -110,12 +82,34 @@ struct MapView: View {
         }
     }
 
-    // Higher zIndex for earlier events
-    private func zIndexFor(post: Post) -> Double {
-        if let idx = sortedPosts.firstIndex(of: post) {
-            return Double(sortedPosts.count - idx)
+    private func eventAnnotation(for post: Post) -> some View {
+        let hasStarted = Date() >= post.startTime
+        let isUnder1Hour = !hasStarted && Date().distance(to: post.startTime) < 3600
+
+        return NavigationLink(value: post) {
+            VStack(spacing: 4) {
+                Text(post.category?.prefix(1) ?? "📍")
+                    .font(.title2)
+
+                Text(timeLabel(for: post.startTime, endTime: post.endTime))
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(isUnder1Hour ? .red : .primary)
+            }
+            .padding(6)
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .shadow(radius: 3)
+            .opacity(hasStarted ? 0.6 : 1.0)
+            .offset(x: isUnder1Hour && shakeToggle ? -6 : 6)
+            .animation(
+                isUnder1Hour
+                ? .easeInOut(duration: 0.08).repeatCount(5, autoreverses: true)
+                : .default,
+                value: shakeToggle
+            )
         }
-        return 0
+        .buttonStyle(.plain)
     }
 
     // Timer for jiggle
