@@ -147,10 +147,19 @@ struct ConfirmEventSpotView: View {
 
     private var mapContent: some View {
         ZStack {
-            mapViewLayer
-                .frame(height: 360)
-                .cornerRadius(12)
-                .shadow(radius: 3)
+            Map(
+                position: $cameraPosition,
+                interactionModes: .all,
+                showsUserLocation: isLocationAuthorized
+            )
+            .frame(height: 360)
+            .cornerRadius(12)
+            .shadow(radius: 3)
+            .onMapCameraChange { context in
+                guard let newRegion = context.region else { return }
+                region = newRegion
+                regionCenterChanged(to: newRegion.center)
+            }
 
             Circle()
                 .fill(Color("LSERed"))
@@ -160,39 +169,6 @@ struct ConfirmEventSpotView: View {
                 )
                 .shadow(radius: 1)
         }
-    }
-
-    @ViewBuilder
-    private var mapViewLayer: some View {
-        if #available(iOS 17.0, *) {
-            MapReader { proxy in
-                Map(position: $cameraPosition, interactionModes: .all)
-                    .onAppear {
-                        updateUserLocationVisibility(using: proxy)
-                    }
-                    .onChange(of: isLocationAuthorized) { _ in
-                        updateUserLocationVisibility(using: proxy)
-                    }
-                    .onMapCameraChange { context in
-                        guard let newRegion = context.region else { return }
-                        region = newRegion
-                        regionCenterChanged(to: newRegion.center)
-                    }
-            }
-        } else {
-            LegacyDraggableConfirmMap(
-                region: $region,
-                showsUserLocation: isLocationAuthorized,
-                onRegionChange: { newRegion in
-                    regionCenterChanged(to: newRegion.center)
-                }
-            )
-        }
-    }
-
-    @available(iOS 17.0, *)
-    private func updateUserLocationVisibility(using proxy: MapProxy) {
-        proxy.showsUserLocation = isLocationAuthorized
     }
 
     @ViewBuilder
