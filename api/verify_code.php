@@ -1,0 +1,76 @@
+<?php
+declare(strict_types=1);
+
+require_once __DIR__ . '/../config.php';
+
+header('Content-Type: application/json');
+
+$email = isset($_POST['email']) ? trim((string) $_POST['email']) : '';
+$code = isset($_POST['code']) ? trim((string) $_POST['code']) : '';
+
+if ($email === '' || $code === '') {
+    http_response_code(400);
+    echo json_encode(['error' => 'Email and code are required.']);
+    exit;
+}
+
+if (!preg_match('/^[0-9]{6}$/', $code)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Invalid verification code.']);
+    exit;
+}
+
+try {
+    $stmt = $pdo->prepare('SELECT id, code_expires_at FROM users WHERE email = :email AND code = :code LIMIT 1');
+    $stmt->execute([
+        ':email' => $email,
+        ':code' => $code,
+    ]);
+    $user = $stmt->fetch();
+} catch (PDOException $exception) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Unable to verify code.']);
+    exit;
+}
+
+if (!$user) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Invalid or expired code.']);
+    exit;
+}
+
+$expiresAt = $user['code_expires_at'];
+if ($expiresAt === null || strtotime($expiresAt) < time()) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Invalid or expired code.']);
+    exit;
+}
+
+try {
+    $token = bin2hex(random_bytes(32));
+} catch (Throwable $exception) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Unable to generate login token.']);
+    exit;
+}
+
+try {
+    $update = $pdo->prepare(
+        'UPDATE users
+         SET verified = 1,
+             code = NULL,
+             code_expires_at = NULL,
+             login_token = :token
+         WHERE id = :id'
+    );
+    $update->execute([
+        ':token' => $token,
+        ':id' => $user['id'],
+    ]);
+} catch (PDOException $exception) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Failed to finalize verification.']);
+    exit;
+}
+
+echo json_encode(['success' => true, 'token' => $token]);
