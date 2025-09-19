@@ -13,11 +13,13 @@ struct PostDraft {
     var contact: ContactInfo
     var latitude: Double
     var longitude: Double
+    var creator: String
 }
 
 // MARK: - AddEventView
 struct AddEventView: View {
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject private var authViewModel: AuthViewModel
 
     // Event fields
     @State private var title = ""
@@ -37,6 +39,8 @@ struct AddEventView: View {
     @State private var invalidFields: Set<String> = []
     @State private var pickedCoordinate: CLLocationCoordinate2D?
     @FocusState private var focusedField: String?
+    @State private var isSubmitting = false
+    @State private var submissionErrorMessage: String?
 
     var body: some View {
         NavigationStack {
@@ -143,6 +147,7 @@ struct AddEventView: View {
                             Spacer()
                         }
                     }
+                    .disabled(isSubmitting)
                 }
             }
             .navigationTitle("New Event")
@@ -159,11 +164,27 @@ struct AddEventView: View {
             .sheet(isPresented: $showSubmissionSheet) {
                 SubmissionConfirmationView { dismiss() }
             }
+            .alert("Submission Failed", isPresented: Binding(
+                get: { submissionErrorMessage != nil },
+                set: { newValue in
+                    if !newValue { submissionErrorMessage = nil }
+                }
+            )) {
+                Button("OK", role: .cancel) {
+                    submissionErrorMessage = nil
+                }
+            } message: {
+                Text(submissionErrorMessage ?? "An unknown error occurred.")
+            }
         }
     }
 
     // MARK: - Validation
     private func validateFields() {
+        guard !isSubmitting else { return }
+
+        submissionErrorMessage = nil
+
         var missing: Set<String> = []
         if title.isEmpty { missing.insert("title") }
         if locationQuery.isEmpty { missing.insert("location") }
@@ -186,6 +207,17 @@ struct AddEventView: View {
     // MARK: - Actually send
     private func actuallySend() {
         guard let coord = pickedCoordinate, let contact = contact else { return }
+        guard let token = authViewModel.token else {
+            submissionErrorMessage = "You need to be logged in to submit an event."
+            return
+        }
+
+        guard let email = authViewModel.loggedInEmail ?? (authViewModel.email.isEmpty ? nil : authViewModel.email) else {
+            submissionErrorMessage = "We couldn't determine your email address. Please try logging in again."
+            return
+        }
+
+        let normalizedEmail = email.lowercased()
 
         let draft = PostDraft(
             title: title,
@@ -197,12 +229,26 @@ struct AddEventView: View {
             category: category,
             contact: contact,
             latitude: coord.latitude,
-            longitude: coord.longitude
+            longitude: coord.longitude,
+            creator: normalizedEmail
         )
 
-        submitEvent(draft) { success in
-            DispatchQueue.main.async {
-                if success { showSubmissionSheet = true }
+        isSubmitting = true
+
+        Task {
+            do {
+                try await APIService.shared.submitEvent(draft: draft, token: token)
+                await MainActor.run {
+                    showSubmissionSheet = true
+                }
+            } catch {
+                await MainActor.run {
+                    submissionErrorMessage = error.localizedDescription
+                }
+            }
+
+            await MainActor.run {
+                isSubmitting = false
             }
         }
     }
@@ -249,32 +295,3 @@ struct JiggleEffect: GeometryEffect {
     }
 }
 
-// MARK: - Networking
-func submitEvent(_ draft: PostDraft, completion: @escaping (Bool) -> Void) {
-    guard let url = URL(string: "https://www.canovari.com/api/events.php") else {
-        completion(false); return
-    }
-    var req = URLRequest(url: url)
-    req.httpMethod = "POST"
-    req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-    let iso = ISO8601DateFormatter()
-    let body: [String: Any] = [
-        "title": draft.title,
-        "startTime": iso.string(from: draft.startTime),
-        "endTime": draft.endTime.map { iso.string(from: $0) } as Any,
-        "location": draft.location,
-        "description": draft.description,
-        "organization": draft.organization,
-        "category": draft.category,
-        "contact": ["type": draft.contact.type, "value": draft.contact.value],
-        "latitude": draft.latitude,
-        "longitude": draft.longitude
-    ]
-
-    req.httpBody = try? JSONSerialization.data(withJSONObject: body)
-
-    URLSession.shared.dataTask(with: req) { _, _, _ in
-        completion(true)
-    }.resume()
-}
