@@ -6,6 +6,7 @@ struct LaunchView: View {
     @StateObject private var viewModel = PostListViewModel() // preload in background
     @StateObject private var authViewModel = AuthViewModel()
     @EnvironmentObject private var locationManager: LocationManager
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         ZStack {
@@ -31,11 +32,18 @@ struct LaunchView: View {
             }
         }
         .onAppear {
-            locationManager.requestPermission()
-
             // Start fetching posts immediately in the background
             viewModel.fetchPosts()
             authViewModel.loadExistingSession()
+
+            if authViewModel.isLoggedIn {
+                locationManager.handleLoginStateChange(
+                    isLoggedIn: true,
+                    tokenProvider: { authViewModel.token }
+                )
+            }
+
+            locationManager.updateAppActivity(isActive: scenePhase == .active)
 
             // Kick off animation
             animate = true
@@ -46,6 +54,19 @@ struct LaunchView: View {
                     finished = true
                 }
             }
+        }
+        .onChange(of: authViewModel.isLoggedIn) { _, isLoggedIn in
+            if isLoggedIn {
+                locationManager.handleLoginStateChange(
+                    isLoggedIn: true,
+                    tokenProvider: { authViewModel.token }
+                )
+            } else {
+                locationManager.handleLoginStateChange(isLoggedIn: false, tokenProvider: nil)
+            }
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            locationManager.updateAppActivity(isActive: newPhase == .active)
         }
     }
 }
