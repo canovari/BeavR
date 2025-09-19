@@ -33,8 +33,8 @@ function listPins(PDO $pdo): void
     $query = $pdo->query(
         'SELECT id, emoji, text, author, creator_email, grid_row, grid_col, created_at
          FROM pins
-         WHERE grid_row BETWEEN 0 AND 4
-           AND grid_col BETWEEN 0 AND 7
+         WHERE grid_row BETWEEN 0 AND 7
+           AND grid_col BETWEEN 0 AND 4
          ORDER BY created_at DESC'
     );
 
@@ -85,7 +85,7 @@ function createPin(PDO $pdo): void
         return;
     }
 
-    if ($gridRow < 0 || $gridRow > 4 || $gridCol < 0 || $gridCol > 7) {
+    if ($gridRow < 0 || $gridRow > 7 || $gridCol < 0 || $gridCol > 4) {
         http_response_code(400);
         echo json_encode(['error' => 'Grid location is out of range.']);
         return;

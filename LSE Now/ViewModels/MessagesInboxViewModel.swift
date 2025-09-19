@@ -40,14 +40,17 @@ final class MessagesInboxViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
 
+        defer { isLoading = false }
+
         do {
             let fetched = try await apiService.fetchMessages(folder: folder.serviceFolder, token: token)
             messages = fetched
+        } catch let urlError as URLError where urlError.code == .cancelled {
+            // Ignore cancellations triggered by switching folders or dismissing the sheet.
+        } catch is CancellationError {
+            // Ignore explicit cancellation errors from Swift concurrency.
         } catch {
             errorMessage = error.localizedDescription
-            messages = []
         }
-
-        isLoading = false
     }
 }
