@@ -5,12 +5,12 @@ import MapKit
 struct PostDraft {
     var title: String
     var startTime: Date
-    var endTime: Date?
+    var endTime: Date
     var location: String
     var description: String
     var organization: String
     var category: String
-    var contact: ContactInfo
+    var contact: ContactInfo?
     var latitude: Double
     var longitude: Double
     var creator: String
@@ -26,8 +26,7 @@ struct AddEventView: View {
     @State private var title = ""
     @State private var startDate = Date()
     @State private var startTime = Date()
-    @State private var durationHours = 1
-    @State private var durationMinutes = 0
+    @State private var endTime = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date()
     @State private var locationQuery = ""
     @State private var description = ""
     @State private var organization = ""
@@ -60,18 +59,14 @@ struct AddEventView: View {
                     .modifier(ValidationHighlight(isInvalid: invalidFields.contains("startTime")))
                     .focused($focusedField, equals: "time")
 
-                Section("Duration") {
-                    DurationPickerView(
-                        hours: $durationHours,
-                        minutes: $durationMinutes,
-                        isInvalid: invalidFields.contains("duration")
-                    )
+                DatePicker("End Time", selection: $endTime, displayedComponents: .hourAndMinute)
+                    .modifier(ValidationHighlight(isInvalid: invalidFields.contains("endTime")))
 
-                    Text(durationDescription)
-                        .font(.footnote)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.leading)
-                }
+                Text(eventTimingSummary)
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
                 // Location & Map Pin
                 NavigationLink {
@@ -124,7 +119,7 @@ struct AddEventView: View {
                     EventContactView(contact: $contact)
                 } label: {
                     HStack {
-                        Text("Contact")
+                        Text("Contact (optional)")
                         Spacer()
                         if let c = contact {
                             Text("\(c.type): \(c.displayValue)")
@@ -136,7 +131,6 @@ struct AddEventView: View {
                         }
                     }
                 }
-                .modifier(ValidationHighlight(isInvalid: invalidFields.contains("contact")))
 
                 // Description
                 TextField("Description", text: $description, axis: .vertical)
@@ -218,9 +212,8 @@ struct AddEventView: View {
         if pickedCoordinate == nil { missing.insert("mapPin") }
         if category.isEmpty { missing.insert("category") }
         if organization.isEmpty { missing.insert("organization") }
-        if contact == nil { missing.insert("contact") }
         if description.isEmpty { missing.insert("description") }
-        if durationTotalSeconds <= 0 { missing.insert("duration") }
+        if eventDuration <= 0 { missing.insert("endTime") }
 
         if missing.isEmpty {
             showFinalConfirmation = true
@@ -238,7 +231,7 @@ struct AddEventView: View {
 
     // MARK: - Actually send
     private func actuallySend() {
-        guard let coord = pickedCoordinate, let contact = contact else { return }
+        guard let coord = pickedCoordinate else { return }
         guard let token = authViewModel.token else {
             submissionErrorMessage = "You need to be logged in to submit an event."
             return
@@ -251,9 +244,8 @@ struct AddEventView: View {
 
         let normalizedEmail = email.lowercased()
 
-        let startDateTime = merge(date: startDate, time: startTime)
-        let totalDurationSeconds = durationTotalSeconds
-        let computedEndTime = totalDurationSeconds > 0 ? startDateTime.addingTimeInterval(TimeInterval(totalDurationSeconds)) : nil
+        let startDateTime = combinedStartDateTime
+        let computedEndTime = resolvedEndDateTime
         let draft = PostDraft(
             title: title,
             startTime: startDateTime,
@@ -297,77 +289,70 @@ struct AddEventView: View {
             hour: t.hour, minute: t.minute)) ?? date
     }
 
-    private var durationTotalSeconds: Int {
-        max(0, (durationHours * 3600) + (durationMinutes * 60))
+    private var combinedStartDateTime: Date {
+        merge(date: startDate, time: startTime)
     }
 
-    private var durationDescription: String {
-        let total = durationTotalSeconds
-        guard total > 0 else {
-            return "Select how long the event lasts."
+    private var resolvedEndDateTime: Date {
+        let sameDayEnd = merge(date: startDate, time: endTime)
+        if sameDayEnd <= combinedStartDateTime {
+            let calendar = Calendar.current
+            return calendar.date(byAdding: .day, value: 1, to: sameDayEnd) ?? sameDayEnd.addingTimeInterval(86_400)
         }
+        return sameDayEnd
+    }
+
+    private var eventDuration: TimeInterval {
+        max(0, resolvedEndDateTime.timeIntervalSince(combinedStartDateTime))
+    }
+
+    private var eventTimingSummary: String {
+        let startString = AddEventView.startFormatter.string(from: combinedStartDateTime)
+        let durationText = formattedDuration(eventDuration)
+
+        if Calendar.current.isDate(resolvedEndDateTime, inSameDayAs: combinedStartDateTime) {
+            return "Event starts on \(startString) and lasts \(durationText)."
+        } else {
+            let endString = AddEventView.endFormatter.string(from: resolvedEndDateTime)
+            return "Event starts on \(startString), lasts \(durationText), and ends on \(endString)."
+        }
+    }
+
+    private func formattedDuration(_ interval: TimeInterval) -> String {
+        guard interval > 0 else { return "less than a minute" }
+
+        let totalMinutes = max(1, Int(round(interval / 60)))
+        let hours = totalMinutes / 60
+        let minutes = totalMinutes % 60
 
         var parts: [String] = []
-        if durationHours > 0 {
-            parts.append(durationHours == 1 ? "1 hour" : "\(durationHours) hours")
+        if hours > 0 {
+            parts.append(hours == 1 ? "1 hour" : "\(hours) hours")
         }
-        if durationMinutes > 0 {
-            parts.append(durationMinutes == 1 ? "1 minute" : "\(durationMinutes) minutes")
+        if minutes > 0 {
+            parts.append(minutes == 1 ? "1 minute" : "\(minutes) minutes")
         }
 
-        let joined = parts.joined(separator: " and ")
-        return "Event lasts \(joined). We'll calculate the end time automatically when you submit."
+        if parts.isEmpty {
+            return "less than a minute"
+        }
+
+        return parts.joined(separator: " and ")
     }
-}
 
-private struct DurationPickerView: View {
-    @Binding var hours: Int
-    @Binding var minutes: Int
-    var isInvalid: Bool
+    private static let startFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale.current
+        formatter.dateFormat = "MMM d 'at' h:mm a"
+        return formatter
+    }()
 
-    private let hourRange = Array(0...12)
-    private let minuteValues = Array(stride(from: 0, through: 55, by: 5))
-
-    var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.secondarySystemBackground))
-
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(isInvalid ? Color.red : Color.clear, lineWidth: 2)
-
-            HStack(spacing: 0) {
-                Picker("Hours", selection: $hours) {
-                    ForEach(hourRange, id: \.self) { hour in
-                        Text(hour == 1 ? "1 hr" : "\(hour) hrs")
-                            .tag(hour)
-                    }
-                }
-                .labelsHidden()
-                .frame(maxWidth: .infinity)
-                .clipped()
-                .pickerStyle(.wheel)
-
-                Rectangle()
-                    .fill(Color(.separator))
-                    .frame(width: 1, height: 120)
-
-                Picker("Minutes", selection: $minutes) {
-                    ForEach(minuteValues, id: \.self) { minute in
-                        Text(minute == 1 ? "1 min" : "\(minute) mins")
-                            .tag(minute)
-                    }
-                }
-                .labelsHidden()
-                .frame(maxWidth: .infinity)
-                .clipped()
-                .pickerStyle(.wheel)
-            }
-            .padding(.horizontal, 8)
-        }
-        .frame(height: 150)
-        .accessibilityElement(children: .combine)
-    }
+    private static let endFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale.current
+        formatter.dateFormat = "MMM d 'at' h:mm a"
+        return formatter
+    }()
 }
 
 // MARK: - Validation highlight

@@ -22,6 +22,7 @@ final class APIService {
         self.urlSession = session
     }
 
+    // MARK: - Posts
     func fetchPosts(completion: @escaping (Result<[Post], Error>) -> Void) {
         let url = baseURL.appendingPathComponent("posts")
         let task = urlSession.dataTask(with: url) { data, resp, err in
@@ -45,13 +46,13 @@ final class APIService {
         task.resume()
     }
 
+    // MARK: - Auth
     func requestLoginCode(for email: String) async throws {
         let endpoint = baseURL.appendingPathComponent("request_code.php")
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
         request.setValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.httpBody = makeFormBody(["email": email])
-
         _ = try await perform(request: request)
     }
 
@@ -69,10 +70,10 @@ final class APIService {
         guard response.success, let token = response.token, !token.isEmpty else {
             throw APIServiceError.invalidResponse
         }
-
         return token
     }
 
+    // MARK: - Events
     func submitEvent(draft: PostDraft, token: String) async throws {
         let endpoint = baseURL.appendingPathComponent("events.php")
         var request = URLRequest(url: endpoint)
@@ -98,7 +99,6 @@ final class APIService {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         request.httpBody = try encoder.encode(payload)
-
         _ = try await perform(request: request)
     }
 
@@ -106,9 +106,7 @@ final class APIService {
         var components = URLComponents(url: baseURL.appendingPathComponent("events.php"), resolvingAgainstBaseURL: false)
         components?.queryItems = [URLQueryItem(name: "mine", value: "1")]
 
-        guard let url = components?.url else {
-            throw APIServiceError.invalidResponse
-        }
+        guard let url = components?.url else { throw APIServiceError.invalidResponse }
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -130,19 +128,19 @@ final class APIService {
 
         let encoder = JSONEncoder()
         request.httpBody = try encoder.encode(CancelEventPayload(id: id))
-
         _ = try await perform(request: request)
     }
 
-    func updateUserLocation(latitude: Double, longitude: Double, timestamp: Date, token: String) async throws {
+    // MARK: - Location (email instead of token)
+    func updateUserLocation(email: String, latitude: Double, longitude: Double, timestamp: Date) async throws {
         let endpoint = baseURL.appendingPathComponent("user_location.php")
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        setAuthorizationHeader(on: &request, token: token)
 
         let payload = LocationUpdatePayload(
+            email: email,
             latitude: latitude,
             longitude: longitude,
             timestamp: timestamp
@@ -151,15 +149,16 @@ final class APIService {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         request.httpBody = try encoder.encode(payload)
-
         _ = try await perform(request: request)
     }
 
+    // MARK: - Pins
     func fetchPins() async throws -> [WhiteboardPin] {
         let endpoint = baseURL.appendingPathComponent("pins.php")
         var request = URLRequest(url: endpoint)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.cachePolicy = .reloadIgnoringLocalCacheData
 
         let data = try await perform(request: request)
         let decoder = JSONDecoder()
@@ -184,6 +183,7 @@ final class APIService {
         return try decoder.decode(WhiteboardPin.self, from: data)
     }
 
+    // MARK: - Messages
     func sendPinReply(payload: PinReplyPayload, token: String) async throws -> WhiteboardMessage {
         let endpoint = baseURL.appendingPathComponent("messages.php")
         var request = URLRequest(url: endpoint)
@@ -206,9 +206,7 @@ final class APIService {
         var components = URLComponents(url: baseURL.appendingPathComponent("messages.php"), resolvingAgainstBaseURL: false)
         components?.queryItems = [URLQueryItem(name: "box", value: folder.rawValue)]
 
-        guard let url = components?.url else {
-            throw APIServiceError.invalidResponse
-        }
+        guard let url = components?.url else { throw APIServiceError.invalidResponse }
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -221,6 +219,7 @@ final class APIService {
         return try decoder.decode([WhiteboardMessage].self, from: data)
     }
 
+    // MARK: - Internals
     private func perform(request: URLRequest) async throws -> Data {
         let (data, response) = try await urlSession.data(for: request)
 
@@ -234,7 +233,6 @@ final class APIService {
             }
             throw APIServiceError.serverMessage("The server returned an unexpected error (\(httpResponse.statusCode)).")
         }
-
         return data
     }
 
@@ -262,6 +260,7 @@ final class APIService {
     }
 }
 
+// MARK: - Payloads
 private struct VerifyResponse: Decodable {
     let success: Bool
     let token: String?
@@ -275,7 +274,7 @@ private struct EventSubmissionPayload: Encodable {
     let description: String
     let organization: String
     let category: String
-    let contact: ContactInfo
+    let contact: ContactInfo?
     let latitude: Double
     let longitude: Double
     let creator: String
@@ -290,6 +289,7 @@ private struct ErrorResponse: Decodable {
 }
 
 private struct LocationUpdatePayload: Encodable {
+    let email: String
     let latitude: Double
     let longitude: Double
     let timestamp: Date

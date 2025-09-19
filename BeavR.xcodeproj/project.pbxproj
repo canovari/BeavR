@@ -35,22 +35,22 @@
 			membershipExceptions = (
 				Assets.xcassets,
 				LSE_NowApp.swift,
-                                Models/ContactInfo.swift,
-                                Models/Post.swift,
-                                "Models/Post+Display.swift",
-                                "Models/Post+Status.swift",
-                                Models/User.swift,
-                                Models/WhiteboardMessage.swift,
-                                Models/WhiteboardPin.swift,
-                                Networking/APIService.swift,
-                                Services/LocationSearchCompleter.swift,
-                                Services/LocationManager.swift,
-                                Services/TokenStorage.swift,
-                                ViewModels/AuthViewModel.swift,
-                                ViewModels/MyEventsViewModel.swift,
-                                ViewModels/PostListViewModel.swift,
-                                ViewModels/MessagesInboxViewModel.swift,
-                                ViewModels/WhiteboardViewModel.swift,
+				Models/ContactInfo.swift,
+				Models/Post.swift,
+				"Models/Post+Display.swift",
+				"Models/Post+Status.swift",
+				Models/User.swift,
+				Models/WhiteboardMessage.swift,
+				Models/WhiteboardPin.swift,
+				Networking/APIService.swift,
+				Services/LocationManager.swift,
+				Services/LocationSearchCompleter.swift,
+				Services/TokenStorage.swift,
+				ViewModels/AuthViewModel.swift,
+				ViewModels/MessagesInboxViewModel.swift,
+				ViewModels/MyEventsViewModel.swift,
+				ViewModels/PostListViewModel.swift,
+				ViewModels/WhiteboardViewModel.swift,
 				Views/AddEventView.swift,
 				Views/CategorySelectionView.swift,
 				Views/ConfirmEventSpotView.swift,
@@ -60,19 +60,19 @@
 				Views/EventContactView.swift,
 				Views/ExploreView.swift,
 				Views/FeedView.swift,
-                                Views/HelpView.swift,
-                                Views/LaunchView.swift,
-                                Views/LoginFlowView.swift,
-                                Views/MainTabView.swift,
-                                Views/MapView.swift,
-                                Views/WhiteboardMessagesInboxView.swift,
-                                Views/WhiteboardView.swift,
-                                Views/NewEventView.swift,
+				Views/HelpView.swift,
+				Views/LaunchView.swift,
+				Views/LoginFlowView.swift,
+				Views/MainTabView.swift,
+				Views/MapView.swift,
+				Views/NewEventView.swift,
 				Views/PostDetailView.swift,
 				Views/PostListView.swift,
 				Views/PostRowView.swift,
 				Views/ProfileView.swift,
 				Views/SubmissionConfirmationView.swift,
+				Views/WhiteboardMessagesInboxView.swift,
+				Views/WhiteboardView.swift,
 			);
 			target = 9AE9E15E2E7B34B7005D3827 /* LSE Now */;
 		};
@@ -81,28 +81,29 @@
 			membershipExceptions = (
 				Assets.xcassets,
 				LSE_NowApp.swift,
+				"LSE-Now-Info.plist",
 			);
 			target = 9AE9E1752E7B34B9005D3827 /* LSE NowUITests */;
 		};
 		9AE9E1B22E7B375C005D3827 /* Exceptions for "LSE Now" folder in "LSE NowTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-                                Models/ContactInfo.swift,
-                                Models/Post.swift,
-                                "Models/Post+Display.swift",
-                                "Models/Post+Status.swift",
-                                Models/User.swift,
-                                Models/WhiteboardMessage.swift,
-                                Models/WhiteboardPin.swift,
+				Models/ContactInfo.swift,
+				Models/Post.swift,
+				"Models/Post+Display.swift",
+				"Models/Post+Status.swift",
+				Models/User.swift,
+				Models/WhiteboardMessage.swift,
+				Models/WhiteboardPin.swift,
 				Networking/APIService.swift,
-                                Services/LocationSearchCompleter.swift,
-                                Services/LocationManager.swift,
-                                Services/TokenStorage.swift,
-                                ViewModels/AuthViewModel.swift,
-                                ViewModels/MyEventsViewModel.swift,
-                                ViewModels/PostListViewModel.swift,
-                                ViewModels/MessagesInboxViewModel.swift,
-                                ViewModels/WhiteboardViewModel.swift,
+				Services/LocationManager.swift,
+				Services/LocationSearchCompleter.swift,
+				Services/TokenStorage.swift,
+				ViewModels/AuthViewModel.swift,
+				ViewModels/MessagesInboxViewModel.swift,
+				ViewModels/MyEventsViewModel.swift,
+				ViewModels/PostListViewModel.swift,
+				ViewModels/WhiteboardViewModel.swift,
 				Views/AddEventView.swift,
 				Views/CategorySelectionView.swift,
 				Views/ConfirmEventSpotView.swift,
@@ -112,19 +113,19 @@
 				Views/EventContactView.swift,
 				Views/ExploreView.swift,
 				Views/FeedView.swift,
-                                Views/HelpView.swift,
-                                Views/LaunchView.swift,
-                                Views/LoginFlowView.swift,
-                                Views/MainTabView.swift,
-                                Views/MapView.swift,
-                                Views/WhiteboardMessagesInboxView.swift,
-                                Views/WhiteboardView.swift,
-                                Views/NewEventView.swift,
+				Views/HelpView.swift,
+				Views/LaunchView.swift,
+				Views/LoginFlowView.swift,
+				Views/MainTabView.swift,
+				Views/MapView.swift,
+				Views/NewEventView.swift,
 				Views/PostDetailView.swift,
 				Views/PostListView.swift,
 				Views/PostRowView.swift,
 				Views/ProfileView.swift,
 				Views/SubmissionConfirmationView.swift,
+				Views/WhiteboardMessagesInboxView.swift,
+				Views/WhiteboardView.swift,
 			);
 			target = 9AE9E16B2E7B34B9005D3827 /* LSE NowTests */;
 		};
@@ -290,7 +291,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 9AE9E15A2E7B34B7005D3827 /* Build configuration list for PBXProject "LSE Now" */;
+			buildConfigurationList = 9AE9E15A2E7B34B7005D3827 /* Build configuration list for PBXProject "BeavR" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -504,6 +505,9 @@
 				DEVELOPMENT_TEAM = WL8UVSQD3L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "LSE-Now-Info.plist";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Give Location";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Give Location";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -533,6 +537,9 @@
 				DEVELOPMENT_TEAM = WL8UVSQD3L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "LSE-Now-Info.plist";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Give Location";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Give Location";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -627,7 +634,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		9AE9E15A2E7B34B7005D3827 /* Build configuration list for PBXProject "LSE Now" */ = {
+		9AE9E15A2E7B34B7005D3827 /* Build configuration list for PBXProject "BeavR" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9AE9E17E2E7B34B9005D3827 /* Debug */,

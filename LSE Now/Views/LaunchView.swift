@@ -39,7 +39,7 @@ struct LaunchView: View {
             if authViewModel.isLoggedIn {
                 locationManager.handleLoginStateChange(
                     isLoggedIn: true,
-                    tokenProvider: { authViewModel.token }
+                    emailProvider: { authViewModel.email } // ✅ now using emailProvider
                 )
             }
 
@@ -59,10 +59,10 @@ struct LaunchView: View {
             if isLoggedIn {
                 locationManager.handleLoginStateChange(
                     isLoggedIn: true,
-                    tokenProvider: { authViewModel.token }
+                    emailProvider: { authViewModel.email } // ✅ emailProvider here too
                 )
             } else {
-                locationManager.handleLoginStateChange(isLoggedIn: false, tokenProvider: nil)
+                locationManager.handleLoginStateChange(isLoggedIn: false, emailProvider: nil)
             }
         }
         .onChange(of: scenePhase) { _, newPhase in
