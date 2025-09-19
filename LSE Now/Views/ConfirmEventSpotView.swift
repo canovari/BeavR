@@ -151,7 +151,7 @@ struct ConfirmEventSpotView: View {
                 position: $cameraPosition,
                 interactionModes: .all,
                 showsUserLocation: isLocationAuthorized
-            ) { }
+            )
             .frame(height: 360)
             .cornerRadius(12)
             .shadow(radius: 3)
