@@ -18,6 +18,8 @@ final class WhiteboardViewModel: ObservableObject {
     @Published var isSendingReply = false
 
     private let apiService: APIService
+    private var expirationTimer: Timer?
+    private let expirationCheckInterval: TimeInterval = 60
 
     init(apiService: APIService = .shared) {
         self.apiService = apiService
@@ -27,7 +29,12 @@ final class WhiteboardViewModel: ObservableObject {
         guard WhiteboardGridConfiguration.contains(row: coordinate.row, column: coordinate.column) else {
             return nil
         }
-        return pins.first { $0.gridRow == coordinate.row && $0.gridCol == coordinate.column }
+        let now = Date()
+        return pins.first { pin in
+            pin.gridRow == coordinate.row &&
+            pin.gridCol == coordinate.column &&
+            !pin.isExpired(referenceDate: now)
+        }
     }
 
     func loadPins() async {
@@ -69,6 +76,7 @@ final class WhiteboardViewModel: ObservableObject {
         }
         pins.removeAll { $0.gridRow == newPin.gridRow && $0.gridCol == newPin.gridCol }
         pins.append(newPin)
+        maintainExpirationTimer()
     }
 
     func sendReply(to pin: WhiteboardPin, message: String, author: String?, token: String) async throws {
@@ -79,5 +87,40 @@ final class WhiteboardViewModel: ObservableObject {
 
         let payload = PinReplyPayload(pinId: pin.id, message: message, author: author)
         _ = try await apiService.sendPinReply(payload: payload, token: token)
+    }
+
+    deinit {
+        expirationTimer?.invalidate()
+    }
+
+    private func maintainExpirationTimer() {
+        pruneExpiredPins()
+
+        if pins.isEmpty {
+            expirationTimer?.invalidate()
+            expirationTimer = nil
+            return
+        }
+
+        guard expirationTimer == nil else { return }
+
+        expirationTimer = Timer.scheduledTimer(withTimeInterval: expirationCheckInterval, repeats: true) { [weak self] _ in
+            guard let self else { return }
+            Task { @MainActor in
+                self.pruneExpiredPins()
+            }
+        }
+    }
+
+    private func pruneExpiredPins(referenceDate: Date = Date()) {
+        let activePins = pins.filter { !$0.isExpired(referenceDate: referenceDate) }
+        if activePins.count != pins.count {
+            pins = activePins
+        }
+
+        if activePins.isEmpty {
+            expirationTimer?.invalidate()
+            expirationTimer = nil
+        }
     }
 }

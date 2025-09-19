@@ -4,7 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/whiteboard_helpers.php';
 
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 
 $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 
@@ -69,7 +69,23 @@ function listMessages(PDO $pdo): void
     $rows = $query->fetchAll() ?: [];
 
     $messages = array_map('formatMessageRow', $rows);
-    echo json_encode($messages);
+    $encoded = json_encode($messages, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    if ($encoded === false) {
+        $messages = array_map(static function (array $message): array {
+            return [
+                'id' => $message['id'],
+                'senderEmail' => ensureUtf8String($message['senderEmail']),
+                'receiverEmail' => ensureUtf8String($message['receiverEmail']),
+                'message' => ensureUtf8String($message['message']),
+                'author' => $message['author'] === null ? null : ensureUtf8String($message['author']),
+                'createdAt' => $message['createdAt'],
+            ];
+        }, $messages);
+
+        $encoded = json_encode($messages, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PARTIAL_OUTPUT_ON_ERROR);
+    }
+
+    echo $encoded === false ? '[]' : $encoded;
 }
 
 function createMessage(PDO $pdo): void
@@ -108,7 +124,7 @@ function createMessage(PDO $pdo): void
         return;
     }
 
-    $messageText = trim((string) ($payload['message'] ?? ''));
+    $messageText = trim(ensureUtf8String((string) ($payload['message'] ?? '')));
     if ($messageText === '') {
         http_response_code(400);
         echo json_encode(['error' => 'Message text is required.']);
@@ -127,8 +143,8 @@ function createMessage(PDO $pdo): void
         return;
     }
 
-    $receiverEmail = strtolower((string) $pin['creator_email']);
-    $senderEmail = $user['email'];
+    $receiverEmail = normalizeEmail($pin['creator_email'] ?? '');
+    $senderEmail = normalizeEmail($user['email'] ?? '');
 
     $stored = json_encode([
         'text' => $messageText,
@@ -170,7 +186,7 @@ function createMessage(PDO $pdo): void
     echo json_encode([
         'success' => true,
         'message' => formatMessageRow($row),
-    ]);
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 }
 
 function formatMessageRow(array $row): array
@@ -179,8 +195,8 @@ function formatMessageRow(array $row): array
 
     return [
         'id' => (int) $row['id'],
-        'senderEmail' => strtolower((string) $row['sender_email']),
-        'receiverEmail' => strtolower((string) $row['receiver_email']),
+        'senderEmail' => normalizeEmail($row['sender_email'] ?? ''),
+        'receiverEmail' => normalizeEmail($row['receiver_email'] ?? ''),
         'message' => $decoded['text'],
         'author' => $decoded['author'],
         'createdAt' => iso8601($row['created_at'] ?? null),

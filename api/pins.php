@@ -4,7 +4,9 @@ declare(strict_types=1);
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/whiteboard_helpers.php';
 
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
+
+const PIN_EXPIRATION_HOURS = 8;
 
 $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 
@@ -30,7 +32,7 @@ try {
 
 function listPins(PDO $pdo): void
 {
-    $query = $pdo->query(
+    $sql = sprintf(
         'SELECT id, emoji, text, author, creator_email, grid_row, grid_col, created_at
          FROM pins
          WHERE grid_row BETWEEN 0 AND 7
@@ -38,10 +40,13 @@ function listPins(PDO $pdo): void
          ORDER BY created_at DESC'
     );
 
+    $query = $pdo->query($sql);
+
     $rows = $query->fetchAll() ?: [];
     $pins = array_map('formatPinRow', $rows);
 
-    echo json_encode($pins);
+    $encoded = json_encode($pins, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    echo $encoded === false ? '[]' : $encoded;
 }
 
 function createPin(PDO $pdo): void
@@ -67,8 +72,8 @@ function createPin(PDO $pdo): void
         return;
     }
 
-    $emoji = trim((string) ($payload['emoji'] ?? ''));
-    $text = trim((string) ($payload['text'] ?? ''));
+    $emoji = trim(ensureUtf8String((string) ($payload['emoji'] ?? '')));
+    $text = trim(ensureUtf8String((string) ($payload['text'] ?? '')));
     $author = isset($payload['author']) ? normalizeOptionalString($payload['author']) : null;
     $gridRow = isset($payload['gridRow']) ? (int) $payload['gridRow'] : null;
     $gridCol = isset($payload['gridCol']) ? (int) $payload['gridCol'] : null;
@@ -97,7 +102,11 @@ function createPin(PDO $pdo): void
         return;
     }
 
-    $slotCheck = $pdo->prepare('SELECT id FROM pins WHERE grid_row = :row AND grid_col = :col LIMIT 1');
+    $slotSql = sprintf(
+        'SELECT id FROM pins WHERE grid_row = :row AND grid_col = :col AND %s LIMIT 1',
+        pinExpirationClause()
+    );
+    $slotCheck = $pdo->prepare($slotSql);
     $slotCheck->execute([
         ':row' => $gridRow,
         ':col' => $gridCol,
@@ -118,7 +127,7 @@ function createPin(PDO $pdo): void
         ':emoji' => $emoji,
         ':text' => $text,
         ':author' => $author,
-        ':creator' => $user['email'],
+        ':creator' => normalizeEmail($user['email'] ?? ''),
         ':row' => $gridRow,
         ':col' => $gridCol,
     ]);
@@ -140,20 +149,25 @@ function createPin(PDO $pdo): void
     }
 
     http_response_code(201);
-    echo json_encode(formatPinRow($pin));
+    echo json_encode(formatPinRow($pin), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 }
 
 function formatPinRow(array $row): array
 {
     return [
         'id' => (int) $row['id'],
-        'emoji' => (string) $row['emoji'],
-        'text' => (string) $row['text'],
+        'emoji' => ensureUtf8String((string) $row['emoji']),
+        'text' => ensureUtf8String((string) $row['text']),
         'author' => normalizeOptionalString($row['author'] ?? null),
-        'creatorEmail' => strtolower((string) $row['creator_email']),
+        'creatorEmail' => normalizeEmail($row['creator_email'] ?? ''),
         'gridRow' => (int) $row['grid_row'],
         'gridCol' => (int) $row['grid_col'],
         'createdAt' => iso8601($row['created_at'] ?? null),
     ];
+}
+
+function pinExpirationClause(): string
+{
+    return sprintf('created_at >= (UTC_TIMESTAMP() - INTERVAL %d HOUR)', (int) PIN_EXPIRATION_HOURS);
 }
 
