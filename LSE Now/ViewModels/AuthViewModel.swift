@@ -79,7 +79,7 @@ final class AuthViewModel: ObservableObject {
             try await apiService.requestLoginCode(for: trimmedEmail)
             step = .codeEntry
             code = ""
-            infoMessage = "We've sent a 6-digit code to \(trimmedEmail)."
+            infoMessage = "We\'ve sent a 6-digit code to \(trimmedEmail)."
             startResendCooldown()
         } catch {
             errorMessage = error.localizedDescription
