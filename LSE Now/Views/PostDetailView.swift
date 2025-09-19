@@ -16,23 +16,20 @@ struct PostDetailView: View {
                     .multilineTextAlignment(.leading)
 
                 // --- Date & Time
-                if let end = post.endTime {
-                    Label("\(post.startTime.formatted(date: .abbreviated, time: .shortened)) – \(end.formatted(date: .omitted, time: .shortened))",
-                          systemImage: "calendar")
-                        .foregroundColor(.secondary)
-                        .font(.subheadline)
-                } else {
-                    Label(post.startTime.formatted(date: .abbreviated, time: .shortened),
-                          systemImage: "calendar")
-                        .foregroundColor(.secondary)
-                        .font(.subheadline)
+                Label {
+                    Text(post.conciseScheduleString())
+                } icon: {
+                    Image(systemName: "calendar")
                 }
+                .foregroundColor(.secondary)
+                .font(.subheadline)
 
                 // --- Location text
-                if let place = post.location, !place.isEmpty {
+                if let place = post.primaryLocationLine ?? post.location, !place.isEmpty {
                     Label(place, systemImage: "mappin.and.ellipse")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
+                        .lineLimit(2)
                 }
 
                 // --- Organization
@@ -44,7 +41,7 @@ struct PostDetailView: View {
 
                 // --- Category
                 if let category = post.category {
-                    Label(category, systemImage: "tag")
+                    Text(category)
                         .font(.headline)
                         .foregroundColor(Color("LSERed"))
                 }

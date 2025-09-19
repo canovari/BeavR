@@ -260,6 +260,38 @@ function formatEvents(array $rows): array
             ];
         }
 
+        $status = null;
+        if ($row['status'] !== null) {
+            $normalized = strtolower((string) $row['status']);
+            switch ($normalized) {
+                case 'live':
+                case 'approved':
+                case 'active':
+                case 'published':
+                    $status = 'live';
+                    break;
+                case 'pending':
+                case 'pending approval':
+                case 'awaiting approval':
+                case 'under review':
+                    $status = 'pending';
+                    break;
+                case 'expired':
+                    $status = 'expired';
+                    break;
+                case 'cancelled':
+                case 'canceled':
+                    $status = 'cancelled';
+                    break;
+                default:
+                    $status = $normalized;
+            }
+        }
+
+        if ($status === null) {
+            $status = 'pending';
+        }
+
         $formatted[] = [
             'id' => (int) $row['id'],
             'title' => (string) $row['title'],
@@ -270,7 +302,7 @@ function formatEvents(array $rows): array
             'organization' => $row['organization'],
             'category' => $row['category'],
             'imageUrl' => null,
-            'status' => $row['status'],
+            'status' => $status,
             'latitude' => $row['latitude'] !== null ? (float) $row['latitude'] : null,
             'longitude' => $row['longitude'] !== null ? (float) $row['longitude'] : null,
             'contact' => $contact,

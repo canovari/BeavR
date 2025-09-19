@@ -16,7 +16,6 @@ struct Post: Identifiable, Codable, Hashable {
     let creator: String?
     let contact: ContactInfo?   // ✅ Reference only, don’t redeclare
 
-    // ✅ Hashable + Equatable by id
     static func == (lhs: Post, rhs: Post) -> Bool {
         lhs.id == rhs.id
     }
@@ -54,13 +53,8 @@ struct Post: Identifiable, Codable, Hashable {
             status: "expired",
             latitude: latitude,
             longitude: longitude,
-            contact: contact,
-            creator: creator
+            creator: creator,
+            contact: contact
         )
-    }
-
-    var resolvedStatus: String {
-        if isExpired() { return "expired" }
-        return status ?? "pending"
     }
 }

@@ -1,9 +1,11 @@
 import Foundation
+import SwiftUI
 
 @MainActor
 final class MyEventsViewModel: ObservableObject {
     @Published private(set) var events: [Post] = []
     @Published private(set) var isLoading: Bool = false
+    @Published private(set) var isRefreshing: Bool = false
     @Published private(set) var cancellingEventIDs: Set<Int> = []
     @Published var errorMessage: String?
 
@@ -13,24 +15,40 @@ final class MyEventsViewModel: ObservableObject {
         self.apiService = apiService
     }
 
-    func loadEvents(token: String) async {
-        guard !isLoading else { return }
+    func loadEvents(token: String, reason: LoadReason = .initial) async {
+        switch reason {
+        case .initial:
+            guard !isLoading else { return }
+            isLoading = true
+        case .refresh:
+            guard !isRefreshing, !isLoading else { return }
+            isRefreshing = true
+        }
 
-        isLoading = true
-        defer { isLoading = false }
+        defer {
+            switch reason {
+            case .initial:
+                isLoading = false
+            case .refresh:
+                isRefreshing = false
+            }
+        }
 
         errorMessage = nil
 
         do {
             let posts = try await apiService.fetchMyEvents(token: token)
-            events = sortEvents(posts)
+            let prepared = posts.map { $0.updatingStatusForExpiry() }
+            withAnimation(.easeInOut(duration: 0.2)) {
+                events = sortEvents(prepared)
+            }
         } catch {
             errorMessage = error.localizedDescription
         }
     }
 
     func refresh(token: String) async {
-        await loadEvents(token: token)
+        await loadEvents(token: token, reason: .refresh)
     }
 
     func cancel(event: Post, token: String) async {
@@ -71,22 +89,22 @@ final class MyEventsViewModel: ObservableObject {
     }
 
     private func statusPriority(for post: Post) -> Int {
-        switch normalizedStatus(for: post) {
-        case "pending":
+        switch post.statusKind {
+        case .pending:
             return 0
-        case "live":
+        case .live:
             return 1
-        case "expired":
+        case .expired:
             return 2
-        default:
+        case .cancelled:
             return 3
+        default:
+            return 4
         }
     }
 
-    private func normalizedStatus(for post: Post) -> String {
-        if post.isExpired() {
-            return "expired"
-        }
-        return post.status?.lowercased() ?? "pending"
+    enum LoadReason {
+        case initial
+        case refresh
     }
 }

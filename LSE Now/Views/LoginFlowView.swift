@@ -51,12 +51,7 @@ struct LoginFlowView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .navigationTitle("Sign In")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Done") { focusedField = nil }
-                }
-            }
+            .toolbar { ToolbarItemGroup(placement: .keyboard) { Spacer(); Button("Done") { focusedField = nil } } }
             .onAppear { focusField(for: viewModel.step) }
             .onChange(of: viewModel.step) { step in
                 focusField(for: step)

@@ -20,15 +20,9 @@ struct PostRowView: View {
                     .font(.headline)
 
                 // Date / Time
-                if let end = post.endTime {
-                    Text("\(post.startTime.formatted(date: .abbreviated, time: .shortened)) – \(end.formatted(date: .omitted, time: .shortened))")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                } else {
-                    Text(post.startTime.formatted(date: .abbreviated, time: .shortened))
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
+                Text(post.conciseScheduleString())
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
 
                 // Description (optional, 2 lines max)
                 if let desc = post.description, !desc.isEmpty {

@@ -239,25 +239,32 @@ struct ConfirmEventSpotView: View {
     }
 
     private func formattedAddress(from placemark: CLPlacemark) -> String {
-        let street = [placemark.subThoroughfare, placemark.thoroughfare]
-            .compactMap { $0 }
-            .joined(separator: " ")
+        var parts: [String] = []
 
-        let locality = [placemark.locality, placemark.administrativeArea, placemark.postalCode]
-            .compactMap { $0 }
-            .joined(separator: ", ")
+        if let number = placemark.subThoroughfare?.trimmingCharacters(in: .whitespacesAndNewlines), !number.isEmpty {
+            parts.append(number)
+        }
 
-        let country = placemark.country
+        if let street = placemark.thoroughfare?.trimmingCharacters(in: .whitespacesAndNewlines), !street.isEmpty {
+            parts.append(street)
+        }
 
-        let components = [street.isEmpty ? placemark.name : street, locality, country]
-            .compactMap { $0 }
-            .filter { !$0.isEmpty }
+        if parts.isEmpty, let name = placemark.name?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty {
+            let trimmedName = name.split(separator: ",").first.map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) } ?? name
+            if !trimmedName.isEmpty {
+                parts.append(trimmedName)
+            }
+        }
 
-        if components.isEmpty {
+        guard !parts.isEmpty else {
             return fallbackAddress(for: placemark.location?.coordinate ?? region.center)
         }
 
-        return components.joined(separator: ", ")
+        if parts.count >= 2 {
+            return "\(parts[0]), \(parts[1])"
+        }
+
+        return parts[0]
     }
 
     private func fallbackAddress(for coordinate: CLLocationCoordinate2D) -> String {

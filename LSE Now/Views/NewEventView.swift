@@ -115,7 +115,7 @@ struct MyEventsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task(id: authViewModel.token) { token in
             guard let token = token else { return }
-            await viewModel.loadEvents(token: token)
+            await viewModel.loadEvents(token: token, reason: .initial)
         }
         .onChange(of: viewModel.errorMessage) { message in
             alertMessage = message
@@ -150,7 +150,7 @@ struct MyEventsView: View {
                     isCancelling: viewModel.isCancelling(eventID: event.id)
                 )
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                    if display.normalized == "pending" {
+                    if display.kind == .pending {
                         Button(role: .destructive) {
                             Task {
                                 await viewModel.cancel(event: event, token: token)
@@ -173,6 +173,14 @@ struct MyEventsView: View {
                     .allowsHitTesting(false)
             } else if viewModel.events.isEmpty {
                 emptyState
+                    .allowsHitTesting(false)
+            }
+        }
+        .overlay(alignment: .top) {
+            if viewModel.isRefreshing && !viewModel.events.isEmpty {
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .padding(.top, 12)
                     .allowsHitTesting(false)
             }
         }
@@ -219,25 +227,24 @@ struct MyEventsView: View {
     }
 
     private func statusDisplay(for post: Post) -> StatusDisplay {
-        var normalized = post.status?.lowercased() ?? "pending"
-        if post.isExpired() {
-            normalized = "expired"
-        }
-
-        switch normalized {
-        case "live":
-            return StatusDisplay(title: "LIVE", normalized: normalized, color: .green)
-        case "expired":
-            return StatusDisplay(title: "Expired", normalized: normalized, color: .gray)
-        default:
-            return StatusDisplay(title: "Pending Approval", normalized: "pending", color: .orange)
+        switch post.statusKind {
+        case .live:
+            return StatusDisplay(title: "LIVE", kind: .live, color: .green)
+        case .expired:
+            return StatusDisplay(title: "Expired", kind: .expired, color: .gray)
+        case .cancelled:
+            return StatusDisplay(title: "Cancelled", kind: .cancelled, color: .red)
+        case .pending:
+            return StatusDisplay(title: "Pending Approval", kind: .pending, color: .orange)
+        case .other(let raw):
+            return StatusDisplay(title: raw.uppercased(), kind: .other(raw), color: .secondary)
         }
     }
 }
 
 private struct StatusDisplay {
     let title: String
-    let normalized: String
+    let kind: Post.StatusKind
     let color: Color
 }
 
@@ -245,8 +252,6 @@ private struct MyEventRow: View {
     let post: Post
     let status: StatusDisplay
     let isCancelling: Bool
-
-    private let calendar = Calendar.current
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -276,11 +281,11 @@ private struct MyEventRow: View {
                 }
             }
 
-            Text(dateRangeText)
+            Text(post.conciseScheduleString())
                 .font(.subheadline)
                 .foregroundColor(.secondary)
 
-            if let location = post.location, !location.isEmpty {
+            if let location = post.primaryLocationLine ?? post.location, !location.isEmpty {
                 Text(location)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
@@ -288,19 +293,6 @@ private struct MyEventRow: View {
             }
         }
         .padding(.vertical, 6)
-    }
-
-    private var dateRangeText: String {
-        if let end = post.endTime {
-            let start = post.startTime
-            if calendar.isDate(start, inSameDayAs: end) {
-                return "\(start.formatted(date: .abbreviated, time: .shortened)) – \(end.formatted(date: .omitted, time: .shortened))"
-            } else {
-                return "\(start.formatted(date: .abbreviated, time: .shortened)) – \(end.formatted(date: .abbreviated, time: .shortened))"
-            }
-        } else {
-            return post.startTime.formatted(date: .abbreviated, time: .shortened)
-        }
     }
 }
 

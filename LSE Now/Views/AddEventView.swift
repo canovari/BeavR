@@ -25,8 +25,8 @@ struct AddEventView: View {
     @State private var title = ""
     @State private var startDate = Date()
     @State private var startTime = Date()
-    @State private var hasEndTime = false
-    @State private var endTime = Date()
+    @State private var durationHours = 1
+    @State private var durationMinutes = 0
     @State private var locationQuery = ""
     @State private var description = ""
     @State private var organization = ""
@@ -58,9 +58,17 @@ struct AddEventView: View {
                     .modifier(ValidationHighlight(isInvalid: invalidFields.contains("startTime")))
                     .focused($focusedField, equals: "time")
 
-                Toggle("Add End Time", isOn: $hasEndTime)
-                if hasEndTime {
-                    DatePicker("End Time", selection: $endTime, displayedComponents: .hourAndMinute)
+                Section("Duration") {
+                    DurationPickerView(
+                        hours: $durationHours,
+                        minutes: $durationMinutes,
+                        isInvalid: invalidFields.contains("duration")
+                    )
+
+                    Text(durationDescription)
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.leading)
                 }
 
                 // Location & Map Pin
@@ -193,6 +201,7 @@ struct AddEventView: View {
         if organization.isEmpty { missing.insert("organization") }
         if contact == nil { missing.insert("contact") }
         if description.isEmpty { missing.insert("description") }
+        if durationTotalSeconds <= 0 { missing.insert("duration") }
 
         if missing.isEmpty {
             showFinalConfirmation = true
@@ -219,10 +228,13 @@ struct AddEventView: View {
 
         let normalizedEmail = email.lowercased()
 
+        let startDateTime = merge(date: startDate, time: startTime)
+        let totalDurationSeconds = durationTotalSeconds
+        let computedEndTime = totalDurationSeconds > 0 ? startDateTime.addingTimeInterval(TimeInterval(totalDurationSeconds)) : nil
         let draft = PostDraft(
             title: title,
-            startTime: merge(date: startDate, time: startTime),
-            endTime: hasEndTime ? merge(date: startDate, time: endTime) : nil,
+            startTime: startDateTime,
+            endTime: computedEndTime,
             location: locationQuery,
             description: description,
             organization: organization,
@@ -260,6 +272,78 @@ struct AddEventView: View {
         return cal.date(from: DateComponents(
             year: d.year, month: d.month, day: d.day,
             hour: t.hour, minute: t.minute)) ?? date
+    }
+
+    private var durationTotalSeconds: Int {
+        max(0, (durationHours * 3600) + (durationMinutes * 60))
+    }
+
+    private var durationDescription: String {
+        let total = durationTotalSeconds
+        guard total > 0 else {
+            return "Select how long the event lasts."
+        }
+
+        var parts: [String] = []
+        if durationHours > 0 {
+            parts.append(durationHours == 1 ? "1 hour" : "\(durationHours) hours")
+        }
+        if durationMinutes > 0 {
+            parts.append(durationMinutes == 1 ? "1 minute" : "\(durationMinutes) minutes")
+        }
+
+        let joined = parts.joined(separator: " and ")
+        return "Event lasts \(joined). We'll calculate the end time automatically when you submit."
+    }
+}
+
+private struct DurationPickerView: View {
+    @Binding var hours: Int
+    @Binding var minutes: Int
+    var isInvalid: Bool
+
+    private let hourRange = Array(0...12)
+    private let minuteValues = Array(stride(from: 0, through: 55, by: 5))
+
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.secondarySystemBackground))
+
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(isInvalid ? Color.red : Color.clear, lineWidth: 2)
+
+            HStack(spacing: 0) {
+                Picker("Hours", selection: $hours) {
+                    ForEach(hourRange, id: \.self) { hour in
+                        Text(hour == 1 ? "1 hr" : "\(hour) hrs")
+                            .tag(hour)
+                    }
+                }
+                .labelsHidden()
+                .frame(maxWidth: .infinity)
+                .clipped()
+                .pickerStyle(.wheel)
+
+                Rectangle()
+                    .fill(Color(.separator))
+                    .frame(width: 1, height: 120)
+
+                Picker("Minutes", selection: $minutes) {
+                    ForEach(minuteValues, id: \.self) { minute in
+                        Text(minute == 1 ? "1 min" : "\(minute) mins")
+                            .tag(minute)
+                    }
+                }
+                .labelsHidden()
+                .frame(maxWidth: .infinity)
+                .clipped()
+                .pickerStyle(.wheel)
+            }
+            .padding(.horizontal, 8)
+        }
+        .frame(height: 150)
+        .accessibilityElement(children: .combine)
     }
 }
 
