@@ -68,6 +68,67 @@ final class APIService {
         return token
     }
 
+    func submitEvent(draft: PostDraft, token: String) async throws {
+        let endpoint = baseURL.appendingPathComponent("events.php")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let payload = EventSubmissionPayload(
+            title: draft.title,
+            startTime: draft.startTime,
+            endTime: draft.endTime,
+            location: draft.location,
+            description: draft.description,
+            organization: draft.organization,
+            category: draft.category,
+            contact: draft.contact,
+            latitude: draft.latitude,
+            longitude: draft.longitude,
+            creator: draft.creator
+        )
+
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        request.httpBody = try encoder.encode(payload)
+
+        _ = try await perform(request: request)
+    }
+
+    func fetchMyEvents(token: String) async throws -> [Post] {
+        var components = URLComponents(url: baseURL.appendingPathComponent("events.php"), resolvingAgainstBaseURL: false)
+        components?.queryItems = [URLQueryItem(name: "mine", value: "1")]
+
+        guard let url = components?.url else {
+            throw APIServiceError.invalidResponse
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let data = try await perform(request: request)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode([Post].self, from: data)
+    }
+
+    func cancelEvent(id: Int, token: String) async throws {
+        let endpoint = baseURL.appendingPathComponent("events.php")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "DELETE"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let encoder = JSONEncoder()
+        request.httpBody = try encoder.encode(CancelEventPayload(id: id))
+
+        _ = try await perform(request: request)
+    }
+
     private func perform(request: URLRequest) async throws -> Data {
         let (data, response) = try await urlSession.data(for: request)
 
@@ -106,6 +167,24 @@ final class APIService {
 private struct VerifyResponse: Decodable {
     let success: Bool
     let token: String?
+}
+
+private struct EventSubmissionPayload: Encodable {
+    let title: String
+    let startTime: Date
+    let endTime: Date?
+    let location: String
+    let description: String
+    let organization: String
+    let category: String
+    let contact: ContactInfo
+    let latitude: Double
+    let longitude: Double
+    let creator: String
+}
+
+private struct CancelEventPayload: Encodable {
+    let id: Int
 }
 
 private struct ErrorResponse: Decodable {
