@@ -1,5 +1,14 @@
 import Foundation
 
+enum WhiteboardGridConfiguration {
+    static let rows = 5
+    static let columns = 8
+
+    static func contains(row: Int, column: Int) -> Bool {
+        row >= 0 && row < rows && column >= 0 && column < columns
+    }
+}
+
 @MainActor
 final class WhiteboardViewModel: ObservableObject {
     @Published private(set) var pins: [WhiteboardPin] = []
@@ -15,7 +24,10 @@ final class WhiteboardViewModel: ObservableObject {
     }
 
     func pin(at coordinate: WhiteboardCoordinate) -> WhiteboardPin? {
-        pins.first { $0.gridRow == coordinate.row && $0.gridCol == coordinate.column }
+        guard WhiteboardGridConfiguration.contains(row: coordinate.row, column: coordinate.column) else {
+            return nil
+        }
+        return pins.first { $0.gridRow == coordinate.row && $0.gridCol == coordinate.column }
     }
 
     func loadPins() async {
@@ -25,7 +37,7 @@ final class WhiteboardViewModel: ObservableObject {
 
         do {
             let fetchedPins = try await apiService.fetchPins()
-            pins = fetchedPins
+            pins = fetchedPins.filter { WhiteboardGridConfiguration.contains(row: $0.gridRow, column: $0.gridCol) }
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -48,6 +60,9 @@ final class WhiteboardViewModel: ObservableObject {
         )
 
         let newPin = try await apiService.createPin(request: request, token: token)
+        guard WhiteboardGridConfiguration.contains(row: newPin.gridRow, column: newPin.gridCol) else {
+            return
+        }
         pins.removeAll { $0.gridRow == newPin.gridRow && $0.gridCol == newPin.gridCol }
         pins.append(newPin)
     }

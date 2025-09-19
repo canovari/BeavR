@@ -79,7 +79,7 @@ final class APIService {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        setAuthorizationHeader(on: &request, token: token)
 
         let payload = EventSubmissionPayload(
             title: draft.title,
@@ -113,7 +113,7 @@ final class APIService {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        setAuthorizationHeader(on: &request, token: token)
 
         let data = try await perform(request: request)
         let decoder = JSONDecoder()
@@ -126,7 +126,7 @@ final class APIService {
         var request = URLRequest(url: endpoint)
         request.httpMethod = "DELETE"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        setAuthorizationHeader(on: &request, token: token)
 
         let encoder = JSONEncoder()
         request.httpBody = try encoder.encode(CancelEventPayload(id: id))
@@ -152,7 +152,7 @@ final class APIService {
         urlRequest.httpMethod = "POST"
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
-        urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        setAuthorizationHeader(on: &urlRequest, token: token)
 
         let encoder = JSONEncoder()
         urlRequest.httpBody = try encoder.encode(request)
@@ -169,7 +169,7 @@ final class APIService {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        setAuthorizationHeader(on: &request, token: token)
 
         let encoder = JSONEncoder()
         request.httpBody = try encoder.encode(payload)
@@ -192,7 +192,7 @@ final class APIService {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        setAuthorizationHeader(on: &request, token: token)
 
         let data = try await perform(request: request)
         let decoder = JSONDecoder()
@@ -215,6 +215,12 @@ final class APIService {
         }
 
         return data
+    }
+
+    private func setAuthorizationHeader(on request: inout URLRequest, token: String) {
+        let trimmedToken = token.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedToken.isEmpty else { return }
+        request.setValue("Bearer \(trimmedToken)", forHTTPHeaderField: "Authorization")
     }
 
     private func makeFormBody(_ parameters: [String: String]) -> Data? {
