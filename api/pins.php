@@ -37,9 +37,7 @@ function listPins(PDO $pdo): void
          FROM pins
          WHERE grid_row BETWEEN 0 AND 7
            AND grid_col BETWEEN 0 AND 4
-           AND %s
-         ORDER BY created_at DESC',
-        pinExpirationClause()
+         ORDER BY created_at DESC'
     );
 
     $query = $pdo->query($sql);

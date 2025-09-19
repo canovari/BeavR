@@ -46,12 +46,7 @@ final class WhiteboardViewModel: ObservableObject {
 
         do {
             let fetchedPins = try await apiService.fetchPins()
-            let now = Date()
-            pins = fetchedPins.filter { pin in
-                WhiteboardGridConfiguration.contains(row: pin.gridRow, column: pin.gridCol) &&
-                !pin.isExpired(referenceDate: now)
-            }
-            maintainExpirationTimer()
+            pins = fetchedPins.filter { WhiteboardGridConfiguration.contains(row: $0.gridRow, column: $0.gridCol) }
         } catch let urlError as URLError where urlError.code == .cancelled {
             // Ignore cancellations that happen during refreshes.
         } catch is CancellationError {
