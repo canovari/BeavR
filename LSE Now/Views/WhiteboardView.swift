@@ -29,7 +29,7 @@ struct WhiteboardView: View {
 
                 ScrollView {
                     VStack(spacing: 24) {
-                        pinboardGrid()
+                        pinboardGrid
                             .padding(.top, 24)
 
                         if viewModel.isLoading && viewModel.pins.isEmpty {
@@ -118,7 +118,8 @@ struct WhiteboardView: View {
         }
     }
 
-    private func pinboardGrid() -> some View {
+
+    private var whiteboardGrid: some View {
         let gridColumns = Array(repeating: GridItem(.flexible(), spacing: 12), count: columns)
 
         return LazyVGrid(columns: gridColumns, spacing: 12) {
@@ -172,45 +173,27 @@ private struct WhiteboardPinCell: View {
     let isMine: Bool
 
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 1)) { timeline in
-            cell(for: timeline.date)
-        }
-    }
-
-    @ViewBuilder
-    private func cell(for referenceDate: Date) -> some View {
-        let progress = CGFloat(pin.remainingLifetimeFraction(referenceDate: referenceDate))
-
-        let accessibilityLabel = makeAccessibilityLabel(referenceDate: referenceDate)
-
         ZStack {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(isMine ? Color("LSERed").opacity(0.12) : Color(.systemBackground))
+                .fill(Color.white)
 
             Text(pin.emoji)
                 .font(.system(size: 44))
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
-
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color(.quaternaryLabel), lineWidth: 1)
-
-            if progress > 0 {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .trim(from: 0, to: progress)
-                    .stroke(Color("LSERed"), style: StrokeStyle(lineWidth: 3, lineCap: .butt, lineJoin: .round))
-                    .rotationEffect(.degrees(-90))
-                    .animation(.linear(duration: 1), value: progress)
-            }
         }
         .frame(maxWidth: .infinity)
         .aspectRatio(1, contentMode: .fit)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(isMine ? Color("LSERed") : Color(.separator), lineWidth: isMine ? 2 : 1)
+        )
         .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(accessibilityLabel)
+        .accessibilityLabel(accessibilityLabel(referenceDate: referenceDate))
     }
 
-    private func makeAccessibilityLabel(referenceDate: Date) -> String {
+    private func accessibilityLabel(referenceDate: Date) -> String {
         var parts: [String] = [pin.emoji, pin.text]
 
         if let author = pin.author, !author.isEmpty {
@@ -235,7 +218,7 @@ private struct EmptySlotCell: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color(.systemBackground))
+                .fill(Color.white)
 
             Image(systemName: "plus")
                 .font(.system(size: 24, weight: .semibold))
@@ -310,7 +293,7 @@ private struct PinDetailSheet: View {
                                 .foregroundColor(.secondary)
                         }
 
-                        if let remaining = remaining {
+                        if let remaining {
                             Label("Expires in \(remaining)", systemImage: "hourglass")
                                 .font(.callout)
                                 .foregroundColor(.secondary)
