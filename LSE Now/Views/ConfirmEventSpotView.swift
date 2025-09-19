@@ -9,6 +9,7 @@ struct ConfirmEventSpotView: View {
     @State private var cameraPosition: MapCameraPosition
     @State private var searchError: String?
     @State private var geocodeWorkItem: DispatchWorkItem?
+    @State private var currentSearch: MKLocalSearch?
     @State private var shouldSkipNextReverseGeocode = false
     @State private var isGeocoding = false
     @State private var hasCenteredOnUser = false
@@ -83,6 +84,7 @@ struct ConfirmEventSpotView: View {
         .onDisappear {
             geocodeWorkItem?.cancel()
             geocoder.cancelGeocode()
+            currentSearch?.cancel()
         }
         .onReceive(locationManager.$latestLocation.compactMap { $0 }) { location in
             guard initialCoordinate == nil, !hasCenteredOnUser else { return }
@@ -110,7 +112,7 @@ struct ConfirmEventSpotView: View {
 
     private var searchSection: some View {
         HStack(spacing: 8) {
-            TextField("Search for an address", text: $locationText)
+            TextField("Search for a place or address", text: $locationText)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .submitLabel(.search)
                 .autocorrectionDisabled(true)
@@ -228,44 +230,93 @@ struct ConfirmEventSpotView: View {
 
         geocodeWorkItem?.cancel()
         geocoder.cancelGeocode()
+        currentSearch?.cancel()
         isGeocoding = true
         searchError = nil
 
-        geocoder.geocodeAddressString(query) { placemarks, error in
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = query
+        request.resultTypes = [.address, .pointOfInterest]
+        request.region = region
+
+        let search = MKLocalSearch(request: request)
+        currentSearch = search
+
+        search.start { response, error in
             DispatchQueue.main.async {
-                isGeocoding = false
-            }
-
-            if let error = error as? CLError, error.code == .geocodeCanceled {
-                return
-            }
-
-            guard let placemark = placemarks?.first,
-                  let location = placemark.location,
-                  error == nil else {
-                DispatchQueue.main.async {
-                    searchError = "Unable to find that address. Try again."
-                }
-                return
-            }
-
-            let coordinate = location.coordinate
-
-            DispatchQueue.main.async {
-                shouldSkipNextReverseGeocode = true
-                let newRegion = MKCoordinateRegion(
-                    center: coordinate,
-                    span: MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
-                )
-
-                withAnimation {
-                    region = newRegion
-                    cameraPosition = .region(newRegion)
-                }
-                locationText = formattedAddress(from: placemark)
-                searchError = nil
+                handleLocalSearch(response: response, error: error, query: query, search: search)
             }
         }
+    }
+
+    private func handleLocalSearch(
+        response: MKLocalSearch.Response?,
+        error: Error?,
+        query: String,
+        search: MKLocalSearch
+    ) {
+        guard currentSearch === search else { return }
+        currentSearch = nil
+
+        if let mkError = error as? MKError, mkError.code == .searchCancelled {
+            isGeocoding = false
+            return
+        }
+
+        if let mapItem = response?.mapItems?.first(where: { CLLocationCoordinate2DIsValid($0.placemark.coordinate) }) {
+            updateMap(for: mapItem.placemark.coordinate, with: mapItem.placemark)
+            isGeocoding = false
+            return
+        }
+
+        performFallbackGeocode(for: query)
+    }
+
+    private func performFallbackGeocode(for query: String) {
+        geocoder.geocodeAddressString(query) { placemarks, error in
+            DispatchQueue.main.async {
+                if let error = error as? CLError, error.code == .geocodeCanceled {
+                    return
+                }
+
+                defer { isGeocoding = false }
+
+                guard let placemark = placemarks?.first,
+                      let location = placemark.location,
+                      error == nil else {
+                    searchError = "Unable to find that place. Try again."
+                    return
+                }
+
+                updateMap(for: location.coordinate, with: placemark)
+            }
+        }
+    }
+
+    private func updateMap(for coordinate: CLLocationCoordinate2D, with placemark: CLPlacemark?) {
+        shouldSkipNextReverseGeocode = true
+
+        let targetCoordinate: CLLocationCoordinate2D
+        if CLLocationCoordinate2DIsValid(coordinate) {
+            targetCoordinate = coordinate
+        } else {
+            targetCoordinate = region.center
+        }
+
+        let newRegion = MKCoordinateRegion(center: targetCoordinate, span: defaultSpan)
+
+        withAnimation {
+            region = newRegion
+            cameraPosition = .region(newRegion)
+        }
+
+        if let placemark {
+            locationText = formattedAddress(from: placemark)
+        } else {
+            locationText = fallbackAddress(for: targetCoordinate)
+        }
+
+        searchError = nil
     }
 
     private func regionCenterChanged(to newCenter: CLLocationCoordinate2D) {
@@ -293,14 +344,12 @@ struct ConfirmEventSpotView: View {
 
         geocoder.reverseGeocodeLocation(location) { placemarks, error in
             DispatchQueue.main.async {
+                if let error = error as? CLError, error.code == .geocodeCanceled {
+                    return
+                }
+
                 isGeocoding = false
-            }
 
-            if let error = error as? CLError, error.code == .geocodeCanceled {
-                return
-            }
-
-            DispatchQueue.main.async {
                 if let placemark = placemarks?.first, error == nil {
                     locationText = formattedAddress(from: placemark)
                     searchError = nil
@@ -326,32 +375,64 @@ struct ConfirmEventSpotView: View {
     }
 
     private func formattedAddress(from placemark: CLPlacemark) -> String {
-        var parts: [String] = []
+        let trimmedNumber = placemark.subThoroughfare?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedStreet = placemark.thoroughfare?.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        if let number = placemark.subThoroughfare?.trimmingCharacters(in: .whitespacesAndNewlines), !number.isEmpty {
-            parts.append(number)
+        let streetLine: String?
+        if let number = trimmedNumber, !number.isEmpty, let street = trimmedStreet, !street.isEmpty {
+            streetLine = "\(number) \(street)"
+        } else if let street = trimmedStreet, !street.isEmpty {
+            streetLine = street
+        } else if let number = trimmedNumber, !number.isEmpty {
+            streetLine = number
+        } else {
+            streetLine = nil
         }
 
-        if let street = placemark.thoroughfare?.trimmingCharacters(in: .whitespacesAndNewlines), !street.isEmpty {
-            parts.append(street)
+        var components: [String] = []
+
+        let combinedLine = [trimmedNumber, trimmedStreet]
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .joined(separator: " ")
+        let excludedValues: [String?] = [streetLine, trimmedStreet, trimmedNumber, combinedLine.isEmpty ? nil : combinedLine]
+
+        if let placeName = sanitizedPlaceName(from: placemark, excluding: excludedValues) {
+            components.append(placeName)
         }
 
-        if parts.isEmpty, let name = placemark.name?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty {
-            let trimmedName = name.split(separator: ",").first.map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) } ?? name
-            if !trimmedName.isEmpty {
-                parts.append(trimmedName)
-            }
+        if let streetLine, !streetLine.isEmpty {
+            components.append(streetLine)
         }
 
-        guard !parts.isEmpty else {
+        guard !components.isEmpty else {
             return fallbackAddress(for: placemark.location?.coordinate ?? region.center)
         }
 
-        if parts.count >= 2 {
-            return "\(parts[0]), \(parts[1])"
+        return components.joined(separator: ", ")
+    }
+
+    private func sanitizedPlaceName(from placemark: CLPlacemark, excluding: [String?]) -> String? {
+        guard let rawName = placemark.name?.trimmingCharacters(in: .whitespacesAndNewlines), !rawName.isEmpty else {
+            return nil
         }
 
-        return parts[0]
+        let primaryName = rawName.split(separator: ",").first.map {
+            String($0).trimmingCharacters(in: .whitespacesAndNewlines)
+        } ?? rawName
+
+        guard !primaryName.isEmpty else { return nil }
+
+        let normalizedName = primaryName.lowercased()
+        let excludedNormalized = excluding
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .map { $0.lowercased() }
+
+        if excludedNormalized.contains(normalizedName) {
+            return nil
+        }
+
+        return primaryName
     }
 
     private func fallbackAddress(for coordinate: CLLocationCoordinate2D) -> String {

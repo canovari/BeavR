@@ -108,6 +108,16 @@ extension KeyedDecodingContainer {
 }
 
 enum WhiteboardDecoding {
+    private static let serverTimeZone: TimeZone = {
+        if let rome = TimeZone(identifier: "Europe/Rome") {
+            return rome
+        }
+        if let offset = TimeZone(secondsFromGMT: 3600) {
+            return offset
+        }
+        return TimeZone(secondsFromGMT: 0) ?? .current
+    }()
+
     static func sanitized(_ value: String?) -> String? {
         guard let value else { return nil }
         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -120,12 +130,24 @@ enum WhiteboardDecoding {
 
         guard !trimmed.isEmpty else { return nil }
 
+        let hasExplicitTimeZone = containsExplicitTimeZone(in: trimmed)
+
         if let date = iso8601WithFractional.date(from: trimmed) {
-            return date
+            return hasExplicitTimeZone ? date : adjustForServerTimeZone(date)
         }
 
         if let date = iso8601.date(from: trimmed) {
-            return date
+            return hasExplicitTimeZone ? date : adjustForServerTimeZone(date)
+        }
+
+        if !hasExplicitTimeZone {
+            if let date = iso8601FractionalWithoutTimeZone.date(from: trimmed) {
+                return date
+            }
+
+            if let date = iso8601WithoutTimeZone.date(from: trimmed) {
+                return date
+            }
         }
 
         if let date = extendedFractional.date(from: trimmed) {
@@ -153,11 +175,27 @@ enum WhiteboardDecoding {
         return formatter
     }()
 
+    private static let iso8601WithoutTimeZone: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = serverTimeZone
+        return formatter
+    }()
+
+    private static let iso8601FractionalWithoutTimeZone: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = serverTimeZone
+        return formatter
+    }()
+
     private static let extendedFractional: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXXXX"
         formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        formatter.timeZone = serverTimeZone
         return formatter
     }()
 
@@ -165,9 +203,22 @@ enum WhiteboardDecoding {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        formatter.timeZone = serverTimeZone
         return formatter
     }()
+
+    private static func containsExplicitTimeZone(in value: String) -> Bool {
+        guard let tIndex = value.firstIndex(of: "T") else { return false }
+        let nextIndex = value.index(after: tIndex)
+        guard nextIndex < value.endIndex else { return false }
+        let timePortion = value[nextIndex...]
+        return timePortion.contains("Z") || timePortion.contains("+") || timePortion.contains("-")
+    }
+
+    private static func adjustForServerTimeZone(_ date: Date) -> Date {
+        let offset = serverTimeZone.secondsFromGMT(for: date)
+        return date - TimeInterval(offset)
+    }
 }
 
 extension WhiteboardPin {
