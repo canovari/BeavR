@@ -67,11 +67,29 @@ struct PostDetailView: View {
 
                 // --- Map Preview
                 if let lat = post.latitude, let lon = post.longitude {
-                    Map(coordinateRegion: .constant(MKCoordinateRegion(
-                        center: CLLocationCoordinate2D(latitude: lat, longitude: lon),
+                    let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+                    let region = MKCoordinateRegion(
+                        center: coordinate,
                         span: MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
-                    )), annotationItems: [CLLocationCoordinate2D(latitude: lat, longitude: lon)]) { coord in
-                        MapMarker(coordinate: coord, tint: .red)
+                    )
+
+                    Group {
+                        if #available(iOS 17.0, *) {
+                            Map(position: .constant(.region(region))) {
+                                Marker(post.title, coordinate: coordinate)
+                            }
+                        } else {
+                            Map(
+                                coordinateRegion: .constant(region),
+                                annotationItems: [MapAnnotationItem(coordinate: coordinate)]
+                            ) { item in
+                                MapAnnotation(coordinate: item.coordinate) {
+                                    Image(systemName: "mappin.circle.fill")
+                                        .foregroundColor(Color("LSERed"))
+                                        .font(.title2)
+                                }
+                            }
+                        }
                     }
                     .frame(height: 200)
                     .cornerRadius(12)
@@ -204,7 +222,7 @@ struct PostDetailView: View {
 
 }
 
-// MARK: - Identifiable helper
-extension CLLocationCoordinate2D: Identifiable {
-    public var id: String { "\(latitude),\(longitude)" }
+private struct MapAnnotationItem: Identifiable {
+    let id = UUID()
+    let coordinate: CLLocationCoordinate2D
 }
