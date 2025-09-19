@@ -2,7 +2,7 @@ import Foundation
 
 @MainActor
 final class AuthViewModel: ObservableObject {
-    enum Step: Equatable {
+    enum Step {
         case emailEntry
         case codeEntry
     }
