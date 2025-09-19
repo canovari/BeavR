@@ -68,35 +68,15 @@ struct MapView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if #available(iOS 17.0, *) {
-                    Map(position: cameraPositionBinding) {
-                        ForEach(mapItems) { item in
-                            switch item.kind {
-                            case .event(let post):
-                                Annotation(post.title, coordinate: item.coordinate, anchor: .bottom) {
-                                    eventAnnotation(for: post)
-                                }
-                            case .userLocation:
-                                Annotation("User Location", coordinate: item.coordinate, anchor: .center) {
-                                    UserLocationAnnotationView()
-                                }
-                            }
-                        }
+            Map(coordinateRegion: $region, annotationItems: mapItems) { item in
+                switch item.kind {
+                case .event(let post):
+                    MapAnnotation(coordinate: item.coordinate) {
+                        eventAnnotation(for: post)
                     }
-                    .annotationTitles(.hidden)
-                } else {
-                    Map(coordinateRegion: $region, annotationItems: mapItems) { item in
-                        switch item.kind {
-                        case .event(let post):
-                            return MapAnnotation(coordinate: item.coordinate) {
-                                eventAnnotation(for: post)
-                            }
-                        case .userLocation:
-                            return MapAnnotation(coordinate: item.coordinate) {
-                                UserLocationAnnotationView()
-                            }
-                        }
+                case .userLocation:
+                    return MapAnnotation(coordinate: item.coordinate) {
+                        UserLocationAnnotationView()
                     }
                 }
             }
@@ -115,11 +95,6 @@ struct MapView: View {
                 PostDetailView(post: post)
             }
         }
-    }
-
-    private func recenterCamera(on coordinate: CLLocationCoordinate2D) {
-        let span = region.span
-        region = MKCoordinateRegion(center: coordinate, span: span)
     }
 
     private func eventAnnotation(for post: Post) -> some View {
