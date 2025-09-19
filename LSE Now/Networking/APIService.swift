@@ -153,12 +153,29 @@ final class APIService {
     }
 
     // MARK: - Pins
-    func fetchPins() async throws -> [WhiteboardPin] {
-        let endpoint = baseURL.appendingPathComponent("pins.php")
+    func fetchPins(cacheBustingToken: String? = nil) async throws -> [WhiteboardPin] {
+        var endpoint = baseURL.appendingPathComponent("pins.php")
+        let trimmedToken = cacheBustingToken?.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if let token = trimmedToken, !token.isEmpty {
+            var components = URLComponents(url: endpoint, resolvingAgainstBaseURL: false)
+            var queryItems = components?.queryItems ?? []
+            queryItems.append(URLQueryItem(name: "ts", value: token))
+            components?.queryItems = queryItems
+            if let urlWithQuery = components?.url {
+                endpoint = urlWithQuery
+            }
+        }
+
         var request = URLRequest(url: endpoint)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.cachePolicy = .reloadIgnoringLocalCacheData
+
+        if let token = trimmedToken, !token.isEmpty {
+            request.setValue("no-cache", forHTTPHeaderField: "Cache-Control")
+            request.setValue("no-cache", forHTTPHeaderField: "Pragma")
+        }
 
         let data = try await perform(request: request)
         let decoder = JSONDecoder()

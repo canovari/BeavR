@@ -53,7 +53,9 @@ final class WhiteboardViewModel: ObservableObject {
         defer { isLoading = false }
 
         do {
-            let fetchedPins = try await apiService.fetchPins()
+            let fetchedPins = try await apiService.fetchPins(
+                cacheBustingToken: forceReload ? UUID().uuidString : nil
+            )
             let normalizedPins = fetchedPins
                 .filter { WhiteboardGridConfiguration.contains(row: $0.gridRow, column: $0.gridCol) }
                 .map { pinWithCreatorAuthor($0) }
