@@ -6,6 +6,9 @@ CREATE TABLE IF NOT EXISTS users (
     code_expires_at DATETIME DEFAULT NULL,
     verified TINYINT(1) NOT NULL DEFAULT 0,
     login_token CHAR(64) DEFAULT NULL,
+    latitude DECIMAL(10,7) DEFAULT NULL,
+    longitude DECIMAL(10,7) DEFAULT NULL,
+    location_updated_at DATETIME DEFAULT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_users_login_token (login_token)

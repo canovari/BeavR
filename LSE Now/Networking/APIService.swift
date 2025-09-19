@@ -134,6 +134,20 @@ final class APIService {
         _ = try await perform(request: request)
     }
 
+    func updateUserLocation(latitude: Double, longitude: Double, token: String) async throws {
+        let endpoint = baseURL.appendingPathComponent("update_location.php")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        setAuthorizationHeader(on: &request, token: token)
+
+        let encoder = JSONEncoder()
+        request.httpBody = try encoder.encode(UpdateLocationPayload(latitude: latitude, longitude: longitude))
+
+        _ = try await perform(request: request)
+    }
+
     func fetchPins() async throws -> [WhiteboardPin] {
         let endpoint = baseURL.appendingPathComponent("pins.php")
         var request = URLRequest(url: endpoint)
@@ -262,6 +276,11 @@ private struct EventSubmissionPayload: Encodable {
 
 private struct CancelEventPayload: Encodable {
     let id: Int
+}
+
+private struct UpdateLocationPayload: Encodable {
+    let latitude: Double
+    let longitude: Double
 }
 
 private struct ErrorResponse: Decodable {

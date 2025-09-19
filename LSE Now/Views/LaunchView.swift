@@ -5,6 +5,7 @@ struct LaunchView: View {
     @State private var finished = false
     @StateObject private var viewModel = PostListViewModel() // preload in background
     @StateObject private var authViewModel = AuthViewModel()
+    @EnvironmentObject private var locationManager: LocationManager
 
     var body: some View {
         ZStack {
@@ -33,6 +34,7 @@ struct LaunchView: View {
             // Start fetching posts immediately in the background
             viewModel.fetchPosts()
             authViewModel.loadExistingSession()
+            locationManager.requestAuthorization()
 
             // Kick off animation
             animate = true
