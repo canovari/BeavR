@@ -4,11 +4,16 @@ struct LaunchView: View {
     @State private var animate = false
     @State private var finished = false
     @StateObject private var viewModel = PostListViewModel() // preload in background
+    @StateObject private var authViewModel = AuthViewModel()
 
     var body: some View {
         ZStack {
             if finished {
-                MainTabView(viewModel: viewModel) // pass loaded VM forward
+                if authViewModel.isLoggedIn {
+                    MainTabView(viewModel: viewModel) // pass loaded VM forward
+                } else {
+                    LoginFlowView(viewModel: authViewModel)
+                }
             } else {
                 Color("LSERed")
                     .ignoresSafeArea()
@@ -26,6 +31,7 @@ struct LaunchView: View {
         .onAppear {
             // Start fetching posts immediately in the background
             viewModel.fetchPosts()
+            authViewModel.loadExistingSession()
 
             // Kick off animation
             animate = true
