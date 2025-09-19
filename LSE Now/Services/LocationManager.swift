@@ -2,8 +2,8 @@ import Foundation
 import CoreLocation
 
 final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
-    @Published var authorizationStatus: CLAuthorizationStatus
-    @Published var latestLocation: CLLocation?
+    @Published private(set) var authorizationStatus: CLAuthorizationStatus
+    @Published private(set) var latestLocation: CLLocation?
 
     private let locationManager: CLLocationManager
     private let apiService: APIService
@@ -44,8 +44,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
 
     func requestPermission() {
         hasPromptedForPermission = true
-
-        switch locationManager.authorizationStatus {
+witch locationManager.authorizationStatus {
         case .notDetermined:
             log("Asking user for when-in-use authorization")
             locationManager.requestWhenInUseAuthorization()
@@ -177,10 +176,104 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         }
     }
 
-    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        let status = manager.authorizationStatus
+    func handleLoginStateChange(isLoggedIn: Bool, tokenProvider: (() -> String?)?) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
 
-        DispatchQueue.main.async {
+            self.log("Login state changed. isLoggedIn: \(isLoggedIn)")
+
+            if isLoggedIn {
+                self.isTrackingUser = true
+                self.tokenProvider = tokenProvider
+
+                if !self.hasPromptedForPermission {
+                    self.log("Location permission has not been requested yet; prompting user")
+                    self.requestPermission()
+                } else {
+                    self.log("Location permission already handled; ensuring updates are active")
+                    self.startLocationUpdatesIfAuthorized()
+                }
+
+                if let location = self.latestLocation {
+                    self.log("Sending immediate location update using cached coordinates")
+                    self.shouldUploadWhenLocationAvailable = false
+                    self.sendLocationUpdate(using: location)
+                } else {
+                    self.log("Waiting for first location fix before uploading to server")
+                    self.shouldUploadWhenLocationAvailable = true
+                    self.refreshLocation()
+                }
+            } else {
+                self.log("Stopping user location tracking and clearing resources")
+                self.isTrackingUser = false
+                self.tokenProvider = nil
+                self.shouldUploadWhenLocationAvailable = false
+                self.isUploadingLocation = false
+                self.locationManager.stopUpdatingLocation()
+                self.latestLocation = nil
+            }
+
+            self.updateUploadTimerState()
+        }
+    }
+
+    func updateAppActivity(isActive: Bool) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+
+            self.isAppActive = isActive
+            self.log("App activity updated. isActive: \(isActive)")
+
+            if isActive {
+                if self.isTrackingUser {
+                    self.log("App became active while tracking is enabled; triggering immediate upload")
+                    self.handleUploadTimerFired()
+                }
+            } else {
+                self.log("App moved to background; stopping upload timer")
+            }
+
+            self.updateUploadTimerState()
+        }
+    }
+
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let location = locations.last else { return }
+
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+
+            self.latestLocation = location
+            let coordinate = location.coordinate
+            let latitudeString = String(format: "%.6f", coordinate.latitude)
+            let longitudeString = String(format: "%.6f", coordinate.longitude)
+            self.log("Received location update (lat: \(latitudeString), lon: \(longitudeString)) at \(location.timestamp)")
+
+            if self.shouldUploadWhenLocationAvailable {
+                self.log("Uploading deferred location update now that a location is available")
+                self.shouldUploadWhenLocationAvailable = false
+                self.sendLocationUpdate(using: location)
+            }
+        }
+    }
+
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        log("Location manager error: \(error.localizedDescription)")
+    }
+
+    @available(iOS 14.0, *)
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        handleAuthorizationChange(to: manager.authorizationStatus)
+    }
+
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        handleAuthorizationChange(to: status)
+    }
+
+    private func handleAuthorizationChange(to status: CLAuthorizationStatus) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+
             self.authorizationStatus = status
             self.log("Authorization status changed to \(self.describeAuthorizationStatus(status))")
 
@@ -196,6 +289,8 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
                 self.locationManager.stopUpdatingLocation()
                 self.latestLocation = nil
             }
+
+            self.updateUploadTimerState()
         }
     }
 
