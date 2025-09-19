@@ -35,9 +35,11 @@
 			membershipExceptions = (
 				Assets.xcassets,
 				LSE_NowApp.swift,
-				Models/ContactInfo.swift,
-				Models/Post.swift,
-				Models/User.swift,
+                                Models/ContactInfo.swift,
+                                Models/Post.swift,
+                                Models/Post+Display.swift,
+                                Models/Post+Status.swift,
+                                Models/User.swift,
                                 Networking/APIService.swift,
                                 Services/LocationSearchCompleter.swift,
                                 Services/TokenStorage.swift,
@@ -78,9 +80,11 @@
 		9AE9E1B22E7B375C005D3827 /* Exceptions for "LSE Now" folder in "LSE NowTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Models/ContactInfo.swift,
-				Models/Post.swift,
-				Models/User.swift,
+                                Models/ContactInfo.swift,
+                                Models/Post.swift,
+                                Models/Post+Display.swift,
+                                Models/Post+Status.swift,
+                                Models/User.swift,
 				Networking/APIService.swift,
                                 Services/LocationSearchCompleter.swift,
                                 Services/TokenStorage.swift,
