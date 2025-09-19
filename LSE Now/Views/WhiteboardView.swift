@@ -107,7 +107,7 @@ struct WhiteboardView: View {
     }
 
     private var whiteboardGrid: some View {
-        let gridColumns = Array(repeating: GridItem(.flexible(minimum: 56, maximum: 120), spacing: 12), count: columns)
+        let gridColumns = Array(repeating: GridItem(.flexible(), spacing: 12), count: columns)
 
         return LazyVGrid(columns: gridColumns, spacing: 12) {
             ForEach(0..<(rows * self.columns), id: \.self) { index in
@@ -145,32 +145,22 @@ private struct WhiteboardPinCell: View {
     let isMine: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(pin.emoji)
-                .font(.system(size: 34))
-
-            Text(pin.text)
-                .font(.footnote)
-                .foregroundColor(.primary)
-                .lineLimit(2)
-
-            if let author = pin.author, !author.isEmpty {
-                Text(author)
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-            }
-        }
-        .frame(maxWidth: .infinity, minHeight: 82, alignment: .leading)
-        .padding(12)
-        .background(
+        ZStack {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(Color.white)
-        )
+
+            Text(pin.emoji)
+                .font(.system(size: 44))
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity)
+        .aspectRatio(1, contentMode: .fit)
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .stroke(isMine ? Color("LSERed") : Color(.separator), lineWidth: isMine ? 2 : 1)
         )
-        .contentShape(Rectangle())
+        .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel)
     }
@@ -186,23 +176,22 @@ private struct WhiteboardPinCell: View {
 
 private struct EmptySlotCell: View {
     var body: some View {
-        VStack {
-            Image(systemName: "plus")
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(Color(.tertiaryLabel))
-        }
-        .frame(maxWidth: .infinity, minHeight: 82)
-        .padding(12)
-        .background(
+        ZStack {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(Color.white)
-        )
+
+            Image(systemName: "plus")
+                .font(.system(size: 24, weight: .semibold))
+                .foregroundColor(Color(.tertiaryLabel))
+        }
+        .frame(maxWidth: .infinity)
+        .aspectRatio(1, contentMode: .fit)
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .stroke(style: StrokeStyle(lineWidth: 1, dash: [5]))
                 .foregroundColor(Color(.tertiaryLabel))
         )
-        .contentShape(Rectangle())
+        .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .accessibilityLabel("Add a new pin here")
     }
 }

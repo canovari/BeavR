@@ -1,8 +1,8 @@
 import Foundation
 
 enum WhiteboardGridConfiguration {
-    static let rows = 5
-    static let columns = 8
+    static let rows = 8
+    static let columns = 5
 
     static func contains(row: Int, column: Int) -> Bool {
         row >= 0 && row < rows && column >= 0 && column < columns
@@ -35,14 +35,18 @@ final class WhiteboardViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
 
+        defer { isLoading = false }
+
         do {
             let fetchedPins = try await apiService.fetchPins()
             pins = fetchedPins.filter { WhiteboardGridConfiguration.contains(row: $0.gridRow, column: $0.gridCol) }
+        } catch let urlError as URLError where urlError.code == .cancelled {
+            // Ignore cancellations that happen during refreshes.
+        } catch is CancellationError {
+            // Ignore explicit cancellation errors triggered by SwiftUI task lifecycle.
         } catch {
             errorMessage = error.localizedDescription
         }
-
-        isLoading = false
     }
 
     func createPin(emoji: String, text: String, author: String?, at coordinate: WhiteboardCoordinate, token: String) async throws {
