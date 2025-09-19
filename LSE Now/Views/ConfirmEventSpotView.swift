@@ -353,3 +353,21 @@ struct ConfirmEventSpotView: View {
         String(format: "Lat %.5f, Lon %.5f", coordinate.latitude, coordinate.longitude)
     }
 }
+
+private struct LegacyDraggableConfirmMap: View {
+    @Binding var region: MKCoordinateRegion
+    let showsUserLocation: Bool
+    let onRegionChange: (MKCoordinateRegion) -> Void
+
+    var body: some View {
+        Map(
+            coordinateRegion: $region,
+            interactionModes: .all,
+            showsUserLocation: showsUserLocation,
+            userTrackingMode: .constant(.none)
+        )
+        .onChange(of: region) { newValue in
+            onRegionChange(newValue)
+        }
+    }
+}
