@@ -5,6 +5,8 @@ require_once __DIR__ . '/../config.php';
 
 header('Content-Type: application/json');
 
+const DEMO_EMAIL = 'demo@lse.ac.uk';
+
 $email = isset($_POST['email']) ? trim((string) $_POST['email']) : '';
 $code = isset($_POST['code']) ? trim((string) $_POST['code']) : '';
 
@@ -17,6 +19,47 @@ if ($email === '' || $code === '') {
 if (!preg_match('/^[0-9]{6}$/', $code)) {
     http_response_code(400);
     echo json_encode(['error' => 'Invalid verification code.']);
+    exit;
+}
+
+$isDemoAccount = strcasecmp($email, DEMO_EMAIL) === 0;
+
+if ($isDemoAccount) {
+    if ($code !== '000000') {
+        http_response_code(400);
+        echo json_encode(['error' => 'Invalid or expired code.']);
+        exit;
+    }
+
+    try {
+        $token = bin2hex(random_bytes(32));
+    } catch (Throwable $exception) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Unable to generate login token.']);
+        exit;
+    }
+
+    try {
+        $upsert = $pdo->prepare(
+            'INSERT INTO users (email, verified, code, code_expires_at, login_token)
+             VALUES (:email, 1, NULL, NULL, :token)
+             ON DUPLICATE KEY UPDATE
+                verified = VALUES(verified),
+                code = VALUES(code),
+                code_expires_at = VALUES(code_expires_at),
+                login_token = VALUES(login_token)'
+        );
+        $upsert->execute([
+            ':email' => $email,
+            ':token' => $token,
+        ]);
+    } catch (PDOException $exception) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to finalize verification.']);
+        exit;
+    }
+
+    echo json_encode(['success' => true, 'token' => $token]);
     exit;
 }
 
