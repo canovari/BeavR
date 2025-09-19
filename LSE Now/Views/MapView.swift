@@ -89,11 +89,8 @@ struct MapView: View {
     @ViewBuilder
     private var mapLayer: some View {
         Map(position: $cameraPosition, interactionModes: .all) {
-            if let userCoordinate = locationManager.latestLocation?.coordinate, isLocationAuthorized {
-                Annotation("Current Location", coordinate: userCoordinate) {
-                    UserLocationMarker()
-                }
-                .annotationTitles(.hidden)
+            if isLocationAuthorized {
+                UserAnnotation()
             }
 
             ForEach(annotatedPosts, id: \.post.id) { entry in
@@ -204,55 +201,6 @@ private struct PostAnnotationView: View {
         }
         .buttonStyle(.plain)
         .zIndex(zIndexValue)
-    }
-}
-
-private struct UserLocationMarker: View {
-    @State private var animate = false
-
-    var body: some View {
-        ZStack {
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [Color("LSERed").opacity(0.35), Color("LSERed").opacity(0.05)],
-                        center: .center,
-                        startRadius: 0,
-                        endRadius: 80
-                    )
-                )
-                .frame(width: 140, height: 140)
-                .scaleEffect(animate ? 1.2 : 0.55)
-                .opacity(animate ? 0.02 : 0.4)
-                .animation(
-                    .easeInOut(duration: 4)
-                        .repeatForever(autoreverses: true),
-                    value: animate
-                )
-
-            Circle()
-                .stroke(Color("LSERed").opacity(0.6), lineWidth: 2)
-                .frame(width: 60, height: 60)
-                .scaleEffect(animate ? 1.1 : 0.9)
-                .opacity(animate ? 0.15 : 0.35)
-                .animation(
-                    .easeInOut(duration: 4)
-                        .repeatForever(autoreverses: true),
-                    value: animate
-                )
-
-            Circle()
-                .fill(Color("LSERed"))
-                .frame(width: 16, height: 16)
-                .overlay(
-                    Circle()
-                        .stroke(Color.white, lineWidth: 4)
-                )
-        }
-        .frame(width: 140, height: 140)
-        .onAppear {
-            animate = true
-        }
     }
 }
 
