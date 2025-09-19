@@ -31,7 +31,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         self.locationManager = manager
         self.apiService = apiService
         self.userDefaults = userDefaults
-        self.authorizationStatus = LocationManager.currentAuthorizationStatus(for: manager)
+        self.authorizationStatus = manager.authorizationStatus
 
         super.init()
 
@@ -44,11 +44,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
 
     func requestPermission() {
         hasPromptedForPermission = true
-
-        let status = currentAuthorizationStatus()
-        log("Permission request invoked. Current status: \(describeAuthorizationStatus(status))")
-
-        switch status {
+witch locationManager.authorizationStatus {
         case .notDetermined:
             log("Asking user for when-in-use authorization")
             locationManager.requestWhenInUseAuthorization()
@@ -62,7 +58,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
     }
 
     func refreshLocation() {
-        let status = currentAuthorizationStatus()
+        let status = locationManager.authorizationStatus
         log("Refreshing location with authorization status \(describeAuthorizationStatus(status))")
 
         switch status {
@@ -74,6 +70,109 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
             locationManager.requestWhenInUseAuthorization()
         default:
             log("Skipping location refresh because authorization is \(describeAuthorizationStatus(status))")
+        }
+    }
+
+    func handleLoginStateChange(isLoggedIn: Bool, tokenProvider: (() -> String?)?) {
+        DispatchQueue.main.async {
+            self.log("Login state changed. isLoggedIn: \(isLoggedIn)")
+            if isLoggedIn {
+                self.log("Starting user location tracking")
+                self.isTrackingUser = true
+                self.tokenProvider = tokenProvider
+
+                if !self.hasPromptedForPermission {
+                    self.log("Location permission has not been requested yet; prompting user")
+                    self.requestPermission()
+                } else {
+                    self.log("Location permission already handled; ensuring updates are active")
+                    self.startLocationUpdatesIfAuthorized()
+                }
+
+                self.startUploadTimerIfNeeded()
+
+                if let location = self.latestLocation {
+                    self.log("Sending immediate location update using cached coordinates")
+                    self.shouldUploadWhenLocationAvailable = false
+                    self.sendLocationUpdate(using: location)
+                } else {
+                    self.log("Waiting for first location fix before uploading to server")
+                    self.shouldUploadWhenLocationAvailable = true
+                    self.refreshLocation()
+                }
+            } else {
+                self.log("Stopping user location tracking and clearing resources")
+                self.isTrackingUser = false
+                self.tokenProvider = nil
+                self.shouldUploadWhenLocationAvailable = false
+                self.stopUploadTimer()
+                self.locationManager.stopUpdatingLocation()
+                self.log("Location updates stopped due to logout")
+            }
+        }
+    }
+
+    func updateAppActivity(isActive: Bool) {
+        DispatchQueue.main.async {
+            self.isAppActive = isActive
+            self.log("App activity updated. isActive: \(isActive)")
+
+            if isActive {
+                if self.isTrackingUser {
+                    self.log("App became active while tracking is enabled; triggering immediate upload")
+                    self.handleUploadTimerFired()
+                    self.startUploadTimerIfNeeded()
+                }
+            } else {
+                self.log("App moved to background; stopping upload timer")
+                self.stopUploadTimer()
+            }
+        }
+    }
+
+    func handleLoginStateChange(isLoggedIn: Bool, tokenProvider: (() -> String?)?) {
+        DispatchQueue.main.async {
+            if isLoggedIn {
+                self.isTrackingUser = true
+                self.tokenProvider = tokenProvider
+
+                if !self.hasPromptedForPermission {
+                    self.requestPermission()
+                } else {
+                    self.startLocationUpdatesIfAuthorized()
+                }
+
+                self.startUploadTimerIfNeeded()
+
+                if let location = self.latestLocation {
+                    self.shouldUploadWhenLocationAvailable = false
+                    self.sendLocationUpdate(using: location)
+                } else {
+                    self.shouldUploadWhenLocationAvailable = true
+                    self.refreshLocation()
+                }
+            } else {
+                self.isTrackingUser = false
+                self.tokenProvider = nil
+                self.shouldUploadWhenLocationAvailable = false
+                self.stopUploadTimer()
+                self.locationManager.stopUpdatingLocation()
+            }
+        }
+    }
+
+    func updateAppActivity(isActive: Bool) {
+        DispatchQueue.main.async {
+            self.isAppActive = isActive
+
+            if isActive {
+                if self.isTrackingUser {
+                    self.handleUploadTimerFired()
+                    self.startUploadTimerIfNeeded()
+                }
+            } else {
+                self.stopUploadTimer()
+            }
         }
     }
 
@@ -183,7 +282,6 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
                 self.log("Permission granted; starting location updates")
                 self.locationManager.startUpdatingLocation()
                 if self.isTrackingUser {
-                    self.log("Requesting location immediately after authorization granted")
                     self.locationManager.requestLocation()
                 }
             default:
@@ -196,34 +294,30 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         }
     }
 
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let location = locations.last else { return }
+
+        DispatchQueue.main.async {
+            self.latestLocation = location
+
+            if self.shouldUploadWhenLocationAvailable {
+                self.shouldUploadWhenLocationAvailable = false
+                self.sendLocationUpdate(using: location)
+            }
+        }
+    }
+
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        log("Location manager error: \(error.localizedDescription)")
+    }
+
     private var hasPromptedForPermission: Bool {
         get { userDefaults.bool(forKey: permissionKey) }
         set { userDefaults.set(newValue, forKey: permissionKey) }
     }
 
-    private var isAuthorizedForLocationUpdates: Bool {
-        switch currentAuthorizationStatus() {
-        case .authorizedWhenInUse, .authorizedAlways:
-            return true
-        default:
-            return false
-        }
-    }
-
-    private func currentAuthorizationStatus() -> CLAuthorizationStatus {
-        LocationManager.currentAuthorizationStatus(for: locationManager)
-    }
-
-    private static func currentAuthorizationStatus(for manager: CLLocationManager) -> CLAuthorizationStatus {
-        if #available(iOS 14.0, *) {
-            return manager.authorizationStatus
-        } else {
-            return CLLocationManager.authorizationStatus()
-        }
-    }
-
     private func startLocationUpdatesIfAuthorized() {
-        let status = currentAuthorizationStatus()
+        let status = locationManager.authorizationStatus
         log("Evaluating whether to start location updates with status \(describeAuthorizationStatus(status))")
 
         switch status {
@@ -236,14 +330,6 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
             locationManager.requestWhenInUseAuthorization()
         default:
             log("Location updates not started because authorization is \(describeAuthorizationStatus(status))")
-        }
-    }
-
-    private func updateUploadTimerState() {
-        if isTrackingUser && isAppActive && isAuthorizedForLocationUpdates {
-            startUploadTimerIfNeeded()
-        } else {
-            stopUploadTimer()
         }
     }
 
@@ -263,17 +349,10 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
             return
         }
 
-        guard isAuthorizedForLocationUpdates else {
-            log("Skipping upload timer start because authorization is \(describeAuthorizationStatus(currentAuthorizationStatus()))")
-            return
-        }
-
         log("Starting upload timer with interval \(locationUploadInterval) seconds")
 
         let timer = Timer.scheduledTimer(withTimeInterval: locationUploadInterval, repeats: true) { [weak self] _ in
-            DispatchQueue.main.async {
-                self?.handleUploadTimerFired()
-            }
+            self?.handleUploadTimerFired()
         }
         RunLoop.main.add(timer, forMode: .common)
         uploadTimer = timer
@@ -282,11 +361,6 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
     private func handleUploadTimerFired() {
         guard isTrackingUser else {
             log("Upload timer fired but tracking is disabled; ignoring")
-            return
-        }
-
-        guard isAuthorizedForLocationUpdates else {
-            log("Upload timer fired but authorization is \(describeAuthorizationStatus(currentAuthorizationStatus()))")
             return
         }
 
@@ -304,28 +378,21 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
     }
 
     private func stopUploadTimer() {
-        guard let timer = uploadTimer else { return }
-
-        log("Stopping upload timer")
-        timer.invalidate()
+        if uploadTimer != nil {
+            log("Stopping upload timer")
+        }
+        uploadTimer?.invalidate()
         uploadTimer = nil
     }
 
     private func sendLocationUpdate(using location: CLLocation) {
-        guard isTrackingUser else {
-            log("Skipping location upload because tracking is disabled")
-            return
-        }
-
         guard let tokenClosure = tokenProvider else {
             log("Cannot send location update because token provider is unavailable")
-            shouldUploadWhenLocationAvailable = true
             return
         }
 
         guard let token = tokenClosure() else {
             log("Cannot send location update because token is unavailable")
-            shouldUploadWhenLocationAvailable = true
             return
         }
 
@@ -333,7 +400,6 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
 
         guard !trimmedToken.isEmpty else {
             log("Cannot send location update because token is empty after trimming")
-            shouldUploadWhenLocationAvailable = true
             return
         }
 
@@ -362,16 +428,13 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
                     timestamp: timestamp,
                     token: trimmedToken
                 )
-                DispatchQueue.main.async {
-                    self.log("Successfully sent location update at \(timestamp)")
-                    self.isUploadingLocation = false
-                }
+                self.log("Successfully sent location update at \(timestamp)")
             } catch {
-                DispatchQueue.main.async {
-                    self.log("Failed to update user location: \(error.localizedDescription)")
-                    self.shouldUploadWhenLocationAvailable = true
-                    self.isUploadingLocation = false
-                }
+                self.log("Failed to update user location: \(error.localizedDescription)")
+            }
+
+            await MainActor.run {
+                self.isUploadingLocation = false
             }
         }
     }
@@ -394,6 +457,81 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
             return "authorized when in use"
         @unknown default:
             return "unknown (\(status.rawValue))"
+        }
+    }
+
+    private var hasPromptedForPermission: Bool {
+        get { userDefaults.bool(forKey: permissionKey) }
+        set { userDefaults.set(newValue, forKey: permissionKey) }
+    }
+
+    private func startLocationUpdatesIfAuthorized() {
+        switch locationManager.authorizationStatus {
+        case .authorizedWhenInUse, .authorizedAlways:
+            locationManager.startUpdatingLocation()
+            locationManager.requestLocation()
+        case .notDetermined:
+            locationManager.requestWhenInUseAuthorization()
+        default:
+            break
+        }
+    }
+
+    private func startUploadTimerIfNeeded() {
+        guard uploadTimer == nil, isTrackingUser, isAppActive else { return }
+
+        let timer = Timer.scheduledTimer(withTimeInterval: locationUploadInterval, repeats: true) { [weak self] _ in
+            self?.handleUploadTimerFired()
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        uploadTimer = timer
+    }
+
+    private func handleUploadTimerFired() {
+        guard isTrackingUser else { return }
+
+        if let location = latestLocation {
+            sendLocationUpdate(using: location)
+            locationManager.requestLocation()
+        } else {
+            shouldUploadWhenLocationAvailable = true
+            refreshLocation()
+        }
+    }
+
+    private func stopUploadTimer() {
+        uploadTimer?.invalidate()
+        uploadTimer = nil
+    }
+
+    private func sendLocationUpdate(using location: CLLocation) {
+        guard let tokenClosure = tokenProvider, let token = tokenClosure() else { return }
+        let trimmedToken = token.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedToken.isEmpty else { return }
+
+        guard !isUploadingLocation else { return }
+
+        isUploadingLocation = true
+        shouldUploadWhenLocationAvailable = false
+
+        let coordinate = location.coordinate
+        let timestamp = Date()
+
+        Task {
+            do {
+                try await apiService.updateUserLocation(
+                    latitude: coordinate.latitude,
+                    longitude: coordinate.longitude,
+                    timestamp: timestamp,
+                    token: trimmedToken
+                )
+            } catch {
+                print("Failed to update user location: \(error.localizedDescription)")
+            }
+
+            await MainActor.run {
+                self.isUploadingLocation = false
+            }
         }
     }
 }
