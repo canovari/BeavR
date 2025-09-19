@@ -7,6 +7,7 @@ struct WhiteboardView: View {
 
     @State private var addTarget: WhiteboardCoordinate?
     @State private var replyTarget: WhiteboardPin?
+    @State private var selectedPin: WhiteboardPin?
     @State private var showingInbox = false
 
     private let rows = WhiteboardGridConfiguration.rows
@@ -28,7 +29,7 @@ struct WhiteboardView: View {
 
                 ScrollView {
                     VStack(spacing: 24) {
-                        whiteboardGrid
+                        pinboardGrid()
                             .padding(.top, 24)
 
                         if viewModel.isLoading && viewModel.pins.isEmpty {
@@ -41,16 +42,17 @@ struct WhiteboardView: View {
                 }
                 .scrollIndicators(.hidden)
                 .refreshable {
-                    await viewModel.loadPins()
+                    await refreshPins()
                 }
             }
-            .navigationTitle("Whiteboard")
+            .navigationTitle("Pinboard")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         showingInbox = true
                     } label: {
                         Image(systemName: "envelope")
+                            .padding(.top, 2)
                     }
                     .accessibilityLabel("Open messages inbox")
                 }
@@ -86,6 +88,16 @@ struct WhiteboardView: View {
                     MissingSessionView()
                 }
             }
+            .sheet(item: $selectedPin) { pin in
+                PinDetailSheet(
+                    pin: pin,
+                    canReply: activeToken != nil,
+                    onReply: {
+                        selectedPin = nil
+                        replyTarget = pin
+                    }
+                )
+            }
             .sheet(item: $replyTarget) { pin in
                 if let token = activeToken {
                     ReplySheet(viewModel: viewModel, pin: pin, token: token)
@@ -106,8 +118,8 @@ struct WhiteboardView: View {
         }
     }
 
-    private var whiteboardGrid: some View {
-        let gridColumns = Array(repeating: GridItem(.flexible(minimum: 56, maximum: 120), spacing: 12), count: columns)
+    private func pinboardGrid() -> some View {
+        let gridColumns = Array(repeating: GridItem(.flexible(), spacing: 12), count: columns)
 
         return LazyVGrid(columns: gridColumns, spacing: 12) {
             ForEach(0..<(rows * self.columns), id: \.self) { index in
@@ -118,7 +130,7 @@ struct WhiteboardView: View {
                 if let pin = viewModel.pin(at: coordinate) {
                     WhiteboardPinCell(pin: pin, isMine: pin.creatorEmail.caseInsensitiveCompare(authViewModel.loggedInEmail ?? "") == .orderedSame)
                         .onTapGesture {
-                            replyTarget = pin
+                            selectedPin = pin
                         }
                 } else {
                     EmptySlotCell()
@@ -138,6 +150,21 @@ struct WhiteboardView: View {
         .padding(.horizontal, 16)
         .animation(.easeInOut(duration: 0.2), value: viewModel.pins)
     }
+
+    private func refreshPins() async {
+        let minimumDuration: TimeInterval = 1
+        let start = Date()
+        await viewModel.loadPins()
+
+        guard !Task.isCancelled else { return }
+
+        let elapsed = Date().timeIntervalSince(start)
+        let remaining = minimumDuration - elapsed
+        guard remaining > 0 else { return }
+
+        let delay = UInt64((remaining * 1_000_000_000).rounded())
+        try? await Task.sleep(nanoseconds: delay)
+    }
 }
 
 private struct WhiteboardPinCell: View {
@@ -145,65 +172,185 @@ private struct WhiteboardPinCell: View {
     let isMine: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(pin.emoji)
-                .font(.system(size: 34))
-
-            Text(pin.text)
-                .font(.footnote)
-                .foregroundColor(.primary)
-                .lineLimit(2)
-
-            if let author = pin.author, !author.isEmpty {
-                Text(author)
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-            }
+        TimelineView(.periodic(from: .now, by: 1)) { timeline in
+            cell(for: timeline.date)
         }
-        .frame(maxWidth: .infinity, minHeight: 82, alignment: .leading)
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color.white)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(isMine ? Color("LSERed") : Color(.separator), lineWidth: isMine ? 2 : 1)
-        )
-        .contentShape(Rectangle())
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(accessibilityLabel)
     }
 
-    private var accessibilityLabel: String {
+    @ViewBuilder
+    private func cell(for referenceDate: Date) -> some View {
+        let progress = CGFloat(pin.remainingLifetimeFraction(referenceDate: referenceDate))
+
+        ZStack {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(isMine ? Color("LSERed").opacity(0.12) : Color(.systemBackground))
+
+            Text(pin.emoji)
+                .font(.system(size: 44))
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
+
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color(.quaternaryLabel), lineWidth: 1)
+
+            if progress > 0 {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .trim(from: 0, to: progress)
+                    .stroke(Color("LSERed"), style: StrokeStyle(lineWidth: 3, lineCap: .butt, lineJoin: .round))
+                    .rotationEffect(.degrees(-90))
+                    .animation(.linear(duration: 1), value: progress)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .aspectRatio(1, contentMode: .fit)
+        .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityLabel(referenceDate: referenceDate))
+    }
+
+    private func accessibilityLabel(referenceDate: Date) -> String {
         var parts: [String] = [pin.emoji, pin.text]
+
         if let author = pin.author, !author.isEmpty {
             parts.append("Author: \(author)")
         }
+
+        if isMine {
+            parts.append("Posted by you")
+        }
+
+        if let remaining = pin.formattedTimeRemaining(referenceDate: referenceDate) {
+            parts.append("Expires in \(remaining)")
+        } else if pin.isExpired(referenceDate: referenceDate) {
+            parts.append("Expired")
+        }
+
         return parts.joined(separator: ". ")
     }
 }
 
 private struct EmptySlotCell: View {
     var body: some View {
-        VStack {
+        ZStack {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color(.systemBackground))
+
             Image(systemName: "plus")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.system(size: 24, weight: .semibold))
                 .foregroundColor(Color(.tertiaryLabel))
         }
-        .frame(maxWidth: .infinity, minHeight: 82)
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color.white)
-        )
+        .frame(maxWidth: .infinity)
+        .aspectRatio(1, contentMode: .fit)
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .stroke(style: StrokeStyle(lineWidth: 1, dash: [5]))
                 .foregroundColor(Color(.tertiaryLabel))
         )
-        .contentShape(Rectangle())
+        .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .accessibilityLabel("Add a new pin here")
+    }
+}
+
+private struct PinDetailSheet: View {
+    @Environment(\.dismiss) private var dismiss
+
+    let pin: WhiteboardPin
+    let canReply: Bool
+    let onReply: () -> Void
+
+    var body: some View {
+        NavigationStack {
+            TimelineView(.periodic(from: .now, by: 30)) { timeline in
+                sheetBody(referenceDate: timeline.date)
+            }
+            .navigationTitle("View Pin")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") { dismiss() }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func sheetBody(referenceDate: Date) -> some View {
+        let isExpired = pin.isExpired(referenceDate: referenceDate)
+        let remaining = pin.formattedTimeRemaining(referenceDate: referenceDate)
+
+        VStack(spacing: 24) {
+            ScrollView {
+                VStack(spacing: 20) {
+                    Text(pin.emoji)
+                        .font(.system(size: 72))
+                        .frame(maxWidth: .infinity)
+
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(pin.text)
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Label("Posted by \(pin.creatorEmail)", systemImage: "envelope")
+                            .font(.callout)
+                            .foregroundColor(.secondary)
+
+                        if let author = pin.author, !author.isEmpty {
+                            Label(author, systemImage: "person")
+                                .font(.callout)
+                                .foregroundColor(.secondary)
+                        }
+
+                        if !pin.formattedTimestamp.isEmpty {
+                            Label("Posted \(pin.formattedTimestamp)", systemImage: "clock")
+                                .font(.callout)
+                                .foregroundColor(.secondary)
+                        }
+
+                        if let remaining = remaining {
+                            Label("Expires in \(remaining)", systemImage: "hourglass")
+                                .font(.callout)
+                                .foregroundColor(.secondary)
+                        } else if isExpired {
+                            Label("This pin has expired", systemImage: "hourglass")
+                                .font(.callout)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
+            }
+            .scrollIndicators(.hidden)
+
+            VStack(spacing: 12) {
+                Button {
+                    onReply()
+                    dismiss()
+                } label: {
+                    Text(isExpired ? "Pin Expired" : "Reply to Pin")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color("LSERed"))
+                        .cornerRadius(16)
+                }
+                .disabled(!canReply || isExpired)
+                .opacity((canReply && !isExpired) ? 1 : 0.5)
+
+                if !canReply {
+                    Text("Log in to reply to pins.")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 24)
+        }
     }
 }
 

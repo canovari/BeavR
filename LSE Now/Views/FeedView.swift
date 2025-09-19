@@ -73,14 +73,7 @@ struct FeedView: View {
                     .padding()
                 }
                 .refreshable {
-                    do {
-                        try await Task.sleep(nanoseconds: 1_000_000_000)
-                    } catch {
-                        return
-                    }
-
-                    guard !Task.isCancelled else { return }
-                    await vm.refreshPosts()
+                    await refreshFeed()
                 }
 
                 if vm.posts.isEmpty && vm.isLoading {
@@ -114,7 +107,22 @@ struct FeedView: View {
             }
         }
     }
-    
+
+    private func refreshFeed() async {
+        let minimumDuration: TimeInterval = 1
+        let start = Date()
+        await vm.refreshPosts()
+
+        guard !Task.isCancelled else { return }
+
+        let elapsed = Date().timeIntervalSince(start)
+        let remaining = minimumDuration - elapsed
+        guard remaining > 0 else { return }
+
+        let delay = UInt64((remaining * 1_000_000_000).rounded())
+        try? await Task.sleep(nanoseconds: delay)
+    }
+
     // MARK: - Helpers
     private func eventIsOngoing(post: Post) -> Bool {
         let now = Date()

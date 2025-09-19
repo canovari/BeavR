@@ -1,8 +1,8 @@
 import Foundation
 
 enum WhiteboardGridConfiguration {
-    static let rows = 5
-    static let columns = 8
+    static let rows = 8
+    static let columns = 5
 
     static func contains(row: Int, column: Int) -> Bool {
         row >= 0 && row < rows && column >= 0 && column < columns
@@ -18,6 +18,8 @@ final class WhiteboardViewModel: ObservableObject {
     @Published var isSendingReply = false
 
     private let apiService: APIService
+    private var expirationTimer: Timer?
+    private let expirationCheckInterval: TimeInterval = 60
 
     init(apiService: APIService = .shared) {
         self.apiService = apiService
@@ -27,7 +29,12 @@ final class WhiteboardViewModel: ObservableObject {
         guard WhiteboardGridConfiguration.contains(row: coordinate.row, column: coordinate.column) else {
             return nil
         }
-        return pins.first { $0.gridRow == coordinate.row && $0.gridCol == coordinate.column }
+        let now = Date()
+        return pins.first { pin in
+            pin.gridRow == coordinate.row &&
+            pin.gridCol == coordinate.column &&
+            !pin.isExpired(referenceDate: now)
+        }
     }
 
     func loadPins() async {
@@ -35,14 +42,23 @@ final class WhiteboardViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
 
+        defer { isLoading = false }
+
         do {
             let fetchedPins = try await apiService.fetchPins()
-            pins = fetchedPins.filter { WhiteboardGridConfiguration.contains(row: $0.gridRow, column: $0.gridCol) }
+            let now = Date()
+            pins = fetchedPins.filter { pin in
+                WhiteboardGridConfiguration.contains(row: pin.gridRow, column: pin.gridCol) &&
+                !pin.isExpired(referenceDate: now)
+            }
+            maintainExpirationTimer()
+        } catch let urlError as URLError where urlError.code == .cancelled {
+            // Ignore cancellations that happen during refreshes.
+        } catch is CancellationError {
+            // Ignore explicit cancellation errors triggered by SwiftUI task lifecycle.
         } catch {
             errorMessage = error.localizedDescription
         }
-
-        isLoading = false
     }
 
     func createPin(emoji: String, text: String, author: String?, at coordinate: WhiteboardCoordinate, token: String) async throws {
@@ -65,6 +81,7 @@ final class WhiteboardViewModel: ObservableObject {
         }
         pins.removeAll { $0.gridRow == newPin.gridRow && $0.gridCol == newPin.gridCol }
         pins.append(newPin)
+        maintainExpirationTimer()
     }
 
     func sendReply(to pin: WhiteboardPin, message: String, author: String?, token: String) async throws {
@@ -75,5 +92,40 @@ final class WhiteboardViewModel: ObservableObject {
 
         let payload = PinReplyPayload(pinId: pin.id, message: message, author: author)
         _ = try await apiService.sendPinReply(payload: payload, token: token)
+    }
+
+    deinit {
+        expirationTimer?.invalidate()
+    }
+
+    private func maintainExpirationTimer() {
+        pruneExpiredPins()
+
+        if pins.isEmpty {
+            expirationTimer?.invalidate()
+            expirationTimer = nil
+            return
+        }
+
+        guard expirationTimer == nil else { return }
+
+        expirationTimer = Timer.scheduledTimer(withTimeInterval: expirationCheckInterval, repeats: true) { [weak self] _ in
+            guard let self else { return }
+            Task { @MainActor in
+                self.pruneExpiredPins()
+            }
+        }
+    }
+
+    private func pruneExpiredPins(referenceDate: Date = Date()) {
+        let activePins = pins.filter { !$0.isExpired(referenceDate: referenceDate) }
+        if activePins.count != pins.count {
+            pins = activePins
+        }
+
+        if activePins.isEmpty {
+            expirationTimer?.invalidate()
+            expirationTimer = nil
+        }
     }
 }

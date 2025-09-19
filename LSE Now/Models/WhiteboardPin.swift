@@ -169,3 +169,63 @@ enum WhiteboardDecoding {
         return formatter
     }()
 }
+
+extension WhiteboardPin {
+    private static let lifetime: TimeInterval = 8 * 60 * 60
+
+    var expirationDate: Date? {
+        guard let createdAt else { return nil }
+        return createdAt.addingTimeInterval(Self.lifetime)
+    }
+
+    func isExpired(referenceDate: Date = Date()) -> Bool {
+        guard let expirationDate else { return false }
+        return expirationDate <= referenceDate
+    }
+
+    func remainingLifetimeFraction(referenceDate: Date = Date()) -> Double {
+        guard let createdAt else { return 0 }
+        let elapsed = referenceDate.timeIntervalSince(createdAt)
+        if elapsed <= 0 {
+            return 1
+        }
+
+        let remaining = max(0, Self.lifetime - elapsed)
+        return max(0, min(1, remaining / Self.lifetime))
+    }
+
+    var formattedTimestamp: String {
+        guard let createdAt else { return "" }
+        return WhiteboardPin.timestampFormatter.string(from: createdAt)
+    }
+
+    func formattedTimeRemaining(referenceDate: Date = Date()) -> String? {
+        guard let expirationDate else { return nil }
+
+        let remaining = expirationDate.timeIntervalSince(referenceDate)
+        if remaining <= 0 {
+            return nil
+        }
+
+        if remaining < 60 {
+            return "Less than 1m"
+        }
+
+        return WhiteboardPin.remainingFormatter.string(from: remaining)
+    }
+
+    private static let timestampFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter
+    }()
+
+    private static let remainingFormatter: DateComponentsFormatter = {
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.hour, .minute]
+        formatter.maximumUnitCount = 2
+        formatter.unitsStyle = .abbreviated
+        return formatter
+    }()
+}
