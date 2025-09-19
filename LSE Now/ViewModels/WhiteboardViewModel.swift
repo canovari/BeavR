@@ -37,8 +37,16 @@ final class WhiteboardViewModel: ObservableObject {
         }
     }
 
-    func loadPins() async {
-        guard !isLoading else { return }
+    func loadPins(forceReload: Bool = false) async {
+        if isLoading {
+            guard forceReload else { return }
+
+            while isLoading {
+                if Task.isCancelled { return }
+                try? await Task.sleep(nanoseconds: 50_000_000)
+            }
+        }
+
         isLoading = true
         errorMessage = nil
 
@@ -46,7 +54,11 @@ final class WhiteboardViewModel: ObservableObject {
 
         do {
             let fetchedPins = try await apiService.fetchPins()
-            pins = fetchedPins.filter { WhiteboardGridConfiguration.contains(row: $0.gridRow, column: $0.gridCol) }
+            let normalizedPins = fetchedPins
+                .filter { WhiteboardGridConfiguration.contains(row: $0.gridRow, column: $0.gridCol) }
+                .map { pinWithCreatorAuthor($0) }
+            pins = normalizedPins
+            maintainExpirationTimer()
         } catch let urlError as URLError where urlError.code == .cancelled {
             // Ignore cancellations that happen during refreshes.
         } catch is CancellationError {
@@ -102,7 +114,7 @@ final class WhiteboardViewModel: ObservableObject {
             return
         }
         pins.removeAll { $0.gridRow == newPin.gridRow && $0.gridCol == newPin.gridCol }
-        pins.append(finalPin)
+        pins.append(pinWithCreatorAuthor(finalPin))
         maintainExpirationTimer()
     }
 
@@ -149,5 +161,31 @@ final class WhiteboardViewModel: ObservableObject {
             expirationTimer?.invalidate()
             expirationTimer = nil
         }
+    }
+
+    private func pinWithCreatorAuthor(_ pin: WhiteboardPin) -> WhiteboardPin {
+        let normalizedCreator = pin.creatorEmail
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+
+        let fallbackAuthor: String?
+        if normalizedCreator.isEmpty {
+            let trimmedAuthor = pin.author?
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            fallbackAuthor = (trimmedAuthor?.isEmpty == false) ? trimmedAuthor : nil
+        } else {
+            fallbackAuthor = normalizedCreator
+        }
+
+        return WhiteboardPin(
+            id: pin.id,
+            emoji: pin.emoji,
+            text: pin.text,
+            author: fallbackAuthor,
+            creatorEmail: normalizedCreator.isEmpty ? pin.creatorEmail : normalizedCreator,
+            gridRow: pin.gridRow,
+            gridCol: pin.gridCol,
+            createdAt: pin.createdAt
+        )
     }
 }

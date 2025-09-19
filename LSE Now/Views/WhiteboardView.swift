@@ -173,16 +173,20 @@ struct WhiteboardView: View {
     private func refreshPins() async {
         let minimumDuration: TimeInterval = 1
         let start = Date()
-        await viewModel.loadPins()
+        print("🔄 Refreshing Pinboard…")
+        await viewModel.loadPins(forceReload: true)
 
         guard !Task.isCancelled else { return }
 
         let elapsed = Date().timeIntervalSince(start)
         let remaining = minimumDuration - elapsed
-        guard remaining > 0 else { return }
+        if remaining > 0 {
+            let delay = UInt64((remaining * 1_000_000_000).rounded())
+            try? await Task.sleep(nanoseconds: delay)
+        }
 
-        let delay = UInt64((remaining * 1_000_000_000).rounded())
-        try? await Task.sleep(nanoseconds: delay)
+        let totalDuration = Date().timeIntervalSince(start)
+        print(String(format: "✅ Pinboard refresh completed in %.2fs", totalDuration))
     }
 }
 
