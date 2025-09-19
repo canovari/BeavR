@@ -1,33 +1,26 @@
 <?php
-declare(strict_types=1);
+// Central DB config — supports both global $pdo and getPDO()
 
-// Shared database connection for API endpoints.
-// Configure these credentials via environment variables on the server.
-$host = getenv('DB_HOST');
-$dbName = getenv('DB_NAME');
-$user = getenv('DB_USER');
-$password = getenv('DB_PASS');
+$host = "sql.canovari.com";
+$db   = "canovari46540";
+$user = "canovari46540";
+$pass = "cano99880";
 
-if ($host === false || $dbName === false || $user === false || $password === false) {
-    http_response_code(500);
-    header('Content-Type: application/json');
-    echo json_encode(['error' => 'Database environment variables are not configured.']);
-    exit;
+$dsn = "mysql:host=$host;dbname=$db;charset=utf8mb4";
+
+function getPDO(): PDO {
+    global $dsn, $user, $pass;
+    return new PDO($dsn, $user, $pass, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    ]);
 }
 
-$dsn = sprintf('mysql:host=%s;dbname=%s;charset=utf8mb4', $host, $dbName);
-
-$options = [
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES => false,
-];
-
-try {
-    $pdo = new PDO($dsn, $user, $password, $options);
-} catch (PDOException $exception) {
-    http_response_code(500);
-    header('Content-Type: application/json');
-    echo json_encode(['error' => 'Database connection failed.']);
-    exit;
+// ✅ Define a global $pdo for backwards compatibility
+if (!isset($pdo) || !$pdo instanceof PDO) {
+    try {
+        $pdo = getPDO();
+    } catch (PDOException $e) {
+        die("DB Connection failed: " . $e->getMessage());
+    }
 }
