@@ -4,9 +4,11 @@ import MapKit
 struct MapView: View {
     @ObservedObject var vm: PostListViewModel
 
-    @State private var region = MKCoordinateRegion(
-        center: CLLocationCoordinate2D(latitude: 51.5145, longitude: -0.1160), // LSE
-        span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+    @State private var cameraPosition = MapCameraPosition.region(
+        MKCoordinateRegion(
+            center: CLLocationCoordinate2D(latitude: 51.5145, longitude: -0.1160), // LSE
+            span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+        )
     )
 
     @State private var shakeToggle = false
@@ -35,41 +37,13 @@ struct MapView: View {
 
     var body: some View {
         NavigationStack {
-            Map(coordinateRegion: $region, annotationItems: sortedPosts) { post in
-                MapAnnotation(
-                    coordinate: CLLocationCoordinate2D(
-                        latitude: post.latitude!,
-                        longitude: post.longitude!
-                    )
-                ) {
-                    let hasStarted = Date() >= post.startTime
-                    let isUnder1Hour = !hasStarted && Date().distance(to: post.startTime) < 3600
-
-                    NavigationLink(value: post) {
-                        VStack(spacing: 4) {
-                            Text(post.category?.prefix(1) ?? "📍")
-                                .font(.title2)
-
-                            Text(timeLabel(for: post.startTime, endTime: post.endTime))
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                                .foregroundColor(isUnder1Hour ? .red : .primary)
+            Map(position: $cameraPosition) {
+                ForEach(sortedPosts) { post in
+                    if let coordinate = coordinate(for: post) {
+                        Annotation(post.title, coordinate: coordinate) {
+                            annotationView(for: post)
                         }
-                        .padding(6)
-                        .background(.ultraThinMaterial)
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                        .shadow(radius: 3)
-                        .opacity(hasStarted ? 0.6 : 1.0)
-                        .offset(x: isUnder1Hour && shakeToggle ? -6 : 6)
-                        .animation(
-                            isUnder1Hour
-                            ? .easeInOut(duration: 0.08).repeatCount(5, autoreverses: true)
-                            : .default,
-                            value: shakeToggle
-                        )
                     }
-                    .buttonStyle(.plain)
-                    .zIndex(zIndexFor(post: post)) // earliest events on top
                 }
             }
             .edgesIgnoringSafeArea(.top)
@@ -82,6 +56,42 @@ struct MapView: View {
                 PostDetailView(post: post)
             }
         }
+    }
+
+    private func coordinate(for post: Post) -> CLLocationCoordinate2D? {
+        guard let latitude = post.latitude, let longitude = post.longitude else { return nil }
+        return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
+
+    private func annotationView(for post: Post) -> some View {
+        let hasStarted = Date() >= post.startTime
+        let isUnder1Hour = !hasStarted && Date().distance(to: post.startTime) < 3600
+
+        return NavigationLink(value: post) {
+            VStack(spacing: 4) {
+                Text(post.category?.prefix(1) ?? "📍")
+                    .font(.title2)
+
+                Text(timeLabel(for: post.startTime, endTime: post.endTime))
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(isUnder1Hour ? .red : .primary)
+            }
+            .padding(6)
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .shadow(radius: 3)
+            .opacity(hasStarted ? 0.6 : 1.0)
+            .offset(x: isUnder1Hour && shakeToggle ? -6 : 6)
+            .animation(
+                isUnder1Hour
+                ? .easeInOut(duration: 0.08).repeatCount(5, autoreverses: true)
+                : .default,
+                value: shakeToggle
+            )
+        }
+        .buttonStyle(.plain)
+        .zIndex(zIndexFor(post: post)) // earliest events on top
     }
 
     // Higher zIndex for earlier events
