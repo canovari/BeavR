@@ -1,0 +1,412 @@
+import SwiftUI
+
+struct WhiteboardView: View {
+    @EnvironmentObject private var authViewModel: AuthViewModel
+    @StateObject private var viewModel = WhiteboardViewModel()
+    @StateObject private var inboxViewModel = MessagesInboxViewModel()
+
+    @State private var addTarget: WhiteboardCoordinate?
+    @State private var replyTarget: WhiteboardPin?
+    @State private var showingInbox = false
+
+    private let rows = 5
+    private let columns = 8
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Color(.systemGroupedBackground)
+                    .ignoresSafeArea()
+
+                ScrollView {
+                    VStack(spacing: 24) {
+                        whiteboardGrid
+                            .padding(.top, 24)
+
+                        if viewModel.isLoading && viewModel.pins.isEmpty {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                                .padding(.bottom, 24)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .scrollIndicators(.hidden)
+                .refreshable {
+                    await viewModel.loadPins()
+                }
+            }
+            .navigationTitle("Whiteboard")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showingInbox = true
+                    } label: {
+                        Image(systemName: "envelope")
+                    }
+                    .accessibilityLabel("Open messages inbox")
+                }
+            }
+            .task {
+                await viewModel.loadPins()
+            }
+            .alert(
+                "Unable to Load Pins",
+                isPresented: Binding(
+                    get: { viewModel.errorMessage != nil },
+                    set: { newValue in
+                        if !newValue {
+                            viewModel.errorMessage = nil
+                        }
+                    }
+                )
+            ) {
+                Button("OK", role: .cancel) {
+                    viewModel.errorMessage = nil
+                }
+            } message: {
+                Text(viewModel.errorMessage ?? "")
+            }
+            .sheet(item: $addTarget) { coordinate in
+                if let token = authViewModel.token {
+                    AddPinSheet(
+                        viewModel: viewModel,
+                        coordinate: coordinate,
+                        token: token
+                    )
+                } else {
+                    MissingSessionView()
+                }
+            }
+            .sheet(item: $replyTarget) { pin in
+                if let token = authViewModel.token {
+                    ReplySheet(viewModel: viewModel, pin: pin, token: token)
+                } else {
+                    MissingSessionView()
+                }
+            }
+            .sheet(isPresented: $showingInbox) {
+                if let token = authViewModel.token {
+                    MessagesInboxView(
+                        viewModel: inboxViewModel,
+                        token: token
+                    )
+                } else {
+                    MissingSessionView()
+                }
+            }
+        }
+    }
+
+    private var whiteboardGrid: some View {
+        let gridColumns = Array(repeating: GridItem(.flexible(minimum: 56, maximum: 120), spacing: 12), count: columns)
+
+        return LazyVGrid(columns: gridColumns, spacing: 12) {
+            ForEach(0..<(rows * self.columns), id: \.self) { index in
+                let row = index / self.columns
+                let column = index % self.columns
+                let coordinate = WhiteboardCoordinate(row: row, column: column)
+
+                if let pin = viewModel.pin(at: coordinate) {
+                    WhiteboardPinCell(pin: pin, isMine: pin.creatorEmail.caseInsensitiveCompare(authViewModel.loggedInEmail ?? "") == .orderedSame)
+                        .onTapGesture {
+                            replyTarget = pin
+                        }
+                } else {
+                    EmptySlotCell()
+                        .onTapGesture {
+                            guard authViewModel.token != nil else { return }
+                            addTarget = coordinate
+                        }
+                }
+            }
+        }
+        .padding(24)
+        .background(
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.06), radius: 14, x: 0, y: 8)
+        )
+        .padding(.horizontal, 16)
+        .animation(.easeInOut(duration: 0.2), value: viewModel.pins)
+    }
+}
+
+private struct WhiteboardPinCell: View {
+    let pin: WhiteboardPin
+    let isMine: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(pin.emoji)
+                .font(.system(size: 34))
+
+            Text(pin.text)
+                .font(.footnote)
+                .foregroundColor(.primary)
+                .lineLimit(2)
+
+            if let author = pin.author, !author.isEmpty {
+                Text(author)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, minHeight: 82, alignment: .leading)
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.white)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(isMine ? Color("LSERed") : Color(.separator), lineWidth: isMine ? 2 : 1)
+        )
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityLabel)
+    }
+
+    private var accessibilityLabel: String {
+        var parts: [String] = [pin.emoji, pin.text]
+        if let author = pin.author, !author.isEmpty {
+            parts.append("Author: \(author)")
+        }
+        return parts.joined(separator: ". ")
+    }
+}
+
+private struct EmptySlotCell: View {
+    var body: some View {
+        Image(systemName: "plus")
+            .font(.system(size: 22, weight: .semibold))
+            .foregroundColor(Color(.tertiaryLabel))
+            .frame(maxWidth: .infinity, minHeight: 82)
+            .padding(12)
+            .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.white)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(style: StrokeStyle(lineWidth: 1, dash: [5]))
+                .foregroundColor(Color(.tertiaryLabel))
+        )
+        .contentShape(Rectangle())
+        .accessibilityLabel("Add a new pin here")
+    }
+}
+
+private struct AddPinSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var viewModel: WhiteboardViewModel
+
+    let coordinate: WhiteboardCoordinate
+    let token: String
+
+    @State private var emoji: String = ""
+    @State private var text: String = ""
+    @State private var author: String = ""
+    @State private var errorMessage: String?
+
+    private var slotOccupied: Bool {
+        viewModel.pin(at: coordinate) != nil
+    }
+
+    private var isSaveDisabled: Bool {
+        sanitizeEmoji(emoji).isEmpty ||
+        text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+        slotOccupied
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section(header: Text("Pin")) {
+                    TextField("Emoji", text: $emoji)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled(true)
+                        .onChange(of: emoji) { newValue in
+                            let sanitized = sanitizeEmoji(newValue)
+                            if sanitized != newValue {
+                                emoji = sanitized
+                            }
+                        }
+
+                    TextField("Message", text: $text, axis: .vertical)
+                        .lineLimit(2...4)
+
+                    TextField("Author (optional)", text: $author)
+                        .textInputAutocapitalization(.words)
+                }
+
+                if slotOccupied {
+                    Text("Someone already posted here. Please pick another slot.")
+                        .font(.footnote)
+                        .foregroundColor(.red)
+                }
+            }
+            .navigationTitle("New Pin")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") { submit() }
+                        .disabled(isSaveDisabled || viewModel.isSubmittingPin)
+                }
+            }
+            .alert("Couldn\'t Save Pin", isPresented: .constant(errorMessage != nil)) {
+                Button("OK", role: .cancel) { errorMessage = nil }
+            } message: {
+                Text(errorMessage ?? "")
+            }
+        }
+    }
+
+    private func submit() {
+        let sanitizedEmoji = sanitizeEmoji(emoji)
+        let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedAuthor = author.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !sanitizedEmoji.isEmpty, !trimmedText.isEmpty else { return }
+
+        Task {
+            do {
+                try await viewModel.createPin(
+                    emoji: sanitizedEmoji,
+                    text: trimmedText,
+                    author: trimmedAuthor.isEmpty ? nil : trimmedAuthor,
+                    at: coordinate,
+                    token: token
+                )
+                dismiss()
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    private func sanitizeEmoji(_ value: String) -> String {
+        var result = ""
+
+        for character in value where character.isEmojiCharacter {
+            if result.isEmpty {
+                result.append(character)
+            } else {
+                break
+            }
+        }
+
+        return result
+    }
+}
+
+private struct ReplySheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var viewModel: WhiteboardViewModel
+
+    let pin: WhiteboardPin
+    let token: String
+
+    @State private var message: String = ""
+    @State private var author: String = ""
+    @State private var errorMessage: String?
+
+    private var isSendDisabled: Bool {
+        message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section(header: Text("Replying to")) {
+                    HStack(alignment: .top, spacing: 12) {
+                        Text(pin.emoji)
+                            .font(.system(size: 32))
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(pin.text)
+                                .font(.body)
+                            if let author = pin.author, !author.isEmpty {
+                                Text(author)
+                                    .font(.footnote)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                }
+
+                Section(header: Text("Message")) {
+                    TextField("Your message", text: $message, axis: .vertical)
+                        .lineLimit(3...6)
+                    TextField("Author (optional)", text: $author)
+                        .textInputAutocapitalization(.words)
+                }
+            }
+            .navigationTitle("Send Reply")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Send") { submit() }
+                        .disabled(isSendDisabled || viewModel.isSendingReply)
+                }
+            }
+            .alert("Couldn\'t Send Reply", isPresented: .constant(errorMessage != nil)) {
+                Button("OK", role: .cancel) { errorMessage = nil }
+            } message: {
+                Text(errorMessage ?? "")
+            }
+        }
+    }
+
+    private func submit() {
+        let trimmedMessage = message.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedAuthor = author.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedMessage.isEmpty else { return }
+
+        Task {
+            do {
+                try await viewModel.sendReply(
+                    to: pin,
+                    message: trimmedMessage,
+                    author: trimmedAuthor.isEmpty ? nil : trimmedAuthor,
+                    token: token
+                )
+                dismiss()
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+}
+
+private struct MissingSessionView: View {
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 16) {
+                Image(systemName: "lock")
+                    .font(.system(size: 40, weight: .medium))
+                    .foregroundColor(.secondary)
+                Text("You need to be logged in to access this feature.")
+                    .font(.body)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.secondary)
+            }
+            .padding()
+            .navigationTitle("Unavailable")
+        }
+    }
+}
+
+private extension Character {
+    var isEmojiCharacter: Bool {
+        unicodeScalars.contains { scalar in
+            scalar.properties.isEmojiPresentation || scalar.properties.isEmoji
+        }
+    }
+}

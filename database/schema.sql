@@ -34,3 +34,26 @@ CREATE TABLE IF NOT EXISTS events (
     CONSTRAINT fk_events_creator_user FOREIGN KEY (creator_user_id)
         REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS pins (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    emoji VARCHAR(10) NOT NULL,
+    text TEXT NOT NULL,
+    author VARCHAR(255) DEFAULT NULL,
+    creator_email VARCHAR(255) NOT NULL,
+    grid_row INT NOT NULL,
+    grid_col INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY idx_pins_location (grid_row, grid_col),
+    INDEX idx_pins_creator (creator_email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_email VARCHAR(255) NOT NULL,
+    receiver_email VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_messages_sender (sender_email),
+    INDEX idx_messages_receiver (receiver_email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
