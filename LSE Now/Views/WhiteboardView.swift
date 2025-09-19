@@ -9,8 +9,8 @@ struct WhiteboardView: View {
     @State private var replyTarget: WhiteboardPin?
     @State private var showingInbox = false
 
-    private let rows = 5
-    private let columns = 8
+    private let rows = 7
+    private let columns = 9
 
     var body: some View {
         NavigationStack {
@@ -178,12 +178,17 @@ private struct WhiteboardPinCell: View {
 
 private struct EmptySlotCell: View {
     var body: some View {
-        Image(systemName: "plus")
-            .font(.system(size: 22, weight: .semibold))
-            .foregroundColor(Color(.tertiaryLabel))
-            .frame(maxWidth: .infinity, minHeight: 82)
-            .padding(12)
-            .background(
+        VStack {
+            Image(systemName: "plus")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundColor(Color(.tertiaryLabel))
+            Text("Add Pin")
+                .font(.caption)
+                .foregroundColor(Color(.tertiaryLabel))
+        }
+        .frame(maxWidth: .infinity, minHeight: 82)
+        .padding(12)
+        .background(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(Color.white)
         )
@@ -214,7 +219,7 @@ private struct AddPinSheet: View {
     }
 
     private var isSaveDisabled: Bool {
-        sanitizeEmoji(emoji).isEmpty ||
+        emoji.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
         text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
         slotOccupied
     }
@@ -226,12 +231,6 @@ private struct AddPinSheet: View {
                     TextField("Emoji", text: $emoji)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled(true)
-                        .onChange(of: emoji) { newValue in
-                            let sanitized = sanitizeEmoji(newValue)
-                            if sanitized != newValue {
-                                emoji = sanitized
-                            }
-                        }
 
                     TextField("Message", text: $text, axis: .vertical)
                         .lineLimit(2...4)
@@ -266,16 +265,16 @@ private struct AddPinSheet: View {
     }
 
     private func submit() {
-        let sanitizedEmoji = sanitizeEmoji(emoji)
+        let trimmedEmoji = emoji.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedAuthor = author.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        guard !sanitizedEmoji.isEmpty, !trimmedText.isEmpty else { return }
+        guard !trimmedEmoji.isEmpty, !trimmedText.isEmpty else { return }
 
         Task {
             do {
                 try await viewModel.createPin(
-                    emoji: sanitizedEmoji,
+                    emoji: trimmedEmoji,
                     text: trimmedText,
                     author: trimmedAuthor.isEmpty ? nil : trimmedAuthor,
                     at: coordinate,
@@ -286,20 +285,6 @@ private struct AddPinSheet: View {
                 errorMessage = error.localizedDescription
             }
         }
-    }
-
-    private func sanitizeEmoji(_ value: String) -> String {
-        var result = ""
-
-        for character in value where character.isEmojiCharacter {
-            if result.isEmpty {
-                result.append(character)
-            } else {
-                break
-            }
-        }
-
-        return result
     }
 }
 
@@ -403,10 +388,3 @@ private struct MissingSessionView: View {
     }
 }
 
-private extension Character {
-    var isEmojiCharacter: Bool {
-        unicodeScalars.contains { scalar in
-            scalar.properties.isEmojiPresentation || scalar.properties.isEmoji
-        }
-    }
-}

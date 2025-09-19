@@ -64,21 +64,6 @@ function normalizeOptionalString(mixed $value): ?string
     return $trimmed === '' ? null : $trimmed;
 }
 
-function isSingleEmoji(string $value): bool
-{
-    $value = trim($value);
-
-    if ($value === '') {
-        return false;
-    }
-
-    if (preg_match('/^\X$/u', $value) !== 1) {
-        return false;
-    }
-
-    return preg_match('/[\p{Extended_Pictographic}\p{RI}]/u', $value) === 1;
-}
-
 function iso8601(mixed $value): ?string
 {
     if ($value === null) {

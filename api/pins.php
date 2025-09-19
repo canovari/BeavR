@@ -83,15 +83,15 @@ function createPin(PDO $pdo): void
         return;
     }
 
-    if ($gridRow < 0 || $gridRow > 4 || $gridCol < 0 || $gridCol > 7) {
+    if ($gridRow < 0 || $gridRow > 6 || $gridCol < 0 || $gridCol > 8) {
         http_response_code(400);
         echo json_encode(['error' => 'Grid location is out of range.']);
         return;
     }
 
-    if (!isSingleEmoji($emoji)) {
+    if (mb_strlen($emoji) > 10) {
         http_response_code(400);
-        echo json_encode(['error' => 'Emoji must be a single emoji character.']);
+        echo json_encode(['error' => 'Emoji must be at most 10 characters.']);
         return;
     }
 

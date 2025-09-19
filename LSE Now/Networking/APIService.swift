@@ -158,21 +158,9 @@ final class APIService {
         urlRequest.httpBody = try encoder.encode(request)
 
         let data = try await perform(request: urlRequest)
-
-        do {
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            return try decoder.decode(WhiteboardPin.self, from: data)
-        } catch {
-            let fallbackDecoder = JSONDecoder()
-            fallbackDecoder.dateDecodingStrategy = .iso8601
-            if let envelope = try? fallbackDecoder.decode(CreatePinEnvelope.self, from: data),
-               let pin = envelope.resolvedPin {
-                return pin
-            }
-
-            throw error
-        }
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode(WhiteboardPin.self, from: data)
     }
 
     func sendPinReply(payload: PinReplyPayload, token: String) async throws -> WhiteboardMessage {
@@ -291,16 +279,6 @@ struct PinReplyPayload: Encodable {
 private struct SendMessageResponse: Decodable {
     let success: Bool
     let message: WhiteboardMessage
-}
-
-private struct CreatePinEnvelope: Decodable {
-    let success: Bool?
-    let pin: WhiteboardPin?
-    let data: WhiteboardPin?
-
-    var resolvedPin: WhiteboardPin? {
-        pin ?? data
-    }
 }
 
 enum APIServiceError: LocalizedError {

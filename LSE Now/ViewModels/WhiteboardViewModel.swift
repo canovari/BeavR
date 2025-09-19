@@ -9,8 +9,6 @@ final class WhiteboardViewModel: ObservableObject {
     @Published var isSendingReply = false
 
     private let apiService: APIService
-    private let validRowRange = 0...4
-    private let validColumnRange = 0...7
 
     init(apiService: APIService = .shared) {
         self.apiService = apiService
@@ -27,9 +25,7 @@ final class WhiteboardViewModel: ObservableObject {
 
         do {
             let fetchedPins = try await apiService.fetchPins()
-            pins = fetchedPins.filter { pin in
-                validRowRange.contains(pin.gridRow) && validColumnRange.contains(pin.gridCol)
-            }
+            pins = fetchedPins
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -54,9 +50,6 @@ final class WhiteboardViewModel: ObservableObject {
         let newPin = try await apiService.createPin(request: request, token: token)
         pins.removeAll { $0.gridRow == newPin.gridRow && $0.gridCol == newPin.gridCol }
         pins.append(newPin)
-        pins = pins.filter { pin in
-            validRowRange.contains(pin.gridRow) && validColumnRange.contains(pin.gridCol)
-        }
     }
 
     func sendReply(to pin: WhiteboardPin, message: String, author: String?, token: String) async throws {
