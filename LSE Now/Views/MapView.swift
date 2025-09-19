@@ -56,7 +56,7 @@ struct MapView: View {
             Map(coordinateRegion: $region, annotationItems: mapItems) { item in
                 switch item.kind {
                 case .event(let post):
-                    return MapAnnotation(coordinate: item.coordinate) {
+                    MapAnnotation(coordinate: item.coordinate) {
                         eventAnnotation(for: post)
                     }
                 case .userLocation:
