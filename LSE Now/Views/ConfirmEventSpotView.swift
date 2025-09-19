@@ -258,12 +258,12 @@ struct ConfirmEventSpotView: View {
         guard currentSearch === search else { return }
         currentSearch = nil
 
-        if let mkError = error as? MKError, mkError.code == .searchCancelled {
+        if let error, isSearchCancellationError(error) {
             isGeocoding = false
             return
         }
 
-        if let mapItem = response?.mapItems?.first(where: { CLLocationCoordinate2DIsValid($0.placemark.coordinate) }) {
+        if let mapItem = response?.mapItems.first(where: { CLLocationCoordinate2DIsValid($0.placemark.coordinate) }) {
             updateMap(for: mapItem.placemark.coordinate, with: mapItem.placemark)
             isGeocoding = false
             return
@@ -437,5 +437,22 @@ struct ConfirmEventSpotView: View {
 
     private func fallbackAddress(for coordinate: CLLocationCoordinate2D) -> String {
         String(format: "Lat %.5f, Lon %.5f", coordinate.latitude, coordinate.longitude)
+    }
+
+    private func isSearchCancellationError(_ error: Error) -> Bool {
+        let nsError = error as NSError
+
+        if nsError.domain == NSURLErrorDomain && nsError.code == NSURLErrorCancelled {
+            return true
+        }
+
+        if nsError.domain == MKError.errorDomain,
+           let underlying = nsError.userInfo[NSUnderlyingErrorKey] as? NSError,
+           underlying.domain == NSURLErrorDomain,
+           underlying.code == NSURLErrorCancelled {
+            return true
+        }
+
+        return false
     }
 }
