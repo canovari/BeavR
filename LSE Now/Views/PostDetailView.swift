@@ -16,23 +16,20 @@ struct PostDetailView: View {
                     .multilineTextAlignment(.leading)
 
                 // --- Date & Time
-                if let end = post.endTime {
-                    Label("\(post.startTime.formatted(date: .abbreviated, time: .shortened)) – \(end.formatted(date: .omitted, time: .shortened))",
-                          systemImage: "calendar")
-                        .foregroundColor(.secondary)
-                        .font(.subheadline)
-                } else {
-                    Label(post.startTime.formatted(date: .abbreviated, time: .shortened),
-                          systemImage: "calendar")
-                        .foregroundColor(.secondary)
-                        .font(.subheadline)
+                Label {
+                    Text(post.conciseScheduleString())
+                } icon: {
+                    Image(systemName: "calendar")
                 }
+                .foregroundColor(.secondary)
+                .font(.subheadline)
 
                 // --- Location text
-                if let place = post.location, !place.isEmpty {
+                if let place = post.primaryLocationLine ?? post.location, !place.isEmpty {
                     Label(place, systemImage: "mappin.and.ellipse")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
+                        .lineLimit(2)
                 }
 
                 // --- Organization
@@ -44,7 +41,7 @@ struct PostDetailView: View {
 
                 // --- Category
                 if let category = post.category {
-                    Label(category, systemImage: "tag")
+                    Text(category)
                         .font(.headline)
                         .foregroundColor(Color("LSERed"))
                 }
@@ -67,11 +64,29 @@ struct PostDetailView: View {
 
                 // --- Map Preview
                 if let lat = post.latitude, let lon = post.longitude {
-                    Map(coordinateRegion: .constant(MKCoordinateRegion(
-                        center: CLLocationCoordinate2D(latitude: lat, longitude: lon),
+                    let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+                    let region = MKCoordinateRegion(
+                        center: coordinate,
                         span: MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
-                    )), annotationItems: [CLLocationCoordinate2D(latitude: lat, longitude: lon)]) { coord in
-                        MapMarker(coordinate: coord, tint: .red)
+                    )
+
+                    Group {
+                        if #available(iOS 17.0, *) {
+                            Map(position: .constant(.region(region))) {
+                                Marker(post.title, coordinate: coordinate)
+                            }
+                        } else {
+                            Map(
+                                coordinateRegion: .constant(region),
+                                annotationItems: [MapAnnotationItem(coordinate: coordinate)]
+                            ) { item in
+                                MapAnnotation(coordinate: item.coordinate) {
+                                    Image(systemName: "mappin.circle.fill")
+                                        .foregroundColor(Color("LSERed"))
+                                        .font(.title2)
+                                }
+                            }
+                        }
                     }
                     .frame(height: 200)
                     .cornerRadius(12)
@@ -204,7 +219,7 @@ struct PostDetailView: View {
 
 }
 
-// MARK: - Identifiable helper
-extension CLLocationCoordinate2D: Identifiable {
-    public var id: String { "\(latitude),\(longitude)" }
+private struct MapAnnotationItem: Identifiable {
+    let id = UUID()
+    let coordinate: CLLocationCoordinate2D
 }
