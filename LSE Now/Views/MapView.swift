@@ -88,8 +88,14 @@ struct MapView: View {
     @ViewBuilder
     private var mapLayer: some View {
         Map(position: $cameraPosition, interactionModes: .all) {
-            if isLocationAuthorized {
-                UserAnnotation()
+            if let userCoordinate = locationManager.latestLocation?.coordinate, isLocationAuthorized {
+                Annotation("Current Location", coordinate: userCoordinate) {
+                    Circle()
+                        .fill(Color.red)
+                        .frame(width: 10, height: 10)
+                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                }
+                .annotationTitles(.hidden)
             }
 
             ForEach(annotatedPosts, id: \.post.id) { entry in
