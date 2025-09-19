@@ -29,3 +29,4 @@ Request a new verification code.
 **Successful response**
 ```json
 { "success": true }
+
