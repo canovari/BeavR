@@ -126,8 +126,11 @@ struct ConfirmEventSpotView: View {
                 reverseGeocode(for: coord)
             }
         }
-        .onChange(of: region.center) { newCenter in
-            regionCenterChanged(to: newCenter)
+        .onChange(of: region.center.latitude) { _ in
+            regionCenterChanged(to: region.center)
+        }
+        .onChange(of: region.center.longitude) { _ in
+            regionCenterChanged(to: region.center)
         }
         .onDisappear {
             geocodeWorkItem?.cancel()
