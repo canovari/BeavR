@@ -9,8 +9,16 @@ struct WhiteboardView: View {
     @State private var replyTarget: WhiteboardPin?
     @State private var showingInbox = false
 
-    private let rows = 7
-    private let columns = 9
+    private let rows = WhiteboardGridConfiguration.rows
+    private let columns = WhiteboardGridConfiguration.columns
+
+    private var activeToken: String? {
+        guard let token = authViewModel.token?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !token.isEmpty else {
+            return nil
+        }
+        return token
+    }
 
     var body: some View {
         NavigationStack {
@@ -68,7 +76,7 @@ struct WhiteboardView: View {
                 Text(viewModel.errorMessage ?? "")
             }
             .sheet(item: $addTarget) { coordinate in
-                if let token = authViewModel.token {
+                if let token = activeToken {
                     AddPinSheet(
                         viewModel: viewModel,
                         coordinate: coordinate,
@@ -79,14 +87,14 @@ struct WhiteboardView: View {
                 }
             }
             .sheet(item: $replyTarget) { pin in
-                if let token = authViewModel.token {
+                if let token = activeToken {
                     ReplySheet(viewModel: viewModel, pin: pin, token: token)
                 } else {
                     MissingSessionView()
                 }
             }
             .sheet(isPresented: $showingInbox) {
-                if let token = authViewModel.token {
+                if let token = activeToken {
                     MessagesInboxView(
                         viewModel: inboxViewModel,
                         token: token
@@ -115,7 +123,7 @@ struct WhiteboardView: View {
                 } else {
                     EmptySlotCell()
                         .onTapGesture {
-                            guard authViewModel.token != nil else { return }
+                            guard activeToken != nil else { return }
                             addTarget = coordinate
                         }
                 }
@@ -181,9 +189,6 @@ private struct EmptySlotCell: View {
         VStack {
             Image(systemName: "plus")
                 .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(Color(.tertiaryLabel))
-            Text("Add Pin")
-                .font(.caption)
                 .foregroundColor(Color(.tertiaryLabel))
         }
         .frame(maxWidth: .infinity, minHeight: 82)
