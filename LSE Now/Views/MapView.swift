@@ -12,7 +12,6 @@ struct MapView: View {
             span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
         )
     )
-    @State private var userTrackingMode: MapUserTrackingMode = .follow
     @State private var hasCenteredOnUser = false
 
     @State private var shakeToggle = false
@@ -48,19 +47,37 @@ struct MapView: View {
         }
     }
 
+    private var annotatedPosts: [(post: Post, coordinate: CLLocationCoordinate2D)] {
+        sortedPosts.compactMap { post in
+            coordinate(for: post).map { (post, $0) }
+        }
+    }
+
     var body: some View {
         NavigationStack {
             Map(
                 position: $cameraPosition,
                 interactionModes: .all,
-                showsUserLocation: isLocationAuthorized,
-                userTrackingMode: $userTrackingMode
+                showsUserLocation: isLocationAuthorized
             ) {
-                ForEach(sortedPosts) { post in
-                    if let coordinate = coordinate(for: post) {
-                        Annotation(post.title, coordinate: coordinate) {
-                            annotationView(for: post)
-                        }
+                ForEach(annotatedPosts, id: \.post.id) { entry in
+                    let post = entry.post
+                    let coordinate = entry.coordinate
+                    let now = Date()
+                    let hasStarted = now >= post.startTime
+                    let isUnder1Hour = !hasStarted && now.distance(to: post.startTime) < 3600
+                    let timeText = timeLabel(for: post.startTime, endTime: post.endTime)
+                    let zIndexValue = zIndexFor(post: post)
+
+                    Annotation(post.title, coordinate: coordinate) {
+                        PostAnnotationView(
+                            post: post,
+                            timeLabel: timeText,
+                            isUnder1Hour: isUnder1Hour,
+                            hasStarted: hasStarted,
+                            shakeToggle: shakeToggle,
+                            zIndexValue: zIndexValue
+                        )
                     }
                 }
             }
@@ -83,7 +100,6 @@ struct MapView: View {
             )
             withAnimation {
                 cameraPosition = .region(region)
-                userTrackingMode = .follow
             }
             hasCenteredOnUser = true
         }
@@ -97,37 +113,6 @@ struct MapView: View {
     private func coordinate(for post: Post) -> CLLocationCoordinate2D? {
         guard let latitude = post.latitude, let longitude = post.longitude else { return nil }
         return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-    }
-
-    private func annotationView(for post: Post) -> some View {
-        let hasStarted = Date() >= post.startTime
-        let isUnder1Hour = !hasStarted && Date().distance(to: post.startTime) < 3600
-
-        return NavigationLink(value: post) {
-            VStack(spacing: 4) {
-                Text(post.category?.prefix(1) ?? "📍")
-                    .font(.title2)
-
-                Text(timeLabel(for: post.startTime, endTime: post.endTime))
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(isUnder1Hour ? .red : .primary)
-            }
-            .padding(6)
-            .background(.ultraThinMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .shadow(radius: 3)
-            .opacity(hasStarted ? 0.6 : 1.0)
-            .offset(x: isUnder1Hour && shakeToggle ? -6 : 6)
-            .animation(
-                isUnder1Hour
-                ? .easeInOut(duration: 0.08).repeatCount(5, autoreverses: true)
-                : .default,
-                value: shakeToggle
-            )
-        }
-        .buttonStyle(.plain)
-        .zIndex(zIndexFor(post: post)) // earliest events on top
     }
 
     // Higher zIndex for earlier events
@@ -167,6 +152,43 @@ struct MapView: View {
         } else {
             return start.formatted(.dateTime.weekday(.abbreviated))
         }
+    }
+}
+
+private struct PostAnnotationView: View {
+    let post: Post
+    let timeLabel: String
+    let isUnder1Hour: Bool
+    let hasStarted: Bool
+    let shakeToggle: Bool
+    let zIndexValue: Double
+
+    var body: some View {
+        NavigationLink(value: post) {
+            VStack(spacing: 4) {
+                Text(post.category?.prefix(1) ?? "📍")
+                    .font(.title2)
+
+                Text(timeLabel)
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(isUnder1Hour ? .red : .primary)
+            }
+            .padding(6)
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .shadow(radius: 3)
+            .opacity(hasStarted ? 0.6 : 1.0)
+            .offset(x: isUnder1Hour && shakeToggle ? -6 : 6)
+            .animation(
+                isUnder1Hour
+                ? .easeInOut(duration: 0.08).repeatCount(5, autoreverses: true)
+                : .default,
+                value: shakeToggle
+            )
+        }
+        .buttonStyle(.plain)
+        .zIndex(zIndexValue)
     }
 }
 

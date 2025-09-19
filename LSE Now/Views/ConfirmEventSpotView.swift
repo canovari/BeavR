@@ -6,11 +6,11 @@ import Combine
 struct ConfirmEventSpotView: View {
     @Binding var locationText: String
     @State private var region: MKCoordinateRegion
+    @State private var cameraPosition: MapCameraPosition
     @State private var searchError: String?
     @State private var geocodeWorkItem: DispatchWorkItem?
     @State private var shouldSkipNextReverseGeocode = false
     @State private var isGeocoding = false
-    @State private var trackingMode: MapUserTrackingMode = .follow
     @State private var hasCenteredOnUser = false
     @FocusState private var isAddressFieldFocused: Bool
 
@@ -31,15 +31,19 @@ struct ConfirmEventSpotView: View {
         self._locationText = locationText
 
         if let coord = initialCoordinate {
-            _region = State(initialValue: MKCoordinateRegion(
+            let initialRegion = MKCoordinateRegion(
                 center: coord,
                 span: MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
-            ))
+            )
+            _region = State(initialValue: initialRegion)
+            _cameraPosition = State(initialValue: .region(initialRegion))
         } else {
-            _region = State(initialValue: MKCoordinateRegion(
+            let initialRegion = MKCoordinateRegion(
                 center: CLLocationCoordinate2D(latitude: 51.5145, longitude: -0.1160),
                 span: MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
-            ))
+            )
+            _region = State(initialValue: initialRegion)
+            _cameraPosition = State(initialValue: .region(initialRegion))
         }
     }
 
@@ -98,14 +102,18 @@ struct ConfirmEventSpotView: View {
 
             ZStack {
                 Map(
-                    coordinateRegion: $region,
+                    position: $cameraPosition,
                     interactionModes: .all,
-                    showsUserLocation: isLocationAuthorized,
-                    userTrackingMode: $trackingMode
+                    showsUserLocation: isLocationAuthorized
                 )
-                    .frame(height: 360)
-                    .cornerRadius(12)
-                    .shadow(radius: 3)
+                .frame(height: 360)
+                .cornerRadius(12)
+                .shadow(radius: 3)
+                .onMapCameraChange { context in
+                    guard let newRegion = context.region else { return }
+                    region = newRegion
+                    regionCenterChanged(to: newRegion.center)
+                }
 
                 Circle()
                     .fill(Color("LSERed"))
@@ -152,12 +160,6 @@ struct ConfirmEventSpotView: View {
                 centerOnUserIfAvailable(shouldReverseGeocode: locationText.isEmpty)
             }
         }
-        .onChange(of: region.center.latitude) { _ in
-            regionCenterChanged(to: region.center)
-        }
-        .onChange(of: region.center.longitude) { _ in
-            regionCenterChanged(to: region.center)
-        }
         .onDisappear {
             geocodeWorkItem?.cancel()
             geocoder.cancelGeocode()
@@ -183,9 +185,11 @@ struct ConfirmEventSpotView: View {
     private func centerMap(on coordinate: CLLocationCoordinate2D, shouldReverseGeocode: Bool) {
         shouldSkipNextReverseGeocode = true
 
+        let newRegion = MKCoordinateRegion(center: coordinate, span: defaultSpan)
+
         withAnimation {
-            region = MKCoordinateRegion(center: coordinate, span: defaultSpan)
-            trackingMode = .follow
+            region = newRegion
+            cameraPosition = .region(newRegion)
         }
 
         if shouldReverseGeocode {
@@ -224,11 +228,14 @@ struct ConfirmEventSpotView: View {
 
             DispatchQueue.main.async {
                 shouldSkipNextReverseGeocode = true
+                let newRegion = MKCoordinateRegion(
+                    center: coordinate,
+                    span: MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
+                )
+
                 withAnimation {
-                    region = MKCoordinateRegion(
-                        center: coordinate,
-                        span: MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
-                    )
+                    region = newRegion
+                    cameraPosition = .region(newRegion)
                 }
                 locationText = formattedAddress(from: placemark)
                 searchError = nil
