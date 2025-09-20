@@ -19,12 +19,15 @@ struct MapView: View {
     @State private var shakeToggle = false
     @State private var timer: Timer?
 
-    // Posts with valid coordinates, not expired
+    // Posts with valid coordinates, not expired, and within the next six days
     private var postsWithCoords: [Post] {
         let now = Date()
+        let sixDaysAhead = Calendar.current.date(byAdding: .day, value: 6, to: now) ?? now
+
         return vm.posts.filter { post in
             guard let _ = post.latitude, let _ = post.longitude else { return false }
-            return !post.isExpired(referenceDate: now)
+            guard !post.isExpired(referenceDate: now) else { return false }
+            return post.startTime <= sixDaysAhead
         }
     }
 
@@ -48,69 +51,44 @@ struct MapView: View {
     }
 
     var body: some View {
-        ZStack(alignment: .bottomLeading) {
-            Map(position: $cameraPosition, interactionModes: .all) {
-                if isLocationAuthorized {
-                    UserAnnotation()
-                }
-
-                ForEach(annotatedPosts, id: \.post.id) { entry in
-                    let post = entry.post
-                    let coordinate = entry.coordinate
-                    let now = Date()
-                    let hasStarted = now >= post.startTime
-                    let isUnder1Hour = !hasStarted && now.distance(to: post.startTime) < 3600
-                    let timeText = timeLabel(for: post.startTime, endTime: post.endTime)
-                    let zIndexValue = zIndexFor(post: post)
-
-                    Annotation(post.title, coordinate: coordinate) {
-                        PostAnnotationView(
-                            post: post,
-                            timeLabel: timeText,
-                            isUnder1Hour: isUnder1Hour,
-                            hasStarted: hasStarted,
-                            shakeToggle: shakeToggle,
-                            zIndexValue: zIndexValue
-                        )
+        NavigationStack {
+            ZStack(alignment: .bottomLeading) {
+                Map(position: $cameraPosition, interactionModes: .all) {
+                    if isLocationAuthorized {
+                        UserAnnotation()
                     }
-                    .annotationTitles(.hidden)
-                }
-            }
-            .ignoresSafeArea()
-            .onAppear {
-                vm.fetchPosts()
-                startTimer()
-                locationManager.refreshLocation()
-            }
-            .onDisappear { stopTimer() }
-            .onReceive(locationManager.$latestLocation.compactMap { $0 }) { location in
-                if !hasCenteredOnUser {
-                    let region = MKCoordinateRegion(
-                        center: location.coordinate,
-                        span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
-                    )
-                    withAnimation {
-                        cameraPosition = .region(region)
+
+                    ForEach(annotatedPosts, id: \.post.id) { entry in
+                        let post = entry.post
+                        let coordinate = entry.coordinate
+                        let now = Date()
+                        let hasStarted = now >= post.startTime
+                        let isUnder1Hour = !hasStarted && now.distance(to: post.startTime) < 3600
+                        let timeText = timeLabel(for: post.startTime, endTime: post.endTime)
+                        let zIndexValue = zIndexFor(post: post)
+
+                        Annotation(post.title, coordinate: coordinate) {
+                            PostAnnotationView(
+                                post: post,
+                                timeLabel: timeText,
+                                isUnder1Hour: isUnder1Hour,
+                                hasStarted: hasStarted,
+                                shakeToggle: shakeToggle,
+                                zIndexValue: zIndexValue
+                            )
+                        }
+                        .annotationTitles(.hidden)
                     }
-                    hasCenteredOnUser = true
-                    showLocationButton = false
                 }
-            }
-            .onChange(of: locationManager.authorizationStatus) { _, newStatus in
-                if newStatus == .authorizedWhenInUse || newStatus == .authorizedAlways {
+                .ignoresSafeArea()
+                .onAppear {
+                    vm.fetchPosts()
+                    startTimer()
                     locationManager.refreshLocation()
                 }
-            }
-            .onMapCameraChange { context in
-                let region = context.region
-                currentRegion = region
-                updateLocationButtonVisibility()
-            }
-
-            // Locate Me button
-            if isLocationAuthorized {
-                Button {
-                    if let location = locationManager.latestLocation {
+                .onDisappear { stopTimer() }
+                .onReceive(locationManager.$latestLocation.compactMap { $0 }) { location in
+                    if !hasCenteredOnUser {
                         let region = MKCoordinateRegion(
                             center: location.coordinate,
                             span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
@@ -118,24 +96,54 @@ struct MapView: View {
                         withAnimation {
                             cameraPosition = .region(region)
                         }
-                        withAnimation {
-                            showLocationButton = false
-                        }
+                        hasCenteredOnUser = true
+                        showLocationButton = false
                     }
-                } label: {
-                    Image(systemName: "location.fill")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.white)
-                        .padding(8)
-                        .background(Color("LSERed"))
-                        .clipShape(Circle())
-                        .shadow(radius: 2)
                 }
-                .padding(.leading, 16)
-                .padding(.bottom, 20)
-                .opacity(showLocationButton ? 1 : 0)
-                .animation(.easeInOut(duration: 0.3), value: showLocationButton)
+                .onChange(of: locationManager.authorizationStatus) { _, newStatus in
+                    if newStatus == .authorizedWhenInUse || newStatus == .authorizedAlways {
+                        locationManager.refreshLocation()
+                    }
+                }
+                .onMapCameraChange { context in
+                    let region = context.region
+                    currentRegion = region
+                    updateLocationButtonVisibility()
+                }
+
+                if isLocationAuthorized {
+                    Button {
+                        if let location = locationManager.latestLocation {
+                            let region = MKCoordinateRegion(
+                                center: location.coordinate,
+                                span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+                            )
+                            withAnimation {
+                                cameraPosition = .region(region)
+                            }
+                            withAnimation {
+                                showLocationButton = false
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "location.fill")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(.white)
+                            .padding(8)
+                            .background(Color("LSERed"))
+                            .clipShape(Circle())
+                            .shadow(radius: 2)
+                    }
+                    .padding(.leading, 16)
+                    .padding(.bottom, 20)
+                    .opacity(showLocationButton ? 1 : 0)
+                    .animation(.easeInOut(duration: 0.3), value: showLocationButton)
+                }
             }
+            .toolbar(.hidden, for: .navigationBar)
+        }
+        .navigationDestination(for: Post.self) { post in
+            PostDetailView(post: post)
         }
     }
 
@@ -193,7 +201,7 @@ struct MapView: View {
         } else if Calendar.current.isDateInTomorrow(start) {
             return "Tomorrow"
         } else {
-            return start.formatted(.dateTime.weekday(.abbreviated))
+            return start.formatted(.dateTime.weekday(.wide))
         }
     }
 }
@@ -220,7 +228,7 @@ private struct PostAnnotationView: View {
             .background(.ultraThinMaterial)
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
             .shadow(radius: 3)
-            .opacity(hasStarted ? 0.6 : 1.0) // ✅ only dim started events
+            .opacity(hasStarted ? 0.6 : 1.0) // Dim only events already in progress
             .offset(x: isUnder1Hour && shakeToggle ? -6 : 6)
             .animation(
                 isUnder1Hour

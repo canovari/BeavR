@@ -97,6 +97,7 @@ struct PostDetailView: View {
         .background(Color(.systemGroupedBackground)) // ✅ same as Explore/New Event
         .navigationTitle("Event Details")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.visible, for: .navigationBar)
     }
 
     @ViewBuilder
