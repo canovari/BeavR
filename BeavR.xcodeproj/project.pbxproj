@@ -34,8 +34,9 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Assets.xcassets,
-				LSE_NowApp.swift,
-				Models/ContactInfo.swift,
+                                AppDelegate.swift,
+                                LSE_NowApp.swift,
+                                Models/ContactInfo.swift,
 				Models/Post.swift,
 				"Models/Post+Display.swift",
 				"Models/Post+Status.swift",
@@ -44,8 +45,9 @@
 				Models/WhiteboardPin.swift,
 				Networking/APIService.swift,
 				Services/LocationManager.swift,
-				Services/LocationSearchCompleter.swift,
-				Services/TokenStorage.swift,
+                                Services/LocationSearchCompleter.swift,
+                                Services/PushNotificationManager.swift,
+                                Services/TokenStorage.swift,
 				Services/WhiteboardSeenPinsStore.swift,
 				ViewModels/AuthViewModel.swift,
 				ViewModels/MessagesInboxViewModel.swift,
@@ -81,8 +83,9 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Assets.xcassets,
-				LSE_NowApp.swift,
-				"LSE-Now-Info.plist",
+                                AppDelegate.swift,
+                                LSE_NowApp.swift,
+                                "LSE-Now-Info.plist",
 			);
 			target = 9AE9E1752E7B34B9005D3827 /* LSE NowUITests */;
 		};
@@ -98,8 +101,9 @@
 				Models/WhiteboardPin.swift,
 				Networking/APIService.swift,
 				Services/LocationManager.swift,
-				Services/LocationSearchCompleter.swift,
-				Services/TokenStorage.swift,
+                                Services/LocationSearchCompleter.swift,
+                                Services/PushNotificationManager.swift,
+                                Services/TokenStorage.swift,
 				Services/WhiteboardSeenPinsStore.swift,
 				ViewModels/AuthViewModel.swift,
 				ViewModels/MessagesInboxViewModel.swift,

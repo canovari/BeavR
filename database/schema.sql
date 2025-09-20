@@ -166,6 +166,41 @@ CREATE TABLE `user_locations` (
 INSERT INTO `user_locations` (`latitude`, `email`, `longitude`, `recorded_at`, `updated_at`) VALUES
 (51.5163163, 'p.canovari@lse.ac.uk', -0.1248199, '2025-09-20 15:22:33', '2025-09-20 15:23:31');
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `notification_devices`
+--
+
+CREATE TABLE `notification_devices` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `device_token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `platform` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'ios',
+  `environment` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'production',
+  `app_version` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `os_version` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `last_used_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `notification_log`
+--
+
+CREATE TABLE `notification_log` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `body` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 --
 -- Indexes for dumped tables
 --
@@ -210,6 +245,21 @@ ALTER TABLE `user_locations`
   ADD UNIQUE KEY `unique_email` (`email`);
 
 --
+-- Indexes for table `notification_devices`
+--
+ALTER TABLE `notification_devices`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `idx_notification_device_token` (`device_token`),
+  ADD KEY `idx_notification_email` (`email`);
+
+--
+-- Indexes for table `notification_log`
+--
+ALTER TABLE `notification_log`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_notification_log_email` (`email`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -236,6 +286,18 @@ ALTER TABLE `pins`
 --
 ALTER TABLE `users`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `notification_devices`
+--
+ALTER TABLE `notification_devices`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+
+--
+-- AUTO_INCREMENT for table `notification_log`
+--
+ALTER TABLE `notification_log`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 
 --
 -- Constraints for dumped tables

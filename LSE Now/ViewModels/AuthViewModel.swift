@@ -27,11 +27,17 @@ final class AuthViewModel: ObservableObject {
 
     private let apiService: APIService
     private let tokenStorage: TokenStorage
+    private let pushManager: PushNotificationManager
     private var resendTimer: Timer?
 
-    init(apiService: APIService = .shared, tokenStorage: TokenStorage = .shared) {
+    init(
+        apiService: APIService = .shared,
+        tokenStorage: TokenStorage = .shared,
+        pushManager: PushNotificationManager = .shared
+    ) {
         self.apiService = apiService
         self.tokenStorage = tokenStorage
+        self.pushManager = pushManager
     }
 
     func loadExistingSession() {
@@ -40,6 +46,10 @@ final class AuthViewModel: ObservableObject {
 
         if let savedEmail = loggedInEmail {
             email = savedEmail
+        }
+
+        if let savedEmail = loggedInEmail, let existingToken = token {
+            pushManager.resumeSession(email: savedEmail, authToken: existingToken)
         }
     }
 
@@ -107,6 +117,7 @@ final class AuthViewModel: ObservableObject {
             loggedInEmail = email
             code = ""
             resetResendCooldown()
+            pushManager.handleSuccessfulLogin(email: email, authToken: token)
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -115,6 +126,13 @@ final class AuthViewModel: ObservableObject {
     }
 
     func logout() {
+        let currentToken = token
+        let currentEmail = loggedInEmail
+
+        if let currentToken, let currentEmail {
+            pushManager.handleLogout(email: currentEmail, authToken: currentToken)
+        }
+
         tokenStorage.clear()
         token = nil
         loggedInEmail = nil

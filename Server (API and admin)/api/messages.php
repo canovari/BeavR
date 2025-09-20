@@ -5,6 +5,7 @@ declare(strict_types=1);
 file_put_contents(__DIR__ . '/messages_log.txt', "[DEBUG] File write test\n", FILE_APPEND);
 
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../services/NotificationService.php';
 require_once __DIR__ . '/whiteboard_helpers.php';
 
 header('Content-Type: application/json');
@@ -198,12 +199,30 @@ function createMessage(PDO $pdo): void
         return;
     }
 
+    $formattedMessage = formatMessageRow($row);
     logMessage("✅ New message {$messageId} delivered to {$receiverEmail}");
+
+    if (strcasecmp($senderEmail, $receiverEmail) !== 0) {
+        try {
+            $notificationService = new NotificationService($pdo);
+            $notificationService->sendMessageReplyNotification(
+                $receiverEmail,
+                $senderEmail,
+                (int) $row['pin_id'],
+                $formattedMessage['message'] ?? '',
+                $messageId
+            );
+        } catch (Throwable $notifyException) {
+            logMessage('⚠️ Notification send failed → ' . $notifyException->getMessage());
+        }
+    } else {
+        logMessage('ℹ️ Skipping push because sender and receiver are identical.');
+    }
 
     http_response_code(201);
     echo json_encode([
         'success' => true,
-        'message' => formatMessageRow($row),
+        'message' => $formattedMessage,
     ]);
 }
 

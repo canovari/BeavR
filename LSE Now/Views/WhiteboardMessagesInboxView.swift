@@ -35,6 +35,12 @@ struct MessagesInboxView: View {
             .task(id: selectedFolder) {
                 await viewModel.fetchMessages(folder: selectedFolder, token: token)
             }
+            .onReceive(NotificationCenter.default.publisher(for: PushNotificationManager.messageReplyReceivedNotification)) { _ in
+                guard selectedFolder == .received else { return }
+                Task {
+                    await viewModel.fetchMessages(folder: .received, token: token)
+                }
+            }
             .alert(
                 "Unable to Load Messages",
                 isPresented: Binding(
