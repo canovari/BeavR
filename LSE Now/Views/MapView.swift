@@ -19,14 +19,12 @@ struct MapView: View {
     @State private var shakeToggle = false
     @State private var timer: Timer?
 
-    // Only posts with coordinates + not ended + within 16h
+    // Posts with valid coordinates, not expired
     private var postsWithCoords: [Post] {
         let now = Date()
-        let cutoff = now.addingTimeInterval(16 * 3600)
         return vm.posts.filter { post in
             guard let _ = post.latitude, let _ = post.longitude else { return false }
-            if post.isExpired(referenceDate: now) { return false }
-            return post.startTime <= cutoff
+            return !post.isExpired(referenceDate: now)
         }
     }
 
@@ -109,7 +107,6 @@ struct MapView: View {
                 updateLocationButtonVisibility()
             }
 
-
             // Locate Me button
             if isLocationAuthorized {
                 Button {
@@ -135,7 +132,7 @@ struct MapView: View {
                         .shadow(radius: 2)
                 }
                 .padding(.leading, 16)
-                .padding(.bottom, 40)
+                .padding(.bottom, 20)
                 .opacity(showLocationButton ? 1 : 0)
                 .animation(.easeInOut(duration: 0.3), value: showLocationButton)
             }
@@ -223,7 +220,7 @@ private struct PostAnnotationView: View {
             .background(.ultraThinMaterial)
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
             .shadow(radius: 3)
-            .opacity(hasStarted ? 0.6 : 1.0)
+            .opacity(hasStarted ? 0.6 : 1.0) // ✅ only dim started events
             .offset(x: isUnder1Hour && shakeToggle ? -6 : 6)
             .animation(
                 isUnder1Hour
@@ -236,6 +233,7 @@ private struct PostAnnotationView: View {
         .zIndex(zIndexValue)
     }
 }
+
 
 private extension Date {
     func distance(to other: Date) -> TimeInterval {
