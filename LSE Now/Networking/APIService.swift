@@ -248,6 +248,11 @@ final class APIService {
         do {
             (data, response) = try await urlSession.data(for: request)
         } catch {
+            if (error as? URLError)?.code == .cancelled {
+                // Don’t log as ❌ — just quietly bubble up
+                print("↩️ [API] \(request.httpMethod ?? "GET") \(request.url?.absoluteString ?? "<nil>") was cancelled")
+                throw error
+            }
             #if DEBUG
             debugLogNetworkFailure(for: request, error: error)
             #endif

@@ -92,7 +92,7 @@ struct MessagesInboxView: View {
         case .received:
             return "No one has replied to your pins yet."
         case .sent:
-            return "You haven\'t sent any pinboard replies yet."
+            return "You haven’t sent any pinboard replies yet."
         }
     }
 }
@@ -104,20 +104,22 @@ private struct MessageRow: View {
     private var descriptor: String {
         switch folder {
         case .received:
-            return "From \(message.senderEmail)"
+            if let author = message.author, !author.isEmpty {
+                return "From \(author)"
+            } else {
+                return "From Someone"
+            }
         case .sent:
-            return "To \(message.receiverEmail)"
+            if let author = message.author, !author.isEmpty {
+                return "To \(author)"
+            } else {
+                return "To Someone"
+            }
         }
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            if let author = message.author, !author.isEmpty {
-                Text(author)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-
             Text(message.message)
                 .font(.body)
                 .foregroundColor(.primary)

@@ -177,22 +177,16 @@ struct WhiteboardView: View {
     }
 
     private func refreshPins() async {
-        let minimumDuration: TimeInterval = 1
-        let start = Date()
         print("🔄 Refreshing Pinboard…")
+
+        // Always spin the refresh wheel for at least 1 second BEFORE fetching
+        try? await Task.sleep(nanoseconds: 1_000_000_000)
+
         await viewModel.loadPins(forceReload: true)
 
         guard !Task.isCancelled else { return }
 
-        let elapsed = Date().timeIntervalSince(start)
-        let remaining = minimumDuration - elapsed
-        if remaining > 0 {
-            let delay = UInt64((remaining * 1_000_000_000).rounded())
-            try? await Task.sleep(nanoseconds: delay)
-        }
-
-        let totalDuration = Date().timeIntervalSince(start)
-        print(String(format: "✅ Pinboard refresh completed in %.2fs", totalDuration))
+        print("✅ Pinboard refresh completed")
     }
 }
 
@@ -566,4 +560,3 @@ private struct MissingSessionView: View {
         }
     }
 }
-

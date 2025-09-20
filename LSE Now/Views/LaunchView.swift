@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct LaunchView: View {
-    @State private var animate = false
     @State private var finished = false
     @State private var zooming = false
     @State private var fadeBackground = false
@@ -14,7 +13,7 @@ struct LaunchView: View {
     var body: some View {
         ZStack {
             if authViewModel.isLoggedIn {
-                MainTabView(viewModel: viewModel) // pass loaded VM forward
+                MainTabView(viewModel: viewModel)
                     .environmentObject(authViewModel)
             } else {
                 LoginFlowView(viewModel: authViewModel)
@@ -27,27 +26,24 @@ struct LaunchView: View {
             }
         }
         .onAppear {
-            // Start fetching posts immediately in the background
+            // Preload
             viewModel.fetchPosts()
             authViewModel.loadExistingSession()
 
             if authViewModel.isLoggedIn {
                 locationManager.handleLoginStateChange(
                     isLoggedIn: true,
-                    emailProvider: { authViewModel.email } // ✅ now using emailProvider
+                    emailProvider: { authViewModel.email }
                 )
             }
 
             locationManager.updateAppActivity(isActive: scenePhase == .active)
 
-            // Kick off animation
-            animate = true
-
-            // Transition to app after ~2 seconds with a zoom + fade sequence
-            let zoomDelay = 2.0
+            // Run sequence
+            let delay = 2.0
             let zoomDuration = 0.7
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + zoomDelay) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                 withAnimation(.easeInOut(duration: zoomDuration)) {
                     zooming = true
                     fadeBackground = true
@@ -71,7 +67,7 @@ struct LaunchView: View {
             if isLoggedIn {
                 locationManager.handleLoginStateChange(
                     isLoggedIn: true,
-                    emailProvider: { authViewModel.email } // ✅ emailProvider here too
+                    emailProvider: { authViewModel.email }
                 )
             } else {
                 locationManager.handleLoginStateChange(isLoggedIn: false, emailProvider: nil)
@@ -89,23 +85,14 @@ struct LaunchView: View {
                 .ignoresSafeArea()
                 .animation(.easeInOut(duration: 0.7), value: fadeBackground)
 
-            VStack(spacing: 28) {
-                BeaverFaceView()
-                    .frame(width: 180, height: 180)
-                    .scaleEffect(zooming ? 7.5 : (animate ? 1.0 : 0.8))
-                    .animation(.easeOut(duration: 1.0), value: animate)
-                    .animation(.easeInOut(duration: 0.7), value: zooming)
-
-                Text("BeavR")
-                    .font(.custom("HelveticaNeue-Bold", size: 44))
-                    .foregroundColor(.white)
-                    .opacity(zooming ? 0.0 : (animate ? 1.0 : 0.0))
-                    .scaleEffect(animate ? 1.0 : 0.8)
-                    .animation(.easeOut(duration: 1.0), value: animate)
-                    .animation(.easeInOut(duration: 0.3), value: zooming)
-            }
-            .opacity(hideLaunchContent ? 0.0 : 1.0)
-            .animation(.easeInOut(duration: 0.3), value: hideLaunchContent)
+            Text("BeavR")
+                .font(.custom("HelveticaNeue-Bold", size: 44))
+                .foregroundColor(.white)
+                .opacity(zooming ? 0.0 : 1.0)          // 👈 starts visible, fades out on zoom
+                .scaleEffect(zooming ? 6.0 : 1.0)      // 👈 zooms up slightly then disappears
+                .animation(.easeInOut(duration: 0.6), value: zooming)
         }
+        .opacity(hideLaunchContent ? 0.0 : 1.0)
+        .animation(.easeInOut(duration: 0.3), value: hideLaunchContent)
     }
 }
