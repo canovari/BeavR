@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BeavR – Events for LSE Students</title>
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html {
+      scroll-behavior: smooth;
+      font-family: Helvetica, Arial, sans-serif;
+      color: #f5f5f5;
+    }
+    body {
+      background: #0d0d0d;
+      line-height: 1.6;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 2rem;
+      background: #141414;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    }
+    header .logo-area {
+      display: flex;
+      align-items: center;
+    }
+    header img {
+      height: 36px;
+      margin-right: 0.6rem;
+    }
+    header h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #E50914;
+    }
+    header nav {
+      display: flex;
+      gap: 1rem;
+    }
+    header nav a {
+      text-decoration: none;
+      background: #E50914;
+      color: white;
+      padding: 0.5rem 1.1rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    header nav a:hover {
+      background: #b0070f;
+      transform: scale(1.05);
+    }
+
+    /* Hero Section */
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1100px;
+      margin: auto;
+      padding: 6rem 2rem 4rem;
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+    .hero h1 {
+      font-size: 4rem;
+      font-weight: 800;
+      color: #f5f5f5;
+    }
+    .hero h1 .shine {
+      background: linear-gradient(90deg, #E50914, #ff4d4d, #E50914);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shine 3s infinite linear;
+    }
+    @keyframes shine {
+      from { background-position: 0% }
+      to { background-position: 200% }
+    }
+    .hero .store-btn img {
+      height: 65px;
+    }
+
+    /* Sections */
+    section {
+      padding: 5rem 2rem;
+      max-width: 1100px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      gap: 3rem;
+      flex-wrap: wrap;
+    }
+    section:nth-child(even) {
+      flex-direction: row-reverse;
+    }
+    section h2 {
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+      color: #E50914;
+    }
+    section p {
+      font-size: 1.1rem;
+      color: #ccc;
+    }
+    .text {
+      flex: 1;
+      min-width: 250px;
+    }
+    .screenshot {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      position: relative;
+    }
+    .screenshot img,
+    .screenshot video {
+      max-width: 320px;
+      width: 90%;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+    }
+    .fade {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 1s ease, transform 1s ease;
+    }
+    .fade.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Replay button */
+    .replay-btn {
+      position: absolute;
+      bottom: 12px;
+      right: 15px;
+      width: 30px;
+      height: 30px;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      cursor: pointer;
+      fill: rgba(229, 9, 20, 0.85);
+    }
+    .replay-btn.show {
+      opacity: 0.9;
+      transform: scale(1);
+    }
+    .replay-btn:hover {
+      opacity: 1;
+      fill: #E50914;
+    }
+
+    /* Footer */
+    footer {
+      background: #141414;
+      color: #888;
+      padding: 2rem;
+      text-align: center;
+      margin-top: 3rem;
+      font-size: 0.9rem;
+    }
+    footer p {
+      margin: 0.3rem 0;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .hero {
+        flex-direction: column;
+        text-align: center;
+        padding: 4rem 1.5rem;
+      }
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+      .hero .store-btn img {
+        height: 55px;
+        margin-top: 1rem;
+      }
+      section {
+        flex-direction: column;
+        text-align: center;
+      }
+      section:nth-child(even) {
+        flex-direction: column;
+      }
+      section h2 {
+        font-size: 1.8rem;
+      }
+      section p {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="logo-area">
+      <img src="BeavR.png" alt="BeavR Logo">
+      <h1>BeavR</h1>
+    </div>
+    <nav>
+      <a href="#download">Download</a>
+      <a href="#contact">Contacts</a>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <div class="hero">
+    <h1>The <span class="shine">#1</span> app on campus.</h1>
+    <div class="store-btn">
+      <a href="#download">
+        <img src="DownloadButton.png" alt="Download on the App Store">
+      </a>
+    </div>
+  </div>
+
+  <!-- First section -->
+  <section>
+    <div class="text">
+      <h2>Find Events Instantly</h2>
+      <p>BeavR connects you with everything happening at LSE in real-time.  
+         Discover society socials, academic talks, and more — all in one place.</p>
+    </div>
+    <div class="screenshot">
+      <img src="Screenshot.png" alt="App Screenshot" class="fade">
+    </div>
+  </section>
+
+  <!-- Second section with video instead of screenshot -->
+  <section>
+    <div class="text">
+      <h2>Share Your Own Events</h2>
+      <p>Hosting something cool? With BeavR, you can add your event and reach the whole campus community in seconds.</p>
+    </div>
+    <div class="screenshot">
+      <video id="video1" autoplay muted loop playsinline>
+        <source src="Video1.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  </section>
+
+  <!-- Third section with video -->
+  <section>
+    <div class="text">
+      <h2>Stay Connected</h2>
+      <p>Never miss out again. BeavR makes sure you’re always updated and always part of the action.</p>
+    </div>
+    <div class="screenshot">
+      <video id="demoVideo" preload="auto" muted playsinline>
+        <source src="Video.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+      <!-- Replay icon -->
+      <svg id="replayBtn" class="replay-btn" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+        <path d="M500.33 5.67c-7.99-7.99-20.94-7.99-28.93 0l-77.7 77.7C353.82 61.19 306.9 48 256 48 
+        141.13 48 48 141.13 48 256s93.13 208 208 208c86.87 0 160.6-51.18 193.65-124.33 
+        4.77-10.77-.09-23.33-10.86-28.1-10.76-4.77-23.33.09-28.1 10.86C385.87 381.13 
+        324.95 416 256 416c-88.22 0-160-71.78-160-160s71.78-160 160-160c38.16 0 73.29 
+        13.53 100.69 35.98l-83.02 83.02c-7.99 7.99-7.99 20.94 0 28.93 7.99 7.99 
+        20.94 7.99 28.93 0l115.31-115.31c7.99-7.99 7.99-20.94 0-28.93z"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer id="contact">
+    <p>© 2025 BeavR. Built for LSE students, by students.</p>
+    <p>canovari.com/beavr</p>
+  </footer>
+
+  <script>
+    // Fade-in animation for images
+    function revealOnScroll() {
+      const elems = document.querySelectorAll('.fade');
+      const trigger = window.innerHeight * 0.9;
+      elems.forEach(el => {
+        const top = el.getBoundingClientRect().top;
+        if (top < trigger) {
+          el.classList.add('show');
+        }
+      });
+    }
+    window.addEventListener('scroll', revealOnScroll);
+    window.addEventListener('load', revealOnScroll);
+
+    // Video1 playback speed
+    const video1 = document.getElementById('video1');
+    video1.playbackRate = 1.4;
+
+    // Third video logic
+    const video = document.getElementById('demoVideo');
+    const replayBtn = document.getElementById('replayBtn');
+    let hasPlayed = false;
+
+    function handleVideoVisibility(entries) {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !hasPlayed) {
+          video.play();
+          hasPlayed = true;
+        }
+      });
+    }
+
+    const observer = new IntersectionObserver(handleVideoVisibility, {
+      threshold: 1.0
+    });
+    observer.observe(video);
+
+    video.addEventListener('ended', () => {
+      replayBtn.classList.add('show');
+    });
+
+    replayBtn.addEventListener('click', () => {
+      video.currentTime = 0;
+      video.play();
+      replayBtn.classList.remove('show');
+    });
+  </script>
+
+</body>
+</html>

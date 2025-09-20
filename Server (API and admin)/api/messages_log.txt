@@ -1,0 +1,1086 @@
+[DEBUG] File write test
+[2025-09-20 01:12:27] 🚀 messages.php started
+[2025-09-20 01:12:27] Incoming POST request → URI: /api/messages.php
+[2025-09-20 01:12:27] 📩 createMessage() called
+[2025-09-20 01:12:27] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:12:27] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:12:27] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:12:27] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:12:27] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php:133
+[DEBUG] File write test
+[2025-09-20 01:12:30] 🚀 messages.php started
+[2025-09-20 01:12:30] Incoming GET request → URI: /api/messages.php
+[2025-09-20 01:12:30] [helpers] extractBearerToken apache_request_headers={"Host":"www.canovari.com","X-Forwarded-For":"158.143.244.231","X-Forwarded-Proto":"https","Connection":"close","Cache-Control":"max-age=0","Sec-Ch-Ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","Sec-Ch-Ua-Mobile":"?0","Sec-Ch-Ua-Platform":"\"macOS\"","Upgrade-Insecure-Requests":"1","User-Agent":"Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/140.0.0.0 Safari\/537.36","Accept":"text\/html,application\/xhtml+xml,application\/xml;q=0.9,image\/avif,image\/webp,image\/apng,*\/*;q=0.8,application\/signed-exchange;v=b3;q=0.7","Sec-Fetch-Site":"none","Sec-Fetch-Mode":"navigate","Sec-Fetch-User":"?1","Sec-Fetch-Dest":"document","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7","Priority":"u=0, i","Cookie":"PHPSESSID=fumg92o4g4g9pqi4st89c59oae"}
+[2025-09-20 01:12:30] [helpers] extractBearerToken → no header found
+[2025-09-20 01:12:30] 🔹 Extracted token (GET): null
+[2025-09-20 01:12:30] ❌ GET failed → no token
+[DEBUG] File write test
+[DEBUG] File write test
+[DEBUG] File write test
+[DEBUG] File write test
+[DEBUG] File write test
+[DEBUG] File write test
+[DEBUG] File write test
+[DEBUG] File write test
+[DEBUG] File write test
+[DEBUG] File write test
+[DEBUG] File write test
+[2025-09-20 01:14:42] 🚀 messages.php started
+[2025-09-20 01:14:42] Incoming GET request → URI: /api/messages.php
+[2025-09-20 01:14:42] [helpers] extractBearerToken apache_request_headers={"Host":"www.canovari.com","X-Forwarded-For":"158.143.244.231","X-Forwarded-Proto":"https","Connection":"close","Cache-Control":"max-age=0","Sec-Ch-Ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","Sec-Ch-Ua-Mobile":"?0","Sec-Ch-Ua-Platform":"\"macOS\"","Upgrade-Insecure-Requests":"1","User-Agent":"Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/140.0.0.0 Safari\/537.36","Accept":"text\/html,application\/xhtml+xml,application\/xml;q=0.9,image\/avif,image\/webp,image\/apng,*\/*;q=0.8,application\/signed-exchange;v=b3;q=0.7","Sec-Fetch-Site":"none","Sec-Fetch-Mode":"navigate","Sec-Fetch-User":"?1","Sec-Fetch-Dest":"document","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7","Priority":"u=0, i","Cookie":"PHPSESSID=fumg92o4g4g9pqi4st89c59oae"}
+[2025-09-20 01:14:42] [helpers] extractBearerToken → no header found
+[2025-09-20 01:14:42] 🔹 Extracted token (GET): null
+[2025-09-20 01:14:42] ❌ GET failed → no token
+[DEBUG] File write test
+[2025-09-20 01:14:43] 🚀 messages.php started
+[2025-09-20 01:14:43] Incoming GET request → URI: /api/messages.php
+[2025-09-20 01:14:43] [helpers] extractBearerToken apache_request_headers={"Host":"www.canovari.com","X-Forwarded-For":"158.143.244.231","X-Forwarded-Proto":"https","Connection":"close","Cache-Control":"max-age=0","Sec-Ch-Ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","Sec-Ch-Ua-Mobile":"?0","Sec-Ch-Ua-Platform":"\"macOS\"","Upgrade-Insecure-Requests":"1","User-Agent":"Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/140.0.0.0 Safari\/537.36","Accept":"text\/html,application\/xhtml+xml,application\/xml;q=0.9,image\/avif,image\/webp,image\/apng,*\/*;q=0.8,application\/signed-exchange;v=b3;q=0.7","Sec-Fetch-Site":"none","Sec-Fetch-Mode":"navigate","Sec-Fetch-User":"?1","Sec-Fetch-Dest":"document","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7","Priority":"u=0, i","Cookie":"PHPSESSID=fumg92o4g4g9pqi4st89c59oae"}
+[2025-09-20 01:14:43] [helpers] extractBearerToken → no header found
+[2025-09-20 01:14:43] 🔹 Extracted token (GET): null
+[2025-09-20 01:14:43] ❌ GET failed → no token
+[DEBUG] File write test
+[2025-09-20 01:14:43] 🚀 messages.php started
+[2025-09-20 01:14:43] Incoming GET request → URI: /api/messages.php
+[2025-09-20 01:14:43] [helpers] extractBearerToken apache_request_headers={"Host":"www.canovari.com","X-Forwarded-For":"158.143.244.231","X-Forwarded-Proto":"https","Connection":"close","Cache-Control":"max-age=0","Sec-Ch-Ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","Sec-Ch-Ua-Mobile":"?0","Sec-Ch-Ua-Platform":"\"macOS\"","Upgrade-Insecure-Requests":"1","User-Agent":"Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/140.0.0.0 Safari\/537.36","Accept":"text\/html,application\/xhtml+xml,application\/xml;q=0.9,image\/avif,image\/webp,image\/apng,*\/*;q=0.8,application\/signed-exchange;v=b3;q=0.7","Sec-Fetch-Site":"none","Sec-Fetch-Mode":"navigate","Sec-Fetch-User":"?1","Sec-Fetch-Dest":"document","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7","Priority":"u=0, i","Cookie":"PHPSESSID=fumg92o4g4g9pqi4st89c59oae"}
+[2025-09-20 01:14:43] [helpers] extractBearerToken → no header found
+[2025-09-20 01:14:43] 🔹 Extracted token (GET): null
+[2025-09-20 01:14:43] ❌ GET failed → no token
+[DEBUG] File write test
+[2025-09-20 01:14:53] 🚀 messages.php started
+[2025-09-20 01:14:53] Incoming POST request → URI: /api/messages.php
+[2025-09-20 01:14:53] 📩 createMessage() called
+[2025-09-20 01:14:53] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:14:53] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:14:53] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:14:53] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:14:53] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:14:53] ✅ Authenticated user: p.canovari@lse.ac.uk
+[2025-09-20 01:14:53] [helpers] decodeJsonPayload raw={"message":"Test msg","pinId":3}
+[2025-09-20 01:14:53] [helpers] decodeJsonPayload success → {"message":"Test msg","pinId":3}
+[2025-09-20 01:14:53] 🔹 Raw POST payload: {"message":"Test msg","pinId":3}
+[2025-09-20 01:14:53] 🔹 Validated payload → pinId=3, text='Test msg', author=null
+[2025-09-20 01:14:53] 🔹 Preparing insert for pin 3 from p.canovari@lse.ac.uk to example@lse.ac.uk
+[2025-09-20 01:14:53] ✅ Inserted new message id 1
+[2025-09-20 01:14:53] ✅ New message 1 delivered to example@lse.ac.uk
+[DEBUG] File write test
+[2025-09-20 01:14:55] 🚀 messages.php started
+[2025-09-20 01:14:55] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 01:14:55] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:14:55] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:14:55] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:14:55] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:14:55] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:14:55] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 01:14:55] 🔹 Found 0 messages
+[DEBUG] File write test
+[2025-09-20 01:14:56] 🚀 messages.php started
+[2025-09-20 01:14:56] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 01:14:56] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:14:56] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:14:56] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:14:56] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:14:56] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:14:56] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 01:14:56] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 01:15:06] 🚀 messages.php started
+[2025-09-20 01:15:06] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 01:15:06] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:06] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:06] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:15:06] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:06] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:15:06] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 01:15:06] 🔹 Found 0 messages
+[DEBUG] File write test
+[2025-09-20 01:15:06] 🚀 messages.php started
+[2025-09-20 01:15:06] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 01:15:06] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:06] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:06] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:15:06] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:06] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:15:06] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 01:15:06] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 01:15:23] 🚀 messages.php started
+[2025-09-20 01:15:23] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 01:15:23] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:23] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:23] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:15:23] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:23] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:15:23] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 01:15:23] 🔹 Found 0 messages
+[DEBUG] File write test
+[2025-09-20 01:15:25] 🚀 messages.php started
+[2025-09-20 01:15:25] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 01:15:25] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:25] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:25] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:15:25] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:25] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:15:25] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 01:15:25] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 01:15:43] 🚀 messages.php started
+[2025-09-20 01:15:44] Incoming POST request → URI: /api/messages.php
+[2025-09-20 01:15:44] 📩 createMessage() called
+[2025-09-20 01:15:44] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:44] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:44] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:15:44] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:44] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:15:44] ✅ Authenticated user: p.canovari@lse.ac.uk
+[2025-09-20 01:15:44] [helpers] decodeJsonPayload raw={"pinId":2,"message":"What"}
+[2025-09-20 01:15:44] [helpers] decodeJsonPayload success → {"pinId":2,"message":"What"}
+[2025-09-20 01:15:44] 🔹 Raw POST payload: {"pinId":2,"message":"What"}
+[2025-09-20 01:15:44] 🔹 Validated payload → pinId=2, text='What', author=null
+[2025-09-20 01:15:44] 🔹 Preparing insert for pin 2 from p.canovari@lse.ac.uk to p.canovari@lse.ac.uk
+[2025-09-20 01:15:44] ✅ Inserted new message id 2
+[2025-09-20 01:15:44] ✅ New message 2 delivered to p.canovari@lse.ac.uk
+[DEBUG] File write test
+[2025-09-20 01:15:45] 🚀 messages.php started
+[2025-09-20 01:15:45] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 01:15:45] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:45] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:45] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:15:45] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:45] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:15:45] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 01:15:45] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 01:15:47] 🚀 messages.php started
+[2025-09-20 01:15:47] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 01:15:47] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:47] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:47] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:15:47] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:47] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:15:47] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 01:15:47] 🔹 Found 2 messages
+[DEBUG] File write test
+[2025-09-20 01:15:48] 🚀 messages.php started
+[2025-09-20 01:15:48] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 01:15:48] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:48] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:48] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:15:48] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:15:48] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:15:48] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 01:15:48] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 01:16:36] 🚀 messages.php started
+[2025-09-20 01:16:36] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 01:16:36] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:16:36] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:16:36] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:16:36] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:16:36] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:16:36] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 01:16:36] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 01:23:08] 🚀 messages.php started
+[2025-09-20 01:23:08] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 01:23:08] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:23:08] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:23:08] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:23:08] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:23:08] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:23:08] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 01:23:08] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 01:28:14] 🚀 messages.php started
+[2025-09-20 01:28:14] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 01:28:14] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:14] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:14] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:28:14] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:14] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:28:14] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 01:28:14] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 01:28:15] 🚀 messages.php started
+[2025-09-20 01:28:15] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 01:28:15] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:15] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:15] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:28:15] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:15] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:28:15] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 01:28:15] 🔹 Found 2 messages
+[DEBUG] File write test
+[2025-09-20 01:28:16] 🚀 messages.php started
+[2025-09-20 01:28:16] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 01:28:16] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:16] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:16] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:28:16] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:16] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:28:16] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 01:28:16] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 01:28:16] 🚀 messages.php started
+[2025-09-20 01:28:16] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 01:28:16] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:16] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:16] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:28:16] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:16] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:28:16] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 01:28:16] 🔹 Found 2 messages
+[DEBUG] File write test
+[2025-09-20 01:28:17] 🚀 messages.php started
+[2025-09-20 01:28:17] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 01:28:17] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:17] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:17] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:28:17] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:17] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:28:17] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 01:28:17] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 01:28:17] 🚀 messages.php started
+[2025-09-20 01:28:17] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 01:28:17] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:17] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:17] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:28:17] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:17] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:28:17] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 01:28:17] 🔹 Found 2 messages
+[DEBUG] File write test
+[2025-09-20 01:28:17] 🚀 messages.php started
+[2025-09-20 01:28:17] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 01:28:17] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:17] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:17] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:28:17] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:17] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:28:17] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 01:28:17] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 01:28:18] 🚀 messages.php started
+[2025-09-20 01:28:18] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 01:28:18] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:18] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:18] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:28:18] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:18] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:28:18] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 01:28:18] 🔹 Found 2 messages
+[DEBUG] File write test
+[2025-09-20 01:28:18] 🚀 messages.php started
+[2025-09-20 01:28:18] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 01:28:18] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:18] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:18] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:28:18] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:18] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:28:18] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 01:28:18] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 01:28:29] 🚀 messages.php started
+[2025-09-20 01:28:29] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 01:28:29] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:29] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:29] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:28:29] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:28:29] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:28:29] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 01:28:29] 🔹 Found 2 messages
+[DEBUG] File write test
+[2025-09-20 01:46:28] 🚀 messages.php started
+[2025-09-20 01:46:28] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 01:46:28] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:46:28] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:46:28] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:46:28] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:46:28] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:46:28] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 01:46:28] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 01:57:29] 🚀 messages.php started
+[2025-09-20 01:57:29] Incoming POST request → URI: /api/messages.php
+[2025-09-20 01:57:29] 📩 createMessage() called
+[2025-09-20 01:57:29] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:57:29] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:57:29] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:57:29] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:57:29] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:57:29] ✅ Authenticated user: p.canovari@lse.ac.uk
+[2025-09-20 01:57:29] [helpers] decodeJsonPayload raw={"pinId":10,"message":"Ciaoo"}
+[2025-09-20 01:57:29] [helpers] decodeJsonPayload success → {"pinId":10,"message":"Ciaoo"}
+[2025-09-20 01:57:29] 🔹 Raw POST payload: {"pinId":10,"message":"Ciaoo"}
+[2025-09-20 01:57:29] 🔹 Validated payload → pinId=10, text='Ciaoo', author=null
+[2025-09-20 01:57:29] 🔹 Preparing insert for pin 10 from p.canovari@lse.ac.uk to example@lse.ac.uk
+[2025-09-20 01:57:29] ✅ Inserted new message id 3
+[2025-09-20 01:57:29] ✅ New message 3 delivered to example@lse.ac.uk
+[DEBUG] File write test
+[2025-09-20 01:57:30] 🚀 messages.php started
+[2025-09-20 01:57:30] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 01:57:30] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:57:30] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:57:30] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:57:30] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:57:30] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:57:30] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 01:57:30] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 01:57:31] 🚀 messages.php started
+[2025-09-20 01:57:31] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 01:57:31] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:57:31] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:57:31] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:57:31] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:57:31] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:57:31] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 01:57:31] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 01:57:33] 🚀 messages.php started
+[2025-09-20 01:57:33] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 01:57:33] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:57:33] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:57:33] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:57:33] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:57:33] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:57:33] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 01:57:33] 🔹 Found 3 messages
+[DEBUG] File write test
+[2025-09-20 01:57:35] 🚀 messages.php started
+[2025-09-20 01:57:35] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 01:57:35] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:57:35] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:57:35] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:57:35] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:57:35] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:57:35] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 01:57:35] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 01:57:36] 🚀 messages.php started
+[2025-09-20 01:57:36] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 01:57:36] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:57:36] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:57:36] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 01:57:36] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 01:57:36] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 01:57:36] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 01:57:36] 🔹 Found 3 messages
+[DEBUG] File write test
+[2025-09-20 14:54:09] 🚀 messages.php started
+[2025-09-20 14:54:09] Incoming POST request → URI: /api/messages.php
+[2025-09-20 14:54:09] 📩 createMessage() called
+[2025-09-20 14:54:09] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:09] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:09] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 14:54:09] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:09] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 14:54:09] ✅ Authenticated user: p.canovari@lse.ac.uk
+[2025-09-20 14:54:09] [helpers] decodeJsonPayload raw={"pinId":14,"author":"Ggg","message":"Hhu"}
+[2025-09-20 14:54:09] [helpers] decodeJsonPayload success → {"pinId":14,"author":"Ggg","message":"Hhu"}
+[2025-09-20 14:54:09] 🔹 Raw POST payload: {"pinId":14,"author":"Ggg","message":"Hhu"}
+[2025-09-20 14:54:09] 🔹 Validated payload → pinId=14, text='Hhu', author=Ggg
+[2025-09-20 14:54:09] 🔹 Preparing insert for pin 14 from p.canovari@lse.ac.uk to example@lse.ac.uk
+[2025-09-20 14:54:09] ✅ Inserted new message id 4
+[2025-09-20 14:54:09] ✅ New message 4 delivered to example@lse.ac.uk
+[DEBUG] File write test
+[2025-09-20 14:54:10] 🚀 messages.php started
+[2025-09-20 14:54:10] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 14:54:10] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:10] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:10] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 14:54:10] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:10] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 14:54:10] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 14:54:10] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 14:54:11] 🚀 messages.php started
+[2025-09-20 14:54:11] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 14:54:11] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:11] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:11] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 14:54:11] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:11] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 14:54:11] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 14:54:11] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 14:54:12] 🚀 messages.php started
+[2025-09-20 14:54:12] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 14:54:12] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:12] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:12] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 14:54:12] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:12] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 14:54:12] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 14:54:12] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 14:54:13] 🚀 messages.php started
+[2025-09-20 14:54:13] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 14:54:13] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:13] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:13] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 14:54:13] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:13] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 14:54:13] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 14:54:13] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 14:54:14] 🚀 messages.php started
+[2025-09-20 14:54:14] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 14:54:14] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:14] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:14] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 14:54:14] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:14] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 14:54:14] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 14:54:14] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 14:54:15] 🚀 messages.php started
+[2025-09-20 14:54:15] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 14:54:15] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:15] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:15] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 14:54:15] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:15] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 14:54:15] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 14:54:15] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 14:54:22] 🚀 messages.php started
+[2025-09-20 14:54:22] Incoming POST request → URI: /api/messages.php
+[2025-09-20 14:54:22] 📩 createMessage() called
+[2025-09-20 14:54:22] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:22] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:22] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 14:54:22] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:22] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 14:54:22] ✅ Authenticated user: p.canovari@lse.ac.uk
+[2025-09-20 14:54:22] [helpers] decodeJsonPayload raw={"pinId":13,"message":"Dxx","author":"Ddd"}
+[2025-09-20 14:54:22] [helpers] decodeJsonPayload success → {"pinId":13,"message":"Dxx","author":"Ddd"}
+[2025-09-20 14:54:22] 🔹 Raw POST payload: {"pinId":13,"message":"Dxx","author":"Ddd"}
+[2025-09-20 14:54:22] 🔹 Validated payload → pinId=13, text='Dxx', author=Ddd
+[2025-09-20 14:54:22] 🔹 Preparing insert for pin 13 from p.canovari@lse.ac.uk to example@lse.ac.uk
+[2025-09-20 14:54:22] ✅ Inserted new message id 5
+[2025-09-20 14:54:22] ✅ New message 5 delivered to example@lse.ac.uk
+[DEBUG] File write test
+[2025-09-20 14:54:24] 🚀 messages.php started
+[2025-09-20 14:54:24] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 14:54:24] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:24] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:24] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 14:54:24] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:24] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 14:54:24] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 14:54:24] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 14:54:25] 🚀 messages.php started
+[2025-09-20 14:54:25] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 14:54:25] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:25] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:25] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 14:54:25] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:25] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 14:54:25] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 14:54:25] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 14:54:26] 🚀 messages.php started
+[2025-09-20 14:54:26] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 14:54:26] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:26] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:26] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 14:54:26] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:26] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 14:54:26] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 14:54:26] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 14:54:33] 🚀 messages.php started
+[2025-09-20 14:54:33] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 14:54:33] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:33] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:33] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 14:54:33] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:33] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 14:54:33] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 14:54:33] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 14:54:34] 🚀 messages.php started
+[2025-09-20 14:54:34] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 14:54:34] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:34] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:34] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 14:54:34] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:34] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 14:54:34] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 14:54:34] 🔹 Found 5 messages
+[DEBUG] File write test
+[2025-09-20 14:54:43] 🚀 messages.php started
+[2025-09-20 14:54:43] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 14:54:43] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:43] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:43] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 14:54:43] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:43] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 14:54:43] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 14:54:43] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 14:54:44] 🚀 messages.php started
+[2025-09-20 14:54:44] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 14:54:44] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:44] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:44] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 14:54:44] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:54:44] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 14:54:44] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 14:54:44] 🔹 Found 1 messages
+[DEBUG] File write test
+[2025-09-20 14:55:09] 🚀 messages.php started
+[2025-09-20 14:55:09] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 14:55:09] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:55:09] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:55:09] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 14:55:09] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:55:09] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 14:55:09] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 14:55:09] 🔹 Found 2 messages
+[DEBUG] File write test
+[2025-09-20 14:55:12] 🚀 messages.php started
+[2025-09-20 14:55:12] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 14:55:12] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:55:12] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:55:12] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 14:55:12] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:55:12] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 14:55:12] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 14:55:12] 🔹 Found 5 messages
+[DEBUG] File write test
+[2025-09-20 14:55:13] 🚀 messages.php started
+[2025-09-20 14:55:13] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 14:55:13] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:55:13] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:55:13] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 14:55:13] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:55:13] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 14:55:13] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 14:55:13] 🔹 Found 5 messages
+[DEBUG] File write test
+[2025-09-20 14:55:14] 🚀 messages.php started
+[2025-09-20 14:55:14] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 14:55:14] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:55:14] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:55:14] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 14:55:14] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:55:14] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 14:55:14] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 14:55:14] 🔹 Found 2 messages
+[DEBUG] File write test
+[2025-09-20 14:55:15] 🚀 messages.php started
+[2025-09-20 14:55:15] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 14:55:15] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:55:15] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:55:15] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 14:55:15] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:55:15] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 14:55:15] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 14:55:15] 🔹 Found 2 messages
+[DEBUG] File write test
+[2025-09-20 14:55:16] 🚀 messages.php started
+[2025-09-20 14:55:16] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 14:55:16] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:55:16] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:55:16] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 14:55:16] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 14:55:16] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 14:55:16] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 14:55:16] 🔹 Found 2 messages
+[DEBUG] File write test
+[2025-09-20 15:13:15] 🚀 messages.php started
+[2025-09-20 15:13:15] Incoming POST request → URI: /api/messages.php
+[2025-09-20 15:13:15] 📩 createMessage() called
+[2025-09-20 15:13:15] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:15] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:15] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:13:15] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:15] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:13:15] ✅ Authenticated user: p.canovari@lse.ac.uk
+[2025-09-20 15:13:15] [helpers] decodeJsonPayload raw={"message":"I'm down!!","pinId":17}
+[2025-09-20 15:13:15] [helpers] decodeJsonPayload success → {"message":"I'm down!!","pinId":17}
+[2025-09-20 15:13:15] 🔹 Raw POST payload: {"message":"I'm down!!","pinId":17}
+[2025-09-20 15:13:15] 🔹 Validated payload → pinId=17, text='I'm down!!', author=null
+[2025-09-20 15:13:15] 🔹 Preparing insert for pin 17 from p.canovari@lse.ac.uk to p.canovari@lse.ac.uk
+[2025-09-20 15:13:15] ✅ Inserted new message id 6
+[2025-09-20 15:13:15] ✅ New message 6 delivered to p.canovari@lse.ac.uk
+[DEBUG] File write test
+[2025-09-20 15:13:16] 🚀 messages.php started
+[2025-09-20 15:13:16] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 15:13:16] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:16] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:16] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:13:16] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:16] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:13:16] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 15:13:16] 🔹 Found 3 messages
+[DEBUG] File write test
+[2025-09-20 15:13:17] 🚀 messages.php started
+[2025-09-20 15:13:17] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 15:13:17] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:17] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:17] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:13:17] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:17] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:13:17] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 15:13:17] 🔹 Found 6 messages
+[DEBUG] File write test
+[2025-09-20 15:13:18] 🚀 messages.php started
+[2025-09-20 15:13:18] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 15:13:18] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:18] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:18] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:13:18] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:18] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:13:18] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 15:13:18] 🔹 Found 3 messages
+[DEBUG] File write test
+[2025-09-20 15:13:20] 🚀 messages.php started
+[2025-09-20 15:13:20] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 15:13:20] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:20] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:20] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:13:20] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:20] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:13:20] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 15:13:20] 🔹 Found 6 messages
+[DEBUG] File write test
+[2025-09-20 15:13:23] 🚀 messages.php started
+[2025-09-20 15:13:23] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 15:13:23] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:23] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:23] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:13:23] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:23] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:13:23] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 15:13:23] 🔹 Found 6 messages
+[DEBUG] File write test
+[2025-09-20 15:13:24] 🚀 messages.php started
+[2025-09-20 15:13:24] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 15:13:24] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:24] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:24] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:13:24] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:24] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:13:24] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 15:13:24] 🔹 Found 3 messages
+[DEBUG] File write test
+[2025-09-20 15:13:25] 🚀 messages.php started
+[2025-09-20 15:13:25] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 15:13:25] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:25] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:25] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:13:25] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:25] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:13:25] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 15:13:25] 🔹 Found 3 messages
+[DEBUG] File write test
+[2025-09-20 15:13:34] 🚀 messages.php started
+[2025-09-20 15:13:34] Incoming POST request → URI: /api/messages.php
+[2025-09-20 15:13:34] 📩 createMessage() called
+[2025-09-20 15:13:34] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:34] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:34] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:13:34] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:34] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:13:34] ✅ Authenticated user: p.canovari@lse.ac.uk
+[2025-09-20 15:13:34] [helpers] decodeJsonPayload raw={"pinId":17,"message":"Hell yea","author":"Hell Yea"}
+[2025-09-20 15:13:34] [helpers] decodeJsonPayload success → {"pinId":17,"message":"Hell yea","author":"Hell Yea"}
+[2025-09-20 15:13:34] 🔹 Raw POST payload: {"pinId":17,"message":"Hell yea","author":"Hell Yea"}
+[2025-09-20 15:13:34] 🔹 Validated payload → pinId=17, text='Hell yea', author=Hell Yea
+[2025-09-20 15:13:34] 🔹 Preparing insert for pin 17 from p.canovari@lse.ac.uk to p.canovari@lse.ac.uk
+[2025-09-20 15:13:34] ✅ Inserted new message id 7
+[2025-09-20 15:13:34] ✅ New message 7 delivered to p.canovari@lse.ac.uk
+[DEBUG] File write test
+[2025-09-20 15:13:35] 🚀 messages.php started
+[2025-09-20 15:13:35] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 15:13:35] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:35] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:35] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:13:35] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:35] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:13:35] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 15:13:35] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 15:13:36] 🚀 messages.php started
+[2025-09-20 15:13:36] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 15:13:36] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:36] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:36] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:13:36] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:13:36] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:13:36] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 15:13:36] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 15:15:42] 🚀 messages.php started
+[2025-09-20 15:15:42] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 15:15:42] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:15:42] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:15:42] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:15:42] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:15:42] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:15:42] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 15:15:42] 🔹 Found 7 messages
+[DEBUG] File write test
+[2025-09-20 15:15:43] 🚀 messages.php started
+[2025-09-20 15:15:43] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 15:15:43] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:15:43] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:15:43] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:15:43] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:15:43] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:15:43] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 15:15:43] 🔹 Found 7 messages
+[DEBUG] File write test
+[2025-09-20 15:15:44] 🚀 messages.php started
+[2025-09-20 15:15:44] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 15:15:44] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:15:44] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:15:44] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:15:44] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:15:44] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:15:44] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 15:15:44] 🔹 Found 7 messages
+[DEBUG] File write test
+[2025-09-20 15:15:46] 🚀 messages.php started
+[2025-09-20 15:15:46] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 15:15:46] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:15:46] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:15:46] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:15:46] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:15:46] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:15:46] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 15:15:46] 🔹 Found 7 messages
+[DEBUG] File write test
+[2025-09-20 15:16:14] 🚀 messages.php started
+[2025-09-20 15:16:14] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 15:16:14] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:16:14] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:16:14] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:16:14] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:16:14] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:16:14] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 15:16:14] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 15:16:17] 🚀 messages.php started
+[2025-09-20 15:16:17] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 15:16:17] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:16:17] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:16:17] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:16:17] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:16:17] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:16:17] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 15:16:17] 🔹 Found 7 messages
+[DEBUG] File write test
+[2025-09-20 15:17:28] 🚀 messages.php started
+[2025-09-20 15:17:28] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 15:17:28] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:28] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:28] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:17:28] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:28] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:17:28] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 15:17:28] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 15:17:29] 🚀 messages.php started
+[2025-09-20 15:17:29] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 15:17:29] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:29] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:29] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:17:29] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:29] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:17:29] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 15:17:29] 🔹 Found 7 messages
+[DEBUG] File write test
+[2025-09-20 15:17:30] 🚀 messages.php started
+[2025-09-20 15:17:30] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 15:17:30] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:30] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:30] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:17:30] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:30] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:17:30] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 15:17:30] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 15:17:31] 🚀 messages.php started
+[2025-09-20 15:17:31] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 15:17:31] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:31] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:31] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:17:31] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:31] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:17:31] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 15:17:31] 🔹 Found 7 messages
+[DEBUG] File write test
+[2025-09-20 15:17:31] 🚀 messages.php started
+[2025-09-20 15:17:31] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 15:17:31] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:31] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:31] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:17:31] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:31] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:17:31] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 15:17:31] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 15:17:32] 🚀 messages.php started
+[2025-09-20 15:17:32] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 15:17:32] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:32] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:32] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:17:32] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:32] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:17:32] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 15:17:32] 🔹 Found 7 messages
+[DEBUG] File write test
+[2025-09-20 15:17:33] 🚀 messages.php started
+[2025-09-20 15:17:33] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 15:17:33] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:33] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:33] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:17:33] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:33] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:17:33] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 15:17:33] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 15:17:33] 🚀 messages.php started
+[2025-09-20 15:17:33] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 15:17:33] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:33] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:33] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:17:33] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:33] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:17:33] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 15:17:33] 🔹 Found 7 messages
+[DEBUG] File write test
+[2025-09-20 15:17:34] 🚀 messages.php started
+[2025-09-20 15:17:34] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 15:17:34] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:34] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:34] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:17:34] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:34] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:17:34] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 15:17:34] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 15:17:36] 🚀 messages.php started
+[2025-09-20 15:17:36] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 15:17:36] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:36] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:36] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:17:36] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:36] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:17:36] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 15:17:36] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 15:17:38] 🚀 messages.php started
+[2025-09-20 15:17:38] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 15:17:38] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:38] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:38] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:17:38] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:17:38] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:17:38] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 15:17:38] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 15:21:40] 🚀 messages.php started
+[2025-09-20 15:21:40] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 15:21:40] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:21:40] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:21:40] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:21:40] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:21:40] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:21:40] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 15:21:40] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 15:21:42] 🚀 messages.php started
+[2025-09-20 15:21:42] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 15:21:42] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:21:42] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:21:42] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:21:42] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:21:42] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:21:42] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 15:21:42] 🔹 Found 7 messages
+[DEBUG] File write test
+[2025-09-20 15:21:42] 🚀 messages.php started
+[2025-09-20 15:21:42] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 15:21:42] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:21:42] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:21:42] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:21:42] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:21:42] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:21:42] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 15:21:42] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 15:21:49] 🚀 messages.php started
+[2025-09-20 15:21:49] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 15:21:49] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:21:49] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:21:49] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:21:49] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:21:49] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:21:49] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 15:21:49] 🔹 Found 7 messages
+[DEBUG] File write test
+[2025-09-20 15:55:33] 🚀 messages.php started
+[2025-09-20 15:55:33] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 15:55:33] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:55:33] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:55:33] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:55:33] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:55:33] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:55:33] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 15:55:33] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 15:55:35] 🚀 messages.php started
+[2025-09-20 15:55:35] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 15:55:35] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:55:35] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:55:35] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:55:35] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:55:35] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:55:35] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 15:55:35] 🔹 Found 7 messages
+[DEBUG] File write test
+[2025-09-20 15:55:37] 🚀 messages.php started
+[2025-09-20 15:55:37] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 15:55:37] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:55:37] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:55:37] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:55:37] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:55:37] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:55:37] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 15:55:37] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 15:55:38] 🚀 messages.php started
+[2025-09-20 15:55:38] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 15:55:38] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:55:38] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:55:38] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:55:38] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:55:38] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:55:38] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 15:55:38] 🔹 Found 7 messages
+[DEBUG] File write test
+[2025-09-20 15:55:38] 🚀 messages.php started
+[2025-09-20 15:55:38] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 15:55:38] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:55:38] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:55:38] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:55:38] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:55:38] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:55:38] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 15:55:38] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 15:55:39] 🚀 messages.php started
+[2025-09-20 15:55:39] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 15:55:39] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:55:39] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:55:39] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:55:39] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:55:39] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:55:39] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 15:55:39] 🔹 Found 7 messages
+[DEBUG] File write test
+[2025-09-20 15:55:39] 🚀 messages.php started
+[2025-09-20 15:55:39] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 15:55:39] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:55:39] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:55:39] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 15:55:39] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 15:55:39] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 15:55:39] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 15:55:39] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 16:06:55] 🚀 messages.php started
+[2025-09-20 16:06:55] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 16:06:55] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 16:06:55] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 16:06:55] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 16:06:55] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 16:06:55] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 16:06:55] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 16:06:55] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 16:06:56] 🚀 messages.php started
+[2025-09-20 16:06:56] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 16:06:56] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 16:06:56] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 16:06:56] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 16:06:56] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 16:06:56] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 16:06:56] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 16:06:56] 🔹 Found 7 messages
+[DEBUG] File write test
+[2025-09-20 16:06:58] 🚀 messages.php started
+[2025-09-20 16:06:58] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 16:06:58] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 16:06:58] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 16:06:58] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 16:06:58] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 16:06:58] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 16:06:58] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 16:06:58] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 16:07:00] 🚀 messages.php started
+[2025-09-20 16:07:00] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 16:07:00] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 16:07:00] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 16:07:00] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 16:07:00] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 16:07:00] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 16:07:00] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 16:07:00] 🔹 Found 7 messages
+[DEBUG] File write test
+[2025-09-20 16:07:01] 🚀 messages.php started
+[2025-09-20 16:07:01] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 16:07:01] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 16:07:01] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 16:07:01] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 16:07:01] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 16:07:01] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 16:07:01] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 16:07:01] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 16:07:02] 🚀 messages.php started
+[2025-09-20 16:07:02] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 16:07:02] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 16:07:02] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 16:07:02] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 16:07:02] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 16:07:02] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 16:07:02] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 16:07:02] 🔹 Found 7 messages
+[DEBUG] File write test
+[2025-09-20 16:07:03] 🚀 messages.php started
+[2025-09-20 16:07:03] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 16:07:03] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 16:07:03] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 16:07:03] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 16:07:03] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 16:07:03] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 16:07:03] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 16:07:03] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 17:24:40] 🚀 messages.php started
+[2025-09-20 17:24:40] Incoming GET request → URI: /api/messages.php?box=received
+[2025-09-20 17:24:40] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 17:24:40] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 17:24:40] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 17:24:40] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 17:24:40] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 17:24:40] ✅ Listing messages for p.canovari@lse.ac.uk in box: received
+[2025-09-20 17:24:40] 🔹 Found 4 messages
+[DEBUG] File write test
+[2025-09-20 17:24:42] 🚀 messages.php started
+[2025-09-20 17:24:42] Incoming GET request → URI: /api/messages.php?box=sent
+[2025-09-20 17:24:42] [helpers] extractBearerToken raw header='Bearer d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 17:24:42] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 17:24:42] 🔹 Extracted token (GET): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
+[2025-09-20 17:24:42] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
+[2025-09-20 17:24:42] [helpers] findUserByToken success → id=1 email=p.canovari@lse.ac.uk
+[2025-09-20 17:24:42] ✅ Listing messages for p.canovari@lse.ac.uk in box: sent
+[2025-09-20 17:24:42] 🔹 Found 7 messages

@@ -1,0 +1,8 @@
+# Custom error handling still possible, but minimal example
+ErrorDocument 403 /__tmp/topweb.shtml
+
+# Ensure PHP is handled
+AddHandler php7.3-script .php
+
+# 🔹 Preserve Authorization header for PHP
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1

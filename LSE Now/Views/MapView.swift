@@ -20,7 +20,7 @@ struct MapView: View {
     @State private var usePinStyle = false
     @State private var selectedPost: Post?
 
-    private let pinZoomThreshold: CLLocationDegrees = 0.035
+    private let pinZoomThreshold: CLLocationDegrees = 0.01
 
     // Posts with valid coordinates, not expired, and within the next six days
     private var postsWithCoords: [Post] {
