@@ -39,8 +39,12 @@ final class WhiteboardViewModel: ObservableObject {
 
     func loadPins(forceReload: Bool = false) async {
         if isLoading {
-            guard forceReload else { return }
+            guard forceReload else {
+                print("⚠️ loadPins called while already loading (no forceReload)")
+                return
+            }
 
+            print("⏳ Waiting for current load to finish before forceReload")
             while isLoading {
                 if Task.isCancelled { return }
                 try? await Task.sleep(nanoseconds: 50_000_000)
@@ -49,24 +53,40 @@ final class WhiteboardViewModel: ObservableObject {
 
         isLoading = true
         errorMessage = nil
+        print("🔄 loadPins starting (forceReload=\(forceReload))")
 
-        defer { isLoading = false }
+        defer {
+            isLoading = false
+            print("✅ loadPins finished. pin count=\(pins.count)")
+        }
 
         do {
-            let fetchedPins = try await apiService.fetchPins(
-                cacheBustingToken: forceReload ? UUID().uuidString : nil
-            )
+            // Detached so SwiftUI refresh cancellation won't kill it
+            let fetchedPins = try await Task.detached(priority: .userInitiated) { [apiService] in
+                print("🌐 Fetching pins from API (forceReload=\(forceReload))")
+                return try await apiService.fetchPins(
+                    cacheBustingToken: forceReload ? UUID().uuidString : nil
+                )
+            }.value
+
+            print("📥 loadPins fetched \(fetchedPins.count) pins from server")
+
             let normalizedPins = fetchedPins
                 .filter { WhiteboardGridConfiguration.contains(row: $0.gridRow, column: $0.gridCol) }
                 .map { pinWithCreatorAuthor($0) }
+
             pins = normalizedPins
             maintainExpirationTimer()
+
+            print("📌 loadPins normalized pins count=\(pins.count)")
+
         } catch let urlError as URLError where urlError.code == .cancelled {
-            // Ignore cancellations that happen during refreshes.
+            print("⛔️ loadPins cancelled (URLError.cancelled)")
         } catch is CancellationError {
-            // Ignore explicit cancellation errors triggered by SwiftUI task lifecycle.
+            print("⛔️ loadPins cancelled (CancellationError)")
         } catch {
             errorMessage = error.localizedDescription
+            print("❌ loadPins error: \(error.localizedDescription)")
         }
     }
 
@@ -113,11 +133,14 @@ final class WhiteboardViewModel: ObservableObject {
         }
 
         guard WhiteboardGridConfiguration.contains(row: newPin.gridRow, column: newPin.gridCol) else {
+            print("⚠️ Ignoring pin outside grid")
             return
         }
+
         pins.removeAll { $0.gridRow == newPin.gridRow && $0.gridCol == newPin.gridCol }
         pins.append(pinWithCreatorAuthor(finalPin))
         maintainExpirationTimer()
+        print("➕ Added new pin at (\(newPin.gridRow),\(newPin.gridCol)). Total now=\(pins.count)")
     }
 
     func sendReply(to pin: WhiteboardPin, message: String, author: String?, token: String) async throws {
@@ -127,7 +150,9 @@ final class WhiteboardViewModel: ObservableObject {
         defer { isSendingReply = false }
 
         let payload = PinReplyPayload(pinId: pin.id, message: message, author: author)
+        print("✉️ Sending reply to pin \(pin.id)")
         _ = try await apiService.sendPinReply(payload: payload, token: token)
+        print("✅ Reply sent")
     }
 
     deinit {
@@ -156,6 +181,7 @@ final class WhiteboardViewModel: ObservableObject {
     private func pruneExpiredPins(referenceDate: Date = Date()) {
         let activePins = pins.filter { !$0.isExpired(referenceDate: referenceDate) }
         if activePins.count != pins.count {
+            print("🗑️ Pruned \(pins.count - activePins.count) expired pins")
             pins = activePins
         }
 

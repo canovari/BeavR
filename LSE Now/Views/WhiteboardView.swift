@@ -177,17 +177,16 @@ struct WhiteboardView: View {
     }
 
     private func refreshPins() async {
-        print("🔄 Refreshing Pinboard…")
-
-        // Always spin the refresh wheel for at least 1 second BEFORE fetching
-        try? await Task.sleep(nanoseconds: 1_000_000_000)
+        print("🔄 [Refresh] Starting refreshPins()")
+        print("🔄 [Refresh] Current thread: \(Thread.isMainThread ? "Main" : "Background")")
+        print("🔄 [Refresh] Current pin count before refresh: \(viewModel.pins.count)")
+        print("🔄 [Refresh] isLoading before refresh: \(viewModel.isLoading)")
 
         await viewModel.loadPins(forceReload: true)
 
-        guard !Task.isCancelled else { return }
-
-        print("✅ Pinboard refresh completed")
+        print("✅ [Refresh] Completed refreshPins() — new pin count: \(viewModel.pins.count)")
     }
+
 }
 
 private struct WhiteboardPinCell: View {
