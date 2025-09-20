@@ -20,7 +20,6 @@ struct PostDraft {
 struct AddEventView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject private var authViewModel: AuthViewModel
-    @EnvironmentObject private var locationManager: LocationManager
 
     // Event fields
     @State private var title = ""
@@ -38,7 +37,6 @@ struct AddEventView: View {
     @State private var showSubmissionSheet = false
     @State private var invalidFields: Set<String> = []
     @State private var pickedCoordinate: CLLocationCoordinate2D?
-    @State private var didSeedLocationFromDevice = false
     @FocusState private var focusedField: String?
     @State private var isSubmitting = false
     @State private var submissionErrorMessage: String?
@@ -181,23 +179,6 @@ struct AddEventView: View {
                 Text(submissionErrorMessage ?? "An unknown error occurred.")
             }
         }
-        .onAppear {
-            locationManager.refreshLocation()
-        }
-        .onReceive(locationManager.$latestLocation) { location in
-            guard !didSeedLocationFromDevice else { return }
-            guard pickedCoordinate == nil else { return }
-            guard let location = location else { return }
-
-            let coordinate = location.coordinate
-            pickedCoordinate = coordinate
-
-            if locationQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                locationQuery = fallbackLocationLabel(for: coordinate)
-            }
-
-            didSeedLocationFromDevice = true
-        }
     }
 
     // MARK: - Validation
@@ -223,10 +204,6 @@ struct AddEventView: View {
                 withAnimation { invalidFields.removeAll() }
             }
         }
-    }
-
-    private func fallbackLocationLabel(for coordinate: CLLocationCoordinate2D) -> String {
-        String(format: "Lat %.5f, Lon %.5f", coordinate.latitude, coordinate.longitude)
     }
 
     // MARK: - Actually send

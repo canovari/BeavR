@@ -12,7 +12,6 @@ struct ConfirmEventSpotView: View {
     @State private var currentSearch: MKLocalSearch?
     @State private var shouldSkipNextReverseGeocode = false
     @State private var isGeocoding = false
-    @State private var hasCenteredOnUser = false
     @FocusState private var isAddressFieldFocused: Bool
 
     private let geocoder = CLGeocoder()
@@ -77,19 +76,11 @@ struct ConfirmEventSpotView: View {
                 reverseGeocode(for: coord)
             }
 
-            if initialCoordinate == nil {
-                centerOnUserIfAvailable(shouldReverseGeocode: locationText.isEmpty)
-            }
         }
         .onDisappear {
             geocodeWorkItem?.cancel()
             geocoder.cancelGeocode()
             currentSearch?.cancel()
-        }
-        .onReceive(locationManager.$latestLocation.compactMap { $0 }) { location in
-            guard initialCoordinate == nil, !hasCenteredOnUser else { return }
-            centerMap(on: location.coordinate, shouldReverseGeocode: locationText.isEmpty)
-            hasCenteredOnUser = true
         }
         .onChange(of: locationManager.authorizationStatus) { _, newStatus in
             if newStatus == .authorizedWhenInUse || newStatus == .authorizedAlways {
@@ -201,12 +192,6 @@ struct ConfirmEventSpotView: View {
                 .cornerRadius(10)
         }
         .disabled(isGeocoding)
-    }
-
-    private func centerOnUserIfAvailable(shouldReverseGeocode: Bool) {
-        guard let coordinate = locationManager.latestLocation?.coordinate else { return }
-        centerMap(on: coordinate, shouldReverseGeocode: shouldReverseGeocode)
-        hasCenteredOnUser = true
     }
 
     private func centerMap(on coordinate: CLLocationCoordinate2D, shouldReverseGeocode: Bool) {
