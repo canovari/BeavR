@@ -386,6 +386,7 @@ struct CreatePinRequest: Encodable {
     let emoji: String
     let text: String
     let author: String?
+    let creatorEmail: String
     let gridRow: Int
     let gridCol: Int
 }

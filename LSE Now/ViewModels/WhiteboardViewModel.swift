@@ -9,6 +9,17 @@ enum WhiteboardGridConfiguration {
     }
 }
 
+enum WhiteboardViewModelError: LocalizedError {
+    case missingCreatorEmail
+
+    var errorDescription: String? {
+        switch self {
+        case .missingCreatorEmail:
+            return "We couldn't verify who created this pin. Please log in again and try posting."
+        }
+    }
+}
+
 @MainActor
 final class WhiteboardViewModel: ObservableObject {
     @Published private(set) var pins: [WhiteboardPin] = []
@@ -103,34 +114,35 @@ final class WhiteboardViewModel: ObservableObject {
         isSubmittingPin = true
         defer { isSubmittingPin = false }
 
+        let normalizedCreator = creatorEmail?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+
+        guard let normalizedCreator, !normalizedCreator.isEmpty else {
+            print("❌ createPin aborted — missing creator email")
+            throw WhiteboardViewModelError.missingCreatorEmail
+        }
+
         let request = CreatePinRequest(
             emoji: emoji,
             text: text,
             author: author,
+            creatorEmail: normalizedCreator,
             gridRow: coordinate.row,
             gridCol: coordinate.column
         )
 
         let newPin = try await apiService.createPin(request: request, token: token)
-        let normalizedCreator = creatorEmail?
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .lowercased()
-
-        let finalPin: WhiteboardPin
-        if let normalizedCreator, !normalizedCreator.isEmpty {
-            finalPin = WhiteboardPin(
-                id: newPin.id,
-                emoji: newPin.emoji,
-                text: newPin.text,
-                author: newPin.author,
-                creatorEmail: normalizedCreator,
-                gridRow: newPin.gridRow,
-                gridCol: newPin.gridCol,
-                createdAt: newPin.createdAt
-            )
-        } else {
-            finalPin = newPin
-        }
+        let finalPin = WhiteboardPin(
+            id: newPin.id,
+            emoji: newPin.emoji,
+            text: newPin.text,
+            author: newPin.author,
+            creatorEmail: normalizedCreator,
+            gridRow: newPin.gridRow,
+            gridCol: newPin.gridCol,
+            createdAt: newPin.createdAt
+        )
 
         guard WhiteboardGridConfiguration.contains(row: newPin.gridRow, column: newPin.gridCol) else {
             print("⚠️ Ignoring pin outside grid")
