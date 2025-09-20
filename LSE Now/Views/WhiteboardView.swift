@@ -436,17 +436,28 @@ private struct AddPinSheet: View {
 
         guard !trimmedEmoji.isEmpty, !trimmedText.isEmpty else { return }
 
+        let normalizedEmail = (authViewModel.loggedInEmail ?? authViewModel.email)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+
+        let resolvedAuthor: String?
+        if !trimmedAuthor.isEmpty {
+            resolvedAuthor = trimmedAuthor
+        } else if !normalizedEmail.isEmpty {
+            resolvedAuthor = normalizedEmail
+        } else {
+            resolvedAuthor = nil
+        }
+
         Task {
             do {
                 try await viewModel.createPin(
                     emoji: trimmedEmoji,
                     text: trimmedText,
-                    author: trimmedAuthor.isEmpty ? nil : trimmedAuthor,
+                    author: resolvedAuthor,
                     at: coordinate,
                     token: token,
-                    creatorEmail: (authViewModel.loggedInEmail ?? authViewModel.email)
-                        .trimmingCharacters(in: .whitespacesAndNewlines)
-                        .lowercased()
+                    creatorEmail: normalizedEmail.isEmpty ? nil : normalizedEmail
                 )
                 dismiss()
             } catch {
