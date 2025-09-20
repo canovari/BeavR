@@ -211,12 +211,18 @@ final class WhiteboardViewModel: ObservableObject {
         let sanitizedAuthor = WhiteboardDecoding.sanitized(pin.author)
 
         let finalAuthor: String?
-        if let sanitizedAuthor, !sanitizedAuthor.isEmpty {
-            finalAuthor = sanitizedAuthor
-        } else if normalizedCreator.isEmpty {
-            finalAuthor = nil
+        if let sanitizedAuthor {
+            let normalizedAuthor = sanitizedAuthor
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .lowercased()
+
+            if !normalizedCreator.isEmpty && normalizedAuthor == normalizedCreator {
+                finalAuthor = nil
+            } else {
+                finalAuthor = sanitizedAuthor
+            }
         } else {
-            finalAuthor = normalizedCreator
+            finalAuthor = nil
         }
 
         return WhiteboardPin(
