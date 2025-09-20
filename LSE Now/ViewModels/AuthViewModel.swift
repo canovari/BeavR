@@ -29,6 +29,10 @@ final class AuthViewModel: ObservableObject {
     private let tokenStorage: TokenStorage
     private let pushManager: PushNotificationManager
     private var resendTimer: Timer?
+    private static let emailPredicate = NSPredicate(
+        format: "SELF MATCHES %@",
+        "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+    )
 
     init(
         apiService: APIService = .shared,
@@ -71,12 +75,12 @@ final class AuthViewModel: ObservableObject {
         let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
 
         guard !trimmedEmail.isEmpty else {
-            errorMessage = "Please enter your LSE email address."
+            errorMessage = "Please enter your email address."
             return
         }
 
-        guard trimmedEmail.hasSuffix("@lse.ac.uk") else {
-            errorMessage = "Only @lse.ac.uk email addresses are supported."
+        guard isValidEmail(trimmedEmail) else {
+            errorMessage = "Please enter a valid email address."
             return
         }
 
@@ -168,5 +172,9 @@ final class AuthViewModel: ObservableObject {
         resendTimer?.invalidate()
         resendTimer = nil
         resendSecondsRemaining = 0
+    }
+
+    private func isValidEmail(_ email: String) -> Bool {
+        Self.emailPredicate.evaluate(with: email)
     }
 }

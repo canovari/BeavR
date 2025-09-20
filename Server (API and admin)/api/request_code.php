@@ -15,9 +15,9 @@ if ($email === '') {
     exit;
 }
 
-if (!preg_match('/^[A-Za-z0-9._%+-]+@lse\.ac\.uk$/', $email)) {
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     http_response_code(400);
-    echo json_encode(['error' => 'Invalid email domain.']);
+    echo json_encode(['error' => 'Invalid email address.']);
     exit;
 }
 
@@ -58,9 +58,9 @@ try {
 }
 
 if (!$isDemoAccount) {
-    $subject = 'Your LSE Events Login Code';
+    $subject = 'Your BeavR Login Code';
     $message = sprintf("Your login code is: %s (valid for 5 minutes).", $code);
-    $headers = "From: LSE Events <noreply@beavr.net>\r\n";
+    $headers = "From: BeavR <noreply@beavr.net>\r\n";
 
     $mailSent = mail($email, $subject, $message, $headers);
 

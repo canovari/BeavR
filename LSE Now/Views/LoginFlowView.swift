@@ -15,7 +15,7 @@ struct LoginFlowView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Welcome to BeavR")
                         .font(.title.bold())
-                    Text("Sign in with your LSE email to continue.")
+                    Text("Sign in with your email to continue.")
                         .foregroundColor(.secondary)
                 }
 
@@ -42,7 +42,7 @@ struct LoginFlowView: View {
 
                 Spacer()
 
-                Text("Only @lse.ac.uk email addresses are eligible at this time.")
+                Text("We'll send you a one-time code to finish signing in.")
                     .font(.footnote)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.leading)
@@ -61,10 +61,10 @@ struct LoginFlowView: View {
 
     private var emailEntry: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("LSE Email")
+            Text("Email")
                 .font(.headline)
 
-            TextField("name@lse.ac.uk", text: $viewModel.email)
+            TextField("name@example.com", text: $viewModel.email)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .keyboardType(.emailAddress)

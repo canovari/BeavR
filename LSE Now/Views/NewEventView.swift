@@ -197,7 +197,7 @@ struct MyEventsView: View {
                 .font(.headline)
                 .foregroundColor(.primary)
 
-            Text("Your submissions will appear here once you're signed in with your LSE email.")
+            Text("Your submissions will appear here once you're signed in with your email.")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)

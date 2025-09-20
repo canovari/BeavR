@@ -158,7 +158,7 @@ function shortToken(string $token): string
             <textarea id="body" name="body" required><?= htmlspecialchars($body, ENT_QUOTES, 'UTF-8') ?></textarea>
 
             <label for="target_email">Target email</label>
-            <input type="text" id="target_email" name="target_email" value="<?= htmlspecialchars($targetEmail, ENT_QUOTES, 'UTF-8') ?>" placeholder="student@lse.ac.uk">
+            <input type="text" id="target_email" name="target_email" value="<?= htmlspecialchars($targetEmail, ENT_QUOTES, 'UTF-8') ?>" placeholder="student@example.com">
 
             <label for="extra">Optional JSON payload</label>
             <textarea id="extra" name="extra" placeholder='{"url":"https://..."}'><?= htmlspecialchars($extraJson, ENT_QUOTES, 'UTF-8') ?></textarea>
