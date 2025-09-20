@@ -436,8 +436,6 @@ private struct AddPinSheet: View {
         let resolvedAuthor: String?
         if !trimmedAuthor.isEmpty {
             resolvedAuthor = trimmedAuthor
-        } else if !normalizedEmail.isEmpty {
-            resolvedAuthor = normalizedEmail
         } else {
             resolvedAuthor = nil
         }
