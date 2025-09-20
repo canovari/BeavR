@@ -1,7 +1,6 @@
 import SwiftUI
 import MapKit
 import CoreLocation
-import Combine
 
 struct ConfirmEventSpotView: View {
     @Binding var locationText: String
@@ -12,6 +11,7 @@ struct ConfirmEventSpotView: View {
     @State private var currentSearch: MKLocalSearch?
     @State private var shouldSkipNextReverseGeocode = false
     @State private var isGeocoding = false
+    @StateObject private var locationSearchCompleter = LocationSearchCompleter()
     @FocusState private var isAddressFieldFocused: Bool
 
     private let geocoder = CLGeocoder()
@@ -22,6 +22,10 @@ struct ConfirmEventSpotView: View {
     @EnvironmentObject private var locationManager: LocationManager
 
     private let defaultSpan = MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
+
+    private var shouldShowSuggestions: Bool {
+        isAddressFieldFocused && !locationSearchCompleter.suggestions.isEmpty
+    }
 
     init(initialCoordinate: CLLocationCoordinate2D? = nil,
          locationText: Binding<String>,
@@ -71,6 +75,7 @@ struct ConfirmEventSpotView: View {
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             locationManager.refreshLocation()
+            locationSearchCompleter.updateRegion(region)
 
             if let coord = initialCoordinate, locationText.isEmpty {
                 reverseGeocode(for: coord)
@@ -81,11 +86,18 @@ struct ConfirmEventSpotView: View {
             geocodeWorkItem?.cancel()
             geocoder.cancelGeocode()
             currentSearch?.cancel()
+            locationSearchCompleter.clear()
         }
         .onChange(of: locationManager.authorizationStatus) { _, newStatus in
             if newStatus == .authorizedWhenInUse || newStatus == .authorizedAlways {
                 locationManager.refreshLocation()
             }
+        }
+        .onChange(of: locationText) { _, newValue in
+            handleLocationTextChange(newValue)
+        }
+        .onChange(of: isAddressFieldFocused) { _, newValue in
+            handleAddressFocusChange(newValue)
         }
     }
 
@@ -102,30 +114,95 @@ struct ConfirmEventSpotView: View {
     }
 
     private var searchSection: some View {
-        HStack(spacing: 8) {
-            TextField("Search for a place or address", text: $locationText)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .submitLabel(.search)
-                .autocorrectionDisabled(true)
-                .textInputAutocapitalization(.words)
-                .focused($isAddressFieldFocused)
-                .onSubmit { searchForAddress() }
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                TextField("Search for a place or address", text: $locationText)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .submitLabel(.search)
+                    .autocorrectionDisabled(true)
+                    .textInputAutocapitalization(.words)
+                    .focused($isAddressFieldFocused)
+                    .onSubmit {
+                        isAddressFieldFocused = false
+                        searchForAddress()
+                    }
 
-            Button {
-                searchForAddress()
-            } label: {
-                if isGeocoding {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle())
-                } else {
-                    Image(systemName: "magnifyingglass")
+                Button {
+                    isAddressFieldFocused = false
+                    searchForAddress()
+                } label: {
+                    if isGeocoding {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle())
+                    } else {
+                        Image(systemName: "magnifyingglass")
+                    }
+                }
+                .frame(width: 44, height: 44)
+                .background(Color(.systemGray5))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .disabled(locationText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isGeocoding)
+            }
+
+            if shouldShowSuggestions {
+                suggestionList
+            }
+        }
+    }
+
+    private var suggestionList: some View {
+        let suggestions = locationSearchCompleter.suggestions
+
+        return VStack(spacing: 0) {
+            ForEach(Array(suggestions.enumerated()), id: \.element.id) { index, suggestion in
+                Button {
+                    applySuggestion(suggestion)
+                } label: {
+                    suggestionLabel(for: suggestion)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .contentShape(Rectangle())
+
+                if index < suggestions.count - 1 {
+                    Divider()
                 }
             }
-            .frame(width: 44, height: 44)
-            .background(Color(.systemGray5))
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-            .disabled(locationText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isGeocoding)
         }
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color(.systemBackground))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(Color(.separator), lineWidth: 0.5)
+        )
+        .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1)
+    }
+
+    private func applySuggestion(_ suggestion: LocationSuggestion) {
+        isAddressFieldFocused = false
+
+        let suggestionText = suggestion.displayText
+        locationText = suggestionText
+        searchForAddress(query: suggestionText)
+    }
+
+    @ViewBuilder
+    private func suggestionLabel(for suggestion: LocationSuggestion) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(suggestion.title)
+                .font(.body)
+                .foregroundColor(.primary)
+
+            if !suggestion.subtitle.isEmpty {
+                Text(suggestion.subtitle)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
     }
 
     @ViewBuilder
@@ -151,6 +228,7 @@ struct ConfirmEventSpotView: View {
             .onMapCameraChange { context in
                 guard let newRegion = context.region as MKCoordinateRegion? else { return }
                 region = newRegion
+                locationSearchCompleter.updateRegion(newRegion)
                 regionCenterChanged(to: newRegion.center)
             }
             .mapControls {
@@ -204,20 +282,25 @@ struct ConfirmEventSpotView: View {
             cameraPosition = .region(newRegion)
         }
 
+        locationSearchCompleter.updateRegion(newRegion)
+
         if shouldReverseGeocode {
             reverseGeocode(for: coordinate)
         }
     }
 
-    private func searchForAddress() {
-        let query = locationText.trimmingCharacters(in: .whitespacesAndNewlines)
+    private func searchForAddress(query providedQuery: String? = nil) {
+        let rawQuery = providedQuery ?? locationText
+        let query = rawQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else { return }
 
+        locationText = query
         geocodeWorkItem?.cancel()
         geocoder.cancelGeocode()
         currentSearch?.cancel()
         isGeocoding = true
         searchError = nil
+        locationSearchCompleter.clear()
 
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = query
@@ -295,6 +378,8 @@ struct ConfirmEventSpotView: View {
             cameraPosition = .region(newRegion)
         }
 
+        locationSearchCompleter.updateRegion(newRegion)
+
         if let placemark {
             locationText = formattedAddress(from: placemark)
         } else {
@@ -357,6 +442,32 @@ struct ConfirmEventSpotView: View {
         locationText = trimmed
         onConfirm(coordinate)
         dismiss()
+    }
+
+    private func handleLocationTextChange(_ newValue: String) {
+        let trimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if trimmed.isEmpty {
+            locationSearchCompleter.clear()
+            return
+        }
+
+        if isAddressFieldFocused {
+            locationSearchCompleter.update(query: trimmed)
+        } else {
+            locationSearchCompleter.clear()
+        }
+    }
+
+    private func handleAddressFocusChange(_ isFocused: Bool) {
+        if isFocused {
+            let trimmed = locationText.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty {
+                locationSearchCompleter.update(query: trimmed)
+            }
+        } else {
+            locationSearchCompleter.clear()
+        }
     }
 
     private func formattedAddress(from placemark: CLPlacemark) -> String {
