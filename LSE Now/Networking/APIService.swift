@@ -238,11 +238,29 @@ final class APIService {
 
     // MARK: - Internals
     private func perform(request: URLRequest) async throws -> Data {
-        let (data, response) = try await urlSession.data(for: request)
+        #if DEBUG
+        debugLogRequest(request)
+        #endif
+
+        let data: Data
+        let response: URLResponse
+
+        do {
+            (data, response) = try await urlSession.data(for: request)
+        } catch {
+            #if DEBUG
+            debugLogNetworkFailure(for: request, error: error)
+            #endif
+            throw error
+        }
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIServiceError.invalidResponse
         }
+
+        #if DEBUG
+        debugLogResponse(httpResponse, data: data)
+        #endif
 
         guard (200..<300).contains(httpResponse.statusCode) else {
             if let message = decodeErrorMessage(from: data) {
@@ -275,6 +293,53 @@ final class APIService {
         let decoder = JSONDecoder()
         return try? decoder.decode(ErrorResponse.self, from: data).error
     }
+
+    #if DEBUG
+    private func debugLogRequest(_ request: URLRequest) {
+        let method = request.httpMethod ?? "GET"
+        let urlString = request.url?.absoluteString ?? "<nil>"
+        var lines: [String] = ["➡️ [API] \(method) \(urlString)"]
+
+        if let headers = request.allHTTPHeaderFields, !headers.isEmpty {
+            let sanitized = headers.map { key, value -> String in
+                if key.caseInsensitiveCompare("Authorization") == .orderedSame {
+                    return "   \(key): <redacted>"
+                }
+                return "   \(key): \(value)"
+            }.sorted()
+
+            if !sanitized.isEmpty {
+                lines.append("   Headers:")
+                lines.append(contentsOf: sanitized)
+            }
+        }
+
+        if let body = request.httpBody, !body.isEmpty {
+            let bodyString = String(data: body, encoding: .utf8) ?? "<non-UTF8 body \(body.count) bytes>"
+            lines.append("   Body: \(bodyString)")
+        }
+
+        print(lines.joined(separator: "\n"))
+    }
+
+    private func debugLogResponse(_ response: HTTPURLResponse, data: Data) {
+        let urlString = response.url?.absoluteString ?? "<nil>"
+        var lines: [String] = ["⬅️ [API] \(response.statusCode) \(urlString)"]
+
+        if !data.isEmpty {
+            let bodyString = String(data: data, encoding: .utf8) ?? "<non-UTF8 body \(data.count) bytes>"
+            lines.append("   Response Body: \(bodyString)")
+        }
+
+        print(lines.joined(separator: "\n"))
+    }
+
+    private func debugLogNetworkFailure(for request: URLRequest, error: Error) {
+        let method = request.httpMethod ?? "GET"
+        let urlString = request.url?.absoluteString ?? "<nil>"
+        print("❌ [API] \(method) \(urlString) failed: \(error.localizedDescription)")
+    }
+    #endif
 }
 
 // MARK: - Payloads
