@@ -18,6 +18,7 @@ struct MapView: View {
     @State private var shakeToggle = false
     @State private var timer: Timer?
     @State private var usePinStyle = false
+    @State private var selectedPost: Post?
 
     private let pinZoomThreshold: CLLocationDegrees = 0.035
 
@@ -70,27 +71,31 @@ struct MapView: View {
                         let zIndexValue = zIndexFor(post: post)
                         let isSameDay = Calendar.current.isDateInToday(post.startTime)
                         Annotation(post.title, coordinate: coordinate) {
-                            ZStack {
-                                if usePinStyle {
-                                    EventPinAnnotationView(
-                                        post: post,
-                                        isSameDay: isSameDay,
-                                        zIndexValue: zIndexValue
-                                    )
-                                    .transition(.scale.combined(with: .opacity))
-                                } else {
-                                    PostAnnotationView(
-                                        post: post,
-                                        timeLabel: timeText,
-                                        isUnder1Hour: isUnder1Hour,
-                                        hasStarted: hasStarted,
-                                        isSameDay: isSameDay,
-                                        shakeToggle: shakeToggle,
-                                        zIndexValue: zIndexValue
-                                    )
-                                    .transition(.scale.combined(with: .opacity))
+                            Button {
+                                selectedPost = post
+                            } label: {
+                                ZStack {
+                                    if usePinStyle {
+                                        EventPinView(
+                                            post: post,
+                                            isSameDay: isSameDay
+                                        )
+                                        .transition(.scale.combined(with: .opacity))
+                                    } else {
+                                        PostAnnotationView(
+                                            post: post,
+                                            timeLabel: timeText,
+                                            isUnder1Hour: isUnder1Hour,
+                                            hasStarted: hasStarted,
+                                            isSameDay: isSameDay,
+                                            shakeToggle: shakeToggle
+                                        )
+                                        .transition(.scale.combined(with: .opacity))
+                                    }
                                 }
                             }
+                            .buttonStyle(.plain)
+                            .zIndex(zIndexValue)
                             .animation(.easeInOut(duration: 0.25), value: usePinStyle)
                         }
                         .annotationTitles(.hidden)
@@ -166,6 +171,9 @@ struct MapView: View {
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
+            .navigationDestination(item: $selectedPost) { post in
+                PostDetailView(post: post)
+            }
         }
     }
 
@@ -240,34 +248,29 @@ private struct PostAnnotationView: View {
     let hasStarted: Bool
     let isSameDay: Bool
     let shakeToggle: Bool
-    let zIndexValue: Double
 
     var body: some View {
-        NavigationLink(destination: PostDetailView(post: post)) {
-            VStack(spacing: 4) {
-                Text(post.category?.prefix(1) ?? "📍")
-                    .font(.title2)
-                    .foregroundStyle(textColor)
-                Text(timeLabel)
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(timeLabelColor)
-            }
-            .padding(6)
-            .background(background)
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .shadow(radius: 3)
-            .opacity(hasStarted ? 0.6 : 1.0) // Dim only events already in progress
-            .offset(x: isUnder1Hour && shakeToggle ? -6 : 6)
-            .animation(
-                isUnder1Hour
-                ? .easeInOut(duration: 0.08).repeatCount(5, autoreverses: true)
-                : .default,
-                value: shakeToggle
-            )
+        VStack(spacing: 4) {
+            Text(post.category?.prefix(1) ?? "📍")
+                .font(.title2)
+                .foregroundStyle(textColor)
+            Text(timeLabel)
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(timeLabelColor)
         }
-        .buttonStyle(.plain)
-        .zIndex(zIndexValue)
+        .padding(6)
+        .background(background)
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .shadow(radius: 3)
+        .opacity(hasStarted ? 0.6 : 1.0) // Dim only events already in progress
+        .offset(x: isUnder1Hour && shakeToggle ? -6 : 6)
+        .animation(
+            isUnder1Hour
+            ? .easeInOut(duration: 0.08).repeatCount(5, autoreverses: true)
+            : .default,
+            value: shakeToggle
+        )
     }
 
     private var background: some View {
@@ -290,20 +293,6 @@ private struct PostAnnotationView: View {
     }
 }
 
-
-private struct EventPinAnnotationView: View {
-    let post: Post
-    let isSameDay: Bool
-    let zIndexValue: Double
-
-    var body: some View {
-        NavigationLink(destination: PostDetailView(post: post)) {
-            EventPinView(post: post, isSameDay: isSameDay)
-        }
-        .buttonStyle(.plain)
-        .zIndex(zIndexValue)
-    }
-}
 
 private struct EventPinView: View {
     let post: Post

@@ -30,7 +30,16 @@ struct FeedView: View {
     
     // Single animation driver for all live indicators
     @State private var blink = false
-    
+
+    private var isLocationAccessAuthorized: Bool {
+        switch locationManager.authorizationStatus {
+        case .authorizedAlways, .authorizedWhenInUse:
+            return true
+        default:
+            return false
+        }
+    }
+
     var filteredPosts: [Post] {
         let trimmedSearch = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -91,10 +100,10 @@ struct FeedView: View {
         NavigationStack {
             ZStack {
                 Color(.systemGroupedBackground).ignoresSafeArea()
-                
+
                 ScrollView {
                     LazyVStack(spacing: 12) {
-                        if sortOption == .location && locationManager.latestLocation == nil {
+                        if sortOption == .location && !isLocationAccessAuthorized {
                             LocationSortUnavailableView()
                         }
 
@@ -170,6 +179,11 @@ struct FeedView: View {
             }
             .onDisappear {
                 blink = false
+            }
+            .onChange(of: sortOption) { _, newValue in
+                if newValue == .location {
+                    locationManager.refreshLocation()
+                }
             }
         }
     }
@@ -290,6 +304,15 @@ struct FilterSheet: View {
 
     @EnvironmentObject private var locationManager: LocationManager
 
+    private var isLocationAccessAuthorized: Bool {
+        switch locationManager.authorizationStatus {
+        case .authorizedAlways, .authorizedWhenInUse:
+            return true
+        default:
+            return false
+        }
+    }
+
     static let categories = [
         "Art Events 🎨", "Career 💼", "Club Events 🎉", "Cooking 👨‍🍳",
         "Cultural 🌍", "Festivals 🎊", "Freebie 😎", "Holiday ✨",
@@ -311,7 +334,7 @@ struct FilterSheet: View {
                     .pickerStyle(.segmented)
 
                     if sortOption == .location {
-                        if locationManager.latestLocation == nil {
+                        if !isLocationAccessAuthorized {
                             Label("Location access required for distance sorting.", systemImage: "location.slash")
                                 .font(.footnote)
                                 .foregroundColor(.secondary)
@@ -332,7 +355,7 @@ struct FilterSheet: View {
                                 .foregroundColor(.secondary)
                         }
                         .padding(.top, 4)
-                        .disabled(locationManager.latestLocation == nil)
+                        .disabled(!isLocationAccessAuthorized)
                     }
                 }
 
