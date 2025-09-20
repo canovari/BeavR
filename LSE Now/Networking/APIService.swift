@@ -10,7 +10,7 @@ import Foundation
 final class APIService {
     static let shared = APIService()
 
-    private let baseURL = URL(string: "https://www.canovari.com/api")!
+    private let baseURL = URL(string: "https://www.beavr.net/api")!
     private let urlSession: URLSession
 
     enum MessageFolder: String {

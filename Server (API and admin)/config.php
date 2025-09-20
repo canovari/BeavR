@@ -1,7 +1,7 @@
 <?php
 // Central DB config — supports both global $pdo and getPDO()
 
-$host = "sql.canovari.com";
+$host = "sql.beavr.net";
 $db   = "canovari46540";
 $user = "canovari46540";
 $pass = "cano99880";

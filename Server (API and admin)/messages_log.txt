@@ -1,36 +1,36 @@
 [2025-09-20 00:03:50] Incoming GET request → URI: /api/messages.php?box=received
-[2025-09-20 00:03:50] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 53
+[2025-09-20 00:03:50] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 53
 [2025-09-20 00:03:52] Incoming GET request → URI: /api/messages.php?box=sent
-[2025-09-20 00:03:52] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 53
+[2025-09-20 00:03:52] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 53
 [2025-09-20 00:04:03] Incoming POST request → URI: /api/messages.php
-[2025-09-20 00:04:04] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 53
+[2025-09-20 00:04:04] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 53
 [2025-09-20 00:05:34] Incoming GET request → URI: /api/messages.php?box=received
-[2025-09-20 00:05:34] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 53
+[2025-09-20 00:05:34] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 53
 [2025-09-20 00:21:21] Incoming GET request → URI: /api/messages.php?box=received
-[2025-09-20 00:21:21] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 53
+[2025-09-20 00:21:21] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 53
 [2025-09-20 00:38:21] Incoming GET request → URI: /api/messages.php?box=received
-[2025-09-20 00:38:21] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 53
+[2025-09-20 00:38:21] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 53
 [2025-09-20 00:38:29] Incoming POST request → URI: /api/messages.php
-[2025-09-20 00:38:29] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 53
+[2025-09-20 00:38:29] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 53
 [2025-09-20 00:43:17] Incoming GET request → URI: /api/messages.php?box=received
-[2025-09-20 00:43:17] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 53
+[2025-09-20 00:43:17] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 53
 [2025-09-20 00:43:26] Incoming POST request → URI: /api/messages.php
-[2025-09-20 00:43:26] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 53
+[2025-09-20 00:43:26] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 53
 [2025-09-20 00:47:07] Incoming POST request → URI: /api/messages.php
 [2025-09-20 00:47:07] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
-[2025-09-20 00:47:07] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 53 in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php:105
+[2025-09-20 00:47:07] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 53 in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php:105
 [2025-09-20 00:47:09] Incoming POST request → URI: /api/messages.php
 [2025-09-20 00:47:09] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
-[2025-09-20 00:47:09] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 53 in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php:105
+[2025-09-20 00:47:09] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 53 in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php:105
 [2025-09-20 00:47:21] Incoming POST request → URI: /api/messages.php
 [2025-09-20 00:47:21] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
-[2025-09-20 00:47:21] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 53 in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php:105
+[2025-09-20 00:47:21] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 53 in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php:105
 [2025-09-20 00:48:11] Incoming POST request → URI: /api/messages.php
 [2025-09-20 00:48:11] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
-[2025-09-20 00:48:11] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 53 in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php:105
+[2025-09-20 00:48:11] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 53 in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php:105
 [2025-09-20 00:48:12] Incoming POST request → URI: /api/messages.php
 [2025-09-20 00:48:12] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
-[2025-09-20 00:48:12] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 53 in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php:105
+[2025-09-20 00:48:12] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 53 in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php:105
 [2025-09-20 00:49:41] 🚀 messages.php started
 [2025-09-20 00:49:41] Incoming POST request → URI: /api/messages.php
 [2025-09-20 00:49:41] 📩 createMessage() called
@@ -38,7 +38,7 @@
 [2025-09-20 00:49:41] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
 [2025-09-20 00:49:41] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
 [2025-09-20 00:49:41] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
-[2025-09-20 00:49:41] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php:133
+[2025-09-20 00:49:41] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php:133
 [2025-09-20 00:49:43] 🚀 messages.php started
 [2025-09-20 00:49:43] Incoming POST request → URI: /api/messages.php
 [2025-09-20 00:49:43] 📩 createMessage() called
@@ -46,7 +46,7 @@
 [2025-09-20 00:49:43] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
 [2025-09-20 00:49:43] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
 [2025-09-20 00:49:43] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
-[2025-09-20 00:49:43] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php:133
+[2025-09-20 00:49:43] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php:133
 [2025-09-20 00:49:45] 🚀 messages.php started
 [2025-09-20 00:49:45] Incoming POST request → URI: /api/messages.php
 [2025-09-20 00:49:45] 📩 createMessage() called
@@ -54,7 +54,7 @@
 [2025-09-20 00:49:45] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
 [2025-09-20 00:49:45] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
 [2025-09-20 00:49:45] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
-[2025-09-20 00:49:45] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php:133
+[2025-09-20 00:49:45] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php:133
 [2025-09-20 00:50:24] 🚀 messages.php started
 [2025-09-20 00:50:24] Incoming POST request → URI: /api/messages.php
 [2025-09-20 00:50:24] 📩 createMessage() called
@@ -62,11 +62,11 @@
 [2025-09-20 00:50:24] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
 [2025-09-20 00:50:24] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
 [2025-09-20 00:50:24] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
-[2025-09-20 00:50:24] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php:133
+[2025-09-20 00:50:24] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php:133
 [BOOT] messages.php loaded
 [2025-09-20 00:56:41] 🚀 messages.php started
 [2025-09-20 00:56:41] Incoming GET request → URI: /api/messages.php
-[2025-09-20 00:56:41] [helpers] extractBearerToken apache_request_headers={"Host":"www.canovari.com","X-Forwarded-For":"158.143.244.231","X-Forwarded-Proto":"https","Connection":"close","Cache-Control":"max-age=0","Sec-Ch-Ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","Sec-Ch-Ua-Mobile":"?0","Sec-Ch-Ua-Platform":"\"macOS\"","Upgrade-Insecure-Requests":"1","User-Agent":"Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/140.0.0.0 Safari\/537.36","Accept":"text\/html,application\/xhtml+xml,application\/xml;q=0.9,image\/avif,image\/webp,image\/apng,*\/*;q=0.8,application\/signed-exchange;v=b3;q=0.7","Sec-Fetch-Site":"none","Sec-Fetch-Mode":"navigate","Sec-Fetch-User":"?1","Sec-Fetch-Dest":"document","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7","Priority":"u=0, i","Cookie":"PHPSESSID=fumg92o4g4g9pqi4st89c59oae"}
+[2025-09-20 00:56:41] [helpers] extractBearerToken apache_request_headers={"Host":"www.beavr.net","X-Forwarded-For":"158.143.244.231","X-Forwarded-Proto":"https","Connection":"close","Cache-Control":"max-age=0","Sec-Ch-Ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","Sec-Ch-Ua-Mobile":"?0","Sec-Ch-Ua-Platform":"\"macOS\"","Upgrade-Insecure-Requests":"1","User-Agent":"Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/140.0.0.0 Safari\/537.36","Accept":"text\/html,application\/xhtml+xml,application\/xml;q=0.9,image\/avif,image\/webp,image\/apng,*\/*;q=0.8,application\/signed-exchange;v=b3;q=0.7","Sec-Fetch-Site":"none","Sec-Fetch-Mode":"navigate","Sec-Fetch-User":"?1","Sec-Fetch-Dest":"document","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7","Priority":"u=0, i","Cookie":"PHPSESSID=fumg92o4g4g9pqi4st89c59oae"}
 [2025-09-20 00:56:41] [helpers] extractBearerToken → no header found
 [2025-09-20 00:56:41] 🔹 Extracted token (GET): null
 [2025-09-20 00:56:41] ❌ GET failed → no token
@@ -78,7 +78,7 @@
 [2025-09-20 00:59:00] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
 [2025-09-20 00:59:00] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
 [2025-09-20 00:59:00] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
-[2025-09-20 00:59:00] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php:133
+[2025-09-20 00:59:00] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php:133
 [BOOT] messages.php loaded
 [2025-09-20 01:01:32] 🚀 messages.php started
 [2025-09-20 01:01:32] Incoming POST request → URI: /api/messages.php
@@ -87,7 +87,7 @@
 [2025-09-20 01:01:32] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
 [2025-09-20 01:01:32] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
 [2025-09-20 01:01:32] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
-[2025-09-20 01:01:32] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php:133
+[2025-09-20 01:01:32] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php:133
 [BOOT] messages.php loaded
 [2025-09-20 01:01:54] 🚀 messages.php started
 [2025-09-20 01:01:54] Incoming POST request → URI: /api/messages.php
@@ -96,7 +96,7 @@
 [2025-09-20 01:01:54] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
 [2025-09-20 01:01:54] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
 [2025-09-20 01:01:54] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
-[2025-09-20 01:01:54] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php:133
+[2025-09-20 01:01:54] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php:133
 [BOOT] messages.php loaded
 [2025-09-20 01:01:56] 🚀 messages.php started
 [2025-09-20 01:01:56] Incoming POST request → URI: /api/messages.php
@@ -105,7 +105,7 @@
 [2025-09-20 01:01:56] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
 [2025-09-20 01:01:56] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
 [2025-09-20 01:01:56] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
-[2025-09-20 01:01:56] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php:133
+[2025-09-20 01:01:56] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php:133
 [BOOT] messages.php loaded
 [2025-09-20 01:07:12] 🚀 messages.php started
 [2025-09-20 01:07:12] Incoming POST request → URI: /api/messages.php
@@ -114,7 +114,7 @@
 [2025-09-20 01:07:12] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
 [2025-09-20 01:07:12] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
 [2025-09-20 01:07:12] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
-[2025-09-20 01:07:12] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php:133
+[2025-09-20 01:07:12] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php:133
 [BOOT] messages.php loaded
 [2025-09-20 01:07:14] 🚀 messages.php started
 [2025-09-20 01:07:14] Incoming POST request → URI: /api/messages.php
@@ -123,7 +123,7 @@
 [2025-09-20 01:07:14] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
 [2025-09-20 01:07:14] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
 [2025-09-20 01:07:14] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
-[2025-09-20 01:07:14] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php:133
+[2025-09-20 01:07:14] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php:133
 [BOOT] messages.php loaded
 [2025-09-20 01:07:16] 🚀 messages.php started
 [2025-09-20 01:07:16] Incoming POST request → URI: /api/messages.php
@@ -132,7 +132,7 @@
 [2025-09-20 01:07:16] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
 [2025-09-20 01:07:16] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
 [2025-09-20 01:07:16] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
-[2025-09-20 01:07:16] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php:133
+[2025-09-20 01:07:16] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php:133
 [BOOT] messages.php loaded
 [2025-09-20 01:09:19] 🚀 messages.php started
 [2025-09-20 01:09:19] Incoming POST request → URI: /api/messages.php
@@ -141,7 +141,7 @@
 [2025-09-20 01:09:19] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
 [2025-09-20 01:09:19] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
 [2025-09-20 01:09:19] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
-[2025-09-20 01:09:19] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php:133
+[2025-09-20 01:09:19] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php:133
 [BOOT] messages.php loaded
 [2025-09-20 01:09:22] 🚀 messages.php started
 [2025-09-20 01:09:22] Incoming POST request → URI: /api/messages.php
@@ -150,7 +150,7 @@
 [2025-09-20 01:09:22] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
 [2025-09-20 01:09:22] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
 [2025-09-20 01:09:22] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
-[2025-09-20 01:09:22] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php:133
+[2025-09-20 01:09:22] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php:133
 [BOOT] messages.php loaded
 [2025-09-20 01:09:24] 🚀 messages.php started
 [2025-09-20 01:09:24] Incoming POST request → URI: /api/messages.php
@@ -159,11 +159,11 @@
 [2025-09-20 01:09:24] [helpers] extractBearerToken found token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
 [2025-09-20 01:09:24] 🔹 Extracted token (POST): d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7
 [2025-09-20 01:09:24] [helpers] findUserByToken searching for token='d84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7'
-[2025-09-20 01:09:24] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.canovari.com/htdocs/api/whiteboard_helpers.php:133
+[2025-09-20 01:09:24] ❌ Exception: Argument 1 passed to normalizeEmail() must be an instance of mixed, string given, called in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php on line 76 in /home/mhd-01/www.beavr.net/htdocs/api/whiteboard_helpers.php:133
 [BOOT] messages.php loaded
 [2025-09-20 01:10:09] 🚀 messages.php started
 [2025-09-20 01:10:09] Incoming GET request → URI: /api/messages.php
-[2025-09-20 01:10:09] [helpers] extractBearerToken apache_request_headers={"Host":"www.canovari.com","X-Forwarded-For":"158.143.244.231","X-Forwarded-Proto":"https","Connection":"close","Sec-Ch-Ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","Sec-Ch-Ua-Mobile":"?0","Sec-Ch-Ua-Platform":"\"macOS\"","Upgrade-Insecure-Requests":"1","User-Agent":"Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/140.0.0.0 Safari\/537.36","Accept":"text\/html,application\/xhtml+xml,application\/xml;q=0.9,image\/avif,image\/webp,image\/apng,*\/*;q=0.8,application\/signed-exchange;v=b3;q=0.7","Sec-Fetch-Site":"none","Sec-Fetch-Mode":"navigate","Sec-Fetch-User":"?1","Sec-Fetch-Dest":"document","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7","Priority":"u=0, i","Cookie":"PHPSESSID=fumg92o4g4g9pqi4st89c59oae"}
+[2025-09-20 01:10:09] [helpers] extractBearerToken apache_request_headers={"Host":"www.beavr.net","X-Forwarded-For":"158.143.244.231","X-Forwarded-Proto":"https","Connection":"close","Sec-Ch-Ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","Sec-Ch-Ua-Mobile":"?0","Sec-Ch-Ua-Platform":"\"macOS\"","Upgrade-Insecure-Requests":"1","User-Agent":"Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/140.0.0.0 Safari\/537.36","Accept":"text\/html,application\/xhtml+xml,application\/xml;q=0.9,image\/avif,image\/webp,image\/apng,*\/*;q=0.8,application\/signed-exchange;v=b3;q=0.7","Sec-Fetch-Site":"none","Sec-Fetch-Mode":"navigate","Sec-Fetch-User":"?1","Sec-Fetch-Dest":"document","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7","Priority":"u=0, i","Cookie":"PHPSESSID=fumg92o4g4g9pqi4st89c59oae"}
 [2025-09-20 01:10:09] [helpers] extractBearerToken → no header found
 [2025-09-20 01:10:09] 🔹 Extracted token (GET): null
 [2025-09-20 01:10:09] ❌ GET failed → no token

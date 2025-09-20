@@ -60,7 +60,7 @@ try {
 if (!$isDemoAccount) {
     $subject = 'Your LSE Events Login Code';
     $message = sprintf("Your login code is: %s (valid for 5 minutes).", $code);
-    $headers = "From: LSE Events <noreply@canovari.com>\r\n";
+    $headers = "From: LSE Events <noreply@beavr.net>\r\n";
 
     $mailSent = mail($email, $subject, $message, $headers);
 
