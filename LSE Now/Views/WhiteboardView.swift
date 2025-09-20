@@ -4,6 +4,7 @@ struct WhiteboardView: View {
     @EnvironmentObject private var authViewModel: AuthViewModel
     @StateObject private var viewModel = WhiteboardViewModel()
     @StateObject private var inboxViewModel = MessagesInboxViewModel()
+    @StateObject private var seenPinsStore = WhiteboardSeenPinsStore()
 
     @State private var addTarget: WhiteboardCoordinate?
     @State private var replyTarget: WhiteboardPin?
@@ -122,6 +123,9 @@ struct WhiteboardView: View {
                 }
             }
         }
+        .onChange(of: viewModel.pins) { newPins in
+            seenPinsStore.sync(with: newPins)
+        }
     }
 
     private var gridItems: [GridItem] {
@@ -146,9 +150,11 @@ struct WhiteboardView: View {
                     WhiteboardPinCell(
                         pin: pin,
                         isMine: !normalizedLoggedInEmail.isEmpty && pin.creatorEmail == normalizedLoggedInEmail,
+                        isSeen: seenPinsStore.isPinSeen(pin.id),
                         referenceDate: referenceDate
                     )
                     .onTapGesture {
+                        seenPinsStore.markPinAsSeen(pin)
                         selectedPin = pin
                     }
                 } else {
@@ -193,6 +199,7 @@ struct WhiteboardView: View {
 private struct WhiteboardPinCell: View {
     let pin: WhiteboardPin
     let isMine: Bool
+    let isSeen: Bool
     let referenceDate: Date
 
     var body: some View {
@@ -211,6 +218,7 @@ private struct WhiteboardPinCell: View {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .stroke(isMine ? Color("LSERed") : Color(.separator), lineWidth: isMine ? 2 : 1)
         )
+        .opacity(isSeen ? 0.7 : 1.0)
         .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel(referenceDate: referenceDate))
