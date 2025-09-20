@@ -76,6 +76,7 @@ switch ($tab) {
         <a href="?tab=old" <?= $tab === "old" ? "style='color:red'" : "" ?>>Old</a>
         <a href="?tab=map" <?= $tab === "map" ? "style='color:red'" : "" ?>>Live Users Map</a>
         <a href="?tab=users" <?= $tab === "users" ? "style='color:red'" : "" ?>>Live Users</a>
+        <a href="notifications.php">Notifications</a>
         <a href="logout.php" style="float:right">Logout</a>
     </nav>
 

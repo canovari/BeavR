@@ -236,6 +236,46 @@ final class APIService {
         return try decoder.decode([WhiteboardMessage].self, from: data)
     }
 
+    // MARK: - Notifications
+    func registerNotificationDevice(
+        token deviceToken: String,
+        environment: String,
+        appVersion: String?,
+        osVersion: String?,
+        authToken: String
+    ) async throws {
+        let endpoint = baseURL.appendingPathComponent("notification_tokens.php")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        setAuthorizationHeader(on: &request, token: authToken)
+
+        let payload = NotificationRegistrationPayload(
+            deviceToken: deviceToken,
+            platform: "ios",
+            environment: environment,
+            appVersion: appVersion,
+            osVersion: osVersion
+        )
+
+        let encoder = JSONEncoder()
+        request.httpBody = try encoder.encode(payload)
+        _ = try await perform(request: request)
+    }
+
+    func unregisterNotificationDevice(deviceToken: String, authToken: String) async throws {
+        let endpoint = baseURL.appendingPathComponent("notification_tokens.php")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "DELETE"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        setAuthorizationHeader(on: &request, token: authToken)
+
+        let encoder = JSONEncoder()
+        request.httpBody = try encoder.encode(NotificationUnregisterPayload(deviceToken: deviceToken))
+        _ = try await perform(request: request)
+    }
+
     // MARK: - Internals
     private func perform(request: URLRequest) async throws -> Data {
         #if DEBUG
@@ -400,6 +440,18 @@ struct PinReplyPayload: Encodable {
 private struct SendMessageResponse: Decodable {
     let success: Bool
     let message: WhiteboardMessage
+}
+
+private struct NotificationRegistrationPayload: Encodable {
+    let deviceToken: String
+    let platform: String
+    let environment: String
+    let appVersion: String?
+    let osVersion: String?
+}
+
+private struct NotificationUnregisterPayload: Encodable {
+    let deviceToken: String
 }
 
 enum APIServiceError: LocalizedError {
