@@ -45,7 +45,7 @@ function handleGet(PDO $pdo): void
         );
         $stmt->execute([
             ':user_id' => $user['id'],
-            ':creator_email' => strtolower($user['email']),
+            ':creator_email' => $user['email'],
         ]);
         $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
         respondWithJson(array_map('mapEventRow', $events));
@@ -105,6 +105,11 @@ function handlePost(PDO $pdo): void
         }
     }
 
+    $creatorEmail = resolveCreatorEmail($user, $payload);
+    if ($creatorEmail === '') {
+        respondWithError(500, 'Unable to determine the creator email.');
+    }
+
     $stmt = $pdo->prepare(
         "INSERT INTO events (
             title, start_time, end_time, location, description, organization,
@@ -129,7 +134,7 @@ function handlePost(PDO $pdo): void
         ':contact_value' => $contactValue,
         ':latitude' => $latitude,
         ':longitude' => $longitude,
-        ':creator' => strtolower($user['email']),
+        ':creator' => $creatorEmail,
         ':creator_user_id' => $user['id'],
     ]);
 
@@ -138,7 +143,7 @@ function handlePost(PDO $pdo): void
     logDebug(sprintf(
         'Created event %d for %s (%s -> %s)',
         $eventId,
-        $user['email'],
+        $creatorEmail,
         $startDate->format(DateTimeInterface::ATOM),
         $endDate ? $endDate->format(DateTimeInterface::ATOM) : 'no end'
     ));
@@ -165,7 +170,7 @@ function handleDelete(PDO $pdo): void
     $stmt->execute([
         ':id' => $eventId,
         ':user_id' => $user['id'],
-        ':creator_email' => strtolower($user['email']),
+        ':creator_email' => $user['email'],
     ]);
 
     $event = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -200,9 +205,14 @@ function requireAuth(PDO $pdo): array
         respondWithError(401, 'Invalid or expired token.');
     }
 
+    $normalizedEmail = normalizeEmail($user['email'] ?? null);
+    if ($normalizedEmail === '') {
+        respondWithError(500, 'Authenticated user email is missing.');
+    }
+
     return [
         'id' => (int)$user['id'],
-        'email' => strtolower((string)$user['email']),
+        'email' => $normalizedEmail,
     ];
 }
 
@@ -274,6 +284,34 @@ function formatDateForJson(?string $value): ?string
     } catch (Exception $e) {
         return null;
     }
+}
+
+function normalizeEmail(null|string $email): string
+{
+    if ($email === null) {
+        return '';
+    }
+
+    $trimmed = trim($email);
+    if ($trimmed === '') {
+        return '';
+    }
+
+    return strtolower($trimmed);
+}
+
+function resolveCreatorEmail(array $user, array $payload): string
+{
+    $payloadEmail = null;
+    if (isset($payload['creator']) && is_string($payload['creator'])) {
+        $payloadEmail = normalizeEmail($payload['creator']);
+    }
+
+    if ($payloadEmail !== null && $payloadEmail !== '') {
+        return $payloadEmail;
+    }
+
+    return normalizeEmail($user['email'] ?? null);
 }
 
 function mapEventRow(array $row): array
