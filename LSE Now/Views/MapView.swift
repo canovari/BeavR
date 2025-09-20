@@ -20,7 +20,7 @@ struct MapView: View {
     @State private var usePinStyle = false
     @State private var selectedPost: Post?
 
-    private let pinZoomThreshold: CLLocationDegrees = 0.035
+    private let pinZoomThreshold: CLLocationDegrees = 0.02
 
     // Posts with valid coordinates, not expired, and within the next six days
     private var postsWithCoords: [Post] {
@@ -74,34 +74,23 @@ struct MapView: View {
                             Button {
                                 selectedPost = post
                             } label: {
-                                ZStack {
-                                    if usePinStyle {
-                                        EventPinView(
-                                            post: post,
-                                            isSameDay: isSameDay
-                                        )
-                                        .transition(.scale.combined(with: .opacity))
-                                    } else {
-                                        PostAnnotationView(
-                                            post: post,
-                                            timeLabel: timeText,
-                                            isUnder1Hour: isUnder1Hour,
-                                            hasStarted: hasStarted,
-                                            isSameDay: isSameDay,
-                                            shakeToggle: shakeToggle
-                                        )
-                                        .transition(.scale.combined(with: .opacity))
-                                    }
-                                }
+                                EventMarkerView(
+                                    style: usePinStyle ? .pin : .card,
+                                    post: post,
+                                    timeLabel: timeText,
+                                    isUnder1Hour: isUnder1Hour,
+                                    hasStarted: hasStarted,
+                                    isSameDay: isSameDay,
+                                    shakeToggle: shakeToggle
+                                )
                             }
                             .buttonStyle(.plain)
                             .zIndex(zIndexValue)
-                            .animation(.easeInOut(duration: 0.25), value: usePinStyle)
                         }
                         .annotationTitles(.hidden)
                     }
                 }
-                .ignoresSafeArea()
+                .ignoresSafeArea(edges: [.horizontal, .bottom])
                 .onAppear {
                     vm.fetchPosts()
                     startTimer()
@@ -241,7 +230,13 @@ struct MapView: View {
     }
 }
 
-private struct PostAnnotationView: View {
+private struct EventMarkerView: View {
+    enum Style {
+        case pin
+        case card
+    }
+
+    let style: Style
     let post: Post
     let timeLabel: String
     let isUnder1Hour: Bool
@@ -249,85 +244,79 @@ private struct PostAnnotationView: View {
     let isSameDay: Bool
     let shakeToggle: Bool
 
+    private let pinDiameter: CGFloat = 34
+
     var body: some View {
-        VStack(spacing: 4) {
+        content
+            .background(background)
+            .overlay(borderOverlay)
+            .clipShape(MorphingMarkerShape(cornerRadius: cornerRadius))
+            .shadow(color: shadowColor, radius: shadowRadius, y: shadowYOffset)
+            .opacity(hasStarted ? 0.6 : 1.0)
+            .offset(x: horizontalOffset)
+            .animation(.easeInOut(duration: 0.25), value: style)
+            .animation(shakeAnimation, value: shakeToggle)
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch style {
+        case .pin:
             Text(post.category?.prefix(1) ?? "📍")
-                .font(.title2)
-                .foregroundStyle(textColor)
-            Text(timeLabel)
-                .font(.caption)
-                .fontWeight(.semibold)
-                .foregroundColor(timeLabelColor)
-        }
-        .padding(6)
-        .background(background)
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-        .shadow(radius: 3)
-        .opacity(hasStarted ? 0.6 : 1.0) // Dim only events already in progress
-        .offset(x: isUnder1Hour && shakeToggle ? -6 : 6)
-        .animation(
-            isUnder1Hour
-            ? .easeInOut(duration: 0.08).repeatCount(5, autoreverses: true)
-            : .default,
-            value: shakeToggle
-        )
-    }
-
-    private var background: some View {
-        Group {
-            if isSameDay {
-                Color("LSERed")
-            } else {
-                Color(.systemBackground).opacity(0.95)
+                .font(.system(size: 20))
+                .frame(width: pinDiameter, height: pinDiameter)
+                .foregroundColor(pinTextColor)
+        case .card:
+            VStack(spacing: timeLabel.isEmpty ? 0 : 4) {
+                Text(post.category?.prefix(1) ?? "📍")
+                    .font(.title2)
+                    .foregroundColor(cardTextColor)
+                if !timeLabel.isEmpty {
+                    Text(timeLabel)
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(cardTimeColor)
+                }
             }
+            .padding(6)
         }
     }
 
-    private var textColor: Color {
-        isSameDay ? .white : .primary
+    @ViewBuilder
+    private var background: some View {
+        if style == .pin {
+            MorphingMarkerShape(cornerRadius: cornerRadius)
+                .fill(pinGradient)
+        } else {
+            MorphingMarkerShape(cornerRadius: cornerRadius)
+                .fill(cardBackgroundColor)
+        }
     }
 
-    private var timeLabelColor: Color {
-        if isSameDay { return .white }
-        return isUnder1Hour ? .red : .primary
+    @ViewBuilder
+    private var borderOverlay: some View {
+        if style == .pin {
+            MorphingMarkerShape(cornerRadius: cornerRadius)
+                .stroke(pinStrokeColor, lineWidth: 2)
+        }
     }
-}
 
+    private var horizontalOffset: CGFloat {
+        guard style == .card, isUnder1Hour else { return 0 }
+        return shakeToggle ? -6 : 6
+    }
 
-private struct EventPinView: View {
-    let post: Post
-    let isSameDay: Bool
+    private var shakeAnimation: Animation {
+        guard style == .card, isUnder1Hour else { return .default }
+        return .easeInOut(duration: 0.08).repeatCount(5, autoreverses: true)
+    }
+
+    private var cornerRadius: CGFloat {
+        style == .pin ? pinDiameter / 2 : 10
+    }
 
     private var pinColor: Color {
         isSameDay ? Color("LSERed") : .white
-    }
-
-    private var textColor: Color {
-        isSameDay ? .white : Color("LSERed")
-    }
-
-    private var strokeColor: Color {
-        isSameDay ? Color.white.opacity(0.35) : Color("LSERed").opacity(0.45)
-    }
-
-    private var shadowColor: Color {
-        isSameDay ? pinColor.opacity(0.35) : Color.black.opacity(0.15)
-    }
-
-    var body: some View {
-        Circle()
-            .fill(pinGradient)
-            .frame(width: 34, height: 34)
-            .overlay(
-                Text(post.category?.prefix(1) ?? "📍")
-                    .font(.headline)
-                    .foregroundColor(textColor)
-            )
-            .overlay(
-                Circle()
-                    .stroke(strokeColor, lineWidth: 2)
-            )
-            .shadow(color: shadowColor, radius: 4, y: 2)
     }
 
     private var pinGradient: LinearGradient {
@@ -344,6 +333,58 @@ private struct EventPinView: View {
                 endPoint: .bottom
             )
         }
+    }
+
+    private var pinStrokeColor: Color {
+        isSameDay ? Color.white.opacity(0.35) : Color("LSERed").opacity(0.45)
+    }
+
+    private var pinTextColor: Color {
+        isSameDay ? .white : Color("LSERed")
+    }
+
+    private var cardBackgroundColor: Color {
+        isSameDay ? Color("LSERed") : Color(.systemBackground).opacity(0.95)
+    }
+
+    private var cardTextColor: Color {
+        isSameDay ? .white : .primary
+    }
+
+    private var cardTimeColor: Color {
+        if isSameDay { return .white }
+        return isUnder1Hour ? .red : .primary
+    }
+
+    private var shadowColor: Color {
+        switch style {
+        case .pin:
+            return isSameDay ? pinColor.opacity(0.35) : Color.black.opacity(0.15)
+        case .card:
+            return Color.black.opacity(0.18)
+        }
+    }
+
+    private var shadowRadius: CGFloat {
+        style == .pin ? 4 : 3
+    }
+
+    private var shadowYOffset: CGFloat {
+        style == .pin ? 2 : 0
+    }
+}
+
+private struct MorphingMarkerShape: Shape {
+    var cornerRadius: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        let radius = min(cornerRadius, min(rect.width, rect.height) / 2)
+        return RoundedRectangle(cornerRadius: radius, style: .continuous).path(in: rect)
+    }
+
+    var animatableData: CGFloat {
+        get { cornerRadius }
+        set { cornerRadius = newValue }
     }
 }
 private extension Date {
