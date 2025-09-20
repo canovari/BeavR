@@ -19,6 +19,8 @@ struct MapView: View {
     @State private var shakeToggle = false
     @State private var timer: Timer?
 
+    private let pinZoomThreshold: CLLocationDegrees = 0.035
+
     // Posts with valid coordinates, not expired, and within the next six days
     private var postsWithCoords: [Post] {
         let now = Date()
@@ -66,16 +68,26 @@ struct MapView: View {
                         let isUnder1Hour = !hasStarted && now.distance(to: post.startTime) < 3600
                         let timeText = timeLabel(for: post.startTime, endTime: post.endTime)
                         let zIndexValue = zIndexFor(post: post)
+                        let isSameDay = Calendar.current.isDateInToday(post.startTime)
 
                         Annotation(post.title, coordinate: coordinate) {
-                            PostAnnotationView(
-                                post: post,
-                                timeLabel: timeText,
-                                isUnder1Hour: isUnder1Hour,
-                                hasStarted: hasStarted,
-                                shakeToggle: shakeToggle,
-                                zIndexValue: zIndexValue
-                            )
+                            if shouldUsePinStyle {
+                                EventPinAnnotationView(
+                                    post: post,
+                                    isSameDay: isSameDay,
+                                    zIndexValue: zIndexValue
+                                )
+                            } else {
+                                PostAnnotationView(
+                                    post: post,
+                                    timeLabel: timeText,
+                                    isUnder1Hour: isUnder1Hour,
+                                    hasStarted: hasStarted,
+                                    isSameDay: isSameDay,
+                                    shakeToggle: shakeToggle,
+                                    zIndexValue: zIndexValue
+                                )
+                            }
                         }
                         .annotationTitles(.hidden)
                     }
@@ -164,6 +176,11 @@ struct MapView: View {
                (coordinate.longitude >= minLon && coordinate.longitude <= maxLon)
     }
 
+    private var shouldUsePinStyle: Bool {
+        currentRegion.span.latitudeDelta > pinZoomThreshold ||
+        currentRegion.span.longitudeDelta > pinZoomThreshold
+    }
+
     private func coordinate(for post: Post) -> CLLocationCoordinate2D? {
         guard let latitude = post.latitude, let longitude = post.longitude else { return nil }
         return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
@@ -211,6 +228,7 @@ private struct PostAnnotationView: View {
     let timeLabel: String
     let isUnder1Hour: Bool
     let hasStarted: Bool
+    let isSameDay: Bool
     let shakeToggle: Bool
     let zIndexValue: Double
 
@@ -219,13 +237,14 @@ private struct PostAnnotationView: View {
             VStack(spacing: 4) {
                 Text(post.category?.prefix(1) ?? "📍")
                     .font(.title2)
+                    .foregroundStyle(textColor)
                 Text(timeLabel)
                     .font(.caption)
                     .fontWeight(.semibold)
-                    .foregroundColor(isUnder1Hour ? .red : .primary)
+                    .foregroundColor(timeLabelColor)
             }
             .padding(6)
-            .background(.ultraThinMaterial)
+            .background(background)
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
             .shadow(radius: 3)
             .opacity(hasStarted ? 0.6 : 1.0) // Dim only events already in progress
@@ -239,6 +258,91 @@ private struct PostAnnotationView: View {
         }
         .buttonStyle(.plain)
         .zIndex(zIndexValue)
+    }
+
+    private var background: some View {
+        Group {
+            if isSameDay {
+                Color("LSERed")
+            } else {
+                Color(.systemBackground).opacity(0.95)
+            }
+        }
+    }
+
+    private var textColor: Color {
+        isSameDay ? .white : .primary
+    }
+
+    private var timeLabelColor: Color {
+        if isSameDay { return .white }
+        return isUnder1Hour ? .red : .primary
+    }
+}
+
+
+private struct EventPinAnnotationView: View {
+    let post: Post
+    let isSameDay: Bool
+    let zIndexValue: Double
+
+    var body: some View {
+        NavigationLink(value: post) {
+            EventPinView(post: post, isSameDay: isSameDay)
+        }
+        .buttonStyle(.plain)
+        .zIndex(zIndexValue)
+    }
+}
+
+private struct EventPinView: View {
+    let post: Post
+    let isSameDay: Bool
+
+    private var pinColor: Color {
+        isSameDay ? Color("LSERed") : Color.accentColor
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Circle()
+                .fill(pinGradient)
+                .frame(width: 34, height: 34)
+                .overlay(
+                    Text(post.category?.prefix(1) ?? "📍")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                )
+                .overlay(
+                    Circle()
+                        .stroke(Color.white.opacity(0.35), lineWidth: 2)
+                )
+                .shadow(color: pinColor.opacity(0.35), radius: 4, y: 2)
+
+            TrianglePointer()
+                .fill(pinColor)
+                .frame(width: 16, height: 10)
+                .shadow(color: pinColor.opacity(0.25), radius: 2, y: 1)
+        }
+    }
+
+    private var pinGradient: LinearGradient {
+        LinearGradient(
+            colors: [pinColor, pinColor.opacity(0.75)],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+    }
+}
+
+private struct TrianglePointer: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.midX, y: rect.maxY))
+        path.closeSubpath()
+        return path
     }
 }
 

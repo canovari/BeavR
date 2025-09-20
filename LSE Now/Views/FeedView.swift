@@ -1,12 +1,32 @@
 import SwiftUI
+import CoreLocation
+
+enum FeedSortOption: String, CaseIterable, Identifiable {
+    case time
+    case location
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .time:
+            return "Time"
+        case .location:
+            return "Location"
+        }
+    }
+}
 
 struct FeedView: View {
     @ObservedObject var vm: PostListViewModel
-    
+    @EnvironmentObject private var locationManager: LocationManager
+
     @State private var showFilterSheet = false
-    @State private var selectedCategory: String? = nil
+    @State private var selectedCategories: Set<String> = Set(FilterSheet.categories)
     @State private var selectedDate: Date? = nil
     @State private var searchText: String = ""
+    @State private var sortOption: FeedSortOption = .time
+    @State private var radiusMiles: Double = 5
     
     // Single animation driver for all live indicators
     @State private var blink = false
@@ -14,25 +34,57 @@ struct FeedView: View {
     var filteredPosts: [Post] {
         let trimmedSearch = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        return vm.posts
-            .filter { post in
-                if let category = selectedCategory, !category.isEmpty, post.category != category {
-                    return false
+        let knownCategories = Set(FilterSheet.categories)
+        let isFilteringCategories = !selectedCategories.isEmpty && selectedCategories.count < knownCategories.count
+
+        let posts = vm.posts.filter { post in
+            if isFilteringCategories {
+                guard let category = post.category else { return false }
+
+                if knownCategories.contains(category) {
+                    guard selectedCategories.contains(category) else { return false }
                 }
+            } else if selectedCategories.isEmpty {
+                return false
+            }
 
-                if let date = selectedDate, !Calendar.current.isDate(post.startTime, inSameDayAs: date) {
-                    return false
-                }
+            if let date = selectedDate, !Calendar.current.isDate(post.startTime, inSameDayAs: date) {
+                return false
+            }
 
-                guard !trimmedSearch.isEmpty else { return true }
-
+            guard trimmedSearch.isEmpty else {
                 let keyword = trimmedSearch.lowercased()
                 let titleMatch = post.title.lowercased().contains(keyword)
                 let organizerMatch = post.organization?.lowercased().contains(keyword) ?? false
 
                 return titleMatch || organizerMatch
             }
-            .sorted(by: { $0.startTime < $1.startTime })
+
+            return true
+        }
+
+        switch sortOption {
+        case .time:
+            return posts.sorted { $0.startTime < $1.startTime }
+        case .location:
+            guard let userLocation = locationManager.latestLocation else {
+                return posts.sorted { $0.startTime < $1.startTime }
+            }
+
+            let radiusInMeters = radiusMiles * 1609.34
+
+            let postsWithDistance = posts.compactMap { post -> (post: Post, distance: CLLocationDistance)? in
+                guard let latitude = post.latitude, let longitude = post.longitude else { return nil }
+                let coordinate = CLLocation(latitude: latitude, longitude: longitude)
+                let distance = userLocation.distance(from: coordinate)
+                guard distance <= radiusInMeters else { return nil }
+                return (post, distance)
+            }
+
+            return postsWithDistance
+                .sorted { $0.distance < $1.distance }
+                .map(\.post)
+        }
     }
     
     var body: some View {
@@ -42,6 +94,18 @@ struct FeedView: View {
                 
                 ScrollView {
                     LazyVStack(spacing: 12) {
+                        if sortOption == .location && locationManager.latestLocation == nil {
+                            LocationSortUnavailableView()
+                        }
+
+                        if sortOption == .location && locationManager.latestLocation != nil && filteredPosts.isEmpty {
+                            Text("No events within \(Int(radiusMiles)) miles of you.")
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .padding(.vertical, 12)
+                        }
+
                         ForEach(filteredPosts) { post in
                             NavigationLink(destination: PostDetailView(post: post)) {
                                 ZStack(alignment: .topTrailing) {
@@ -94,8 +158,10 @@ struct FeedView: View {
             }
             .sheet(isPresented: $showFilterSheet) {
                 FilterSheet(
-                    selectedCategory: $selectedCategory,
-                    selectedDate: $selectedDate
+                    selectedCategories: $selectedCategories,
+                    selectedDate: $selectedDate,
+                    sortOption: $sortOption,
+                    radiusMiles: $radiusMiles
                 )
             }
             .onAppear {
@@ -187,32 +253,105 @@ struct FeedView: View {
     }
 }
 
+private struct LocationSortUnavailableView: View {
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "location.slash")
+                .font(.title3)
+                .foregroundColor(Color("LSERed"))
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Enable location access to sort by distance.")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+
+                Text("Until then, events are ordered by start time.")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 16)
+        .background(Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+    }
+}
+
 // MARK: - Filter Sheet
 struct FilterSheet: View {
-    @Binding var selectedCategory: String?
+    @Binding var selectedCategories: Set<String>
     @Binding var selectedDate: Date?
-    
+    @Binding var sortOption: FeedSortOption
+    @Binding var radiusMiles: Double
+
     @Environment(\.dismiss) var dismiss
-    
-    let categories = [
+
+    @EnvironmentObject private var locationManager: LocationManager
+
+    static let categories = [
         "Art Events 🎨", "Career 💼", "Club Events 🎉", "Cooking 👨‍🍳",
         "Cultural 🌍", "Festivals 🎊", "Freebie 😎", "Holiday ✨",
         "Ice Skating ⛸️", "Lectures 🎤", "Library 📚", "Movie 🎬", "Night Life 🎶",
         "Pride 🏳️‍🌈", "Shows 🎵", "Sports 🏀", "Trivia 🎲", "Wellness 🧘"
     ]
-    
+
+    private let radiusRange: ClosedRange<Double> = 1...50
+
     var body: some View {
         NavigationStack {
             Form {
-                Section("Category") {
-                    Picker("Category", selection: $selectedCategory) {
-                        Text("All").tag(String?.none)
-                        ForEach(categories, id: \.self) { cat in
-                            Text(cat).tag(Optional(cat))
+                Section("Sort") {
+                    Picker("Sort by", selection: $sortOption) {
+                        ForEach(FeedSortOption.allCases) { option in
+                            Text(option.title).tag(option)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+
+                    if sortOption == .location {
+                        if locationManager.latestLocation == nil {
+                            Label("Location access required for distance sorting.", systemImage: "location.slash")
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
+                        }
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("Radius")
+                                Spacer()
+                                Text("\(Int(radiusMiles)) mi")
+                                    .foregroundColor(.secondary)
+                            }
+
+                            Slider(value: $radiusMiles, in: radiusRange, step: 1)
+
+                            Text("Only events within this distance are shown when sorting by location.")
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.top, 4)
+                        .disabled(locationManager.latestLocation == nil)
+                    }
+                }
+
+                Section("Categories") {
+                    NavigationLink {
+                        CategoryFilterListView(
+                            selectedCategories: $selectedCategories,
+                            categories: sortedCategories
+                        )
+                    } label: {
+                        HStack {
+                            Text("Selected")
+                            Spacer()
+                            Text(categorySummary)
+                                .foregroundColor(.secondary)
                         }
                     }
                 }
-                
+
                 Section("Date") {
                     DatePicker("Select Date", selection: Binding(
                         get: { selectedDate ?? Date() },
@@ -233,6 +372,69 @@ struct FilterSheet: View {
                     Button("Done") { dismiss() }
                 }
             }
+        }
+    }
+
+    private var categorySummary: String {
+        if selectedCategories.isEmpty { return "None" }
+        if selectedCategories.count == FilterSheet.categories.count { return "All" }
+
+        let sorted = selectedCategories.sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
+        if sorted.count <= 3 {
+            return sorted.joined(separator: ", ")
+        }
+        return "\(sorted.count) selected"
+    }
+
+    private var sortedCategories: [String] {
+        FilterSheet.categories.sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
+    }
+}
+
+private struct CategoryFilterListView: View {
+    @Binding var selectedCategories: Set<String>
+    let categories: [String]
+
+    var body: some View {
+        List {
+            Section {
+                Button("All") {
+                    selectedCategories = Set(categories)
+                }
+            }
+
+            ForEach(categories, id: \.self) { category in
+                Button {
+                    toggle(category)
+                } label: {
+                    HStack {
+                        Text(category)
+                        Spacer()
+                        if selectedCategories.contains(category) {
+                            Image(systemName: "checkmark")
+                                .foregroundColor(Color("LSERed"))
+                        }
+                    }
+                }
+                .foregroundColor(.primary)
+            }
+        }
+        .listStyle(.insetGrouped)
+        .navigationTitle("Categories")
+        .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+                Button("All") {
+                    selectedCategories = Set(categories)
+                }
+            }
+        }
+    }
+
+    private func toggle(_ category: String) {
+        if selectedCategories.contains(category) {
+            selectedCategories.remove(category)
+        } else {
+            selectedCategories.insert(category)
         }
     }
 }
