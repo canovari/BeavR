@@ -34,7 +34,7 @@ Example error response (`400 Bad Request`):
 { "error": "Invalid email domain." }
 ```
 
-The endpoint generates a 6-digit code, stores it along with a 5-minute expiry window, and sends the email from `noreply@canovari.com`.
+The endpoint generates a 6-digit code, stores it along with a 5-minute expiry window, and sends the email from `noreply@beavr.net`.
 
 #### `POST api/verify_code.php`
 

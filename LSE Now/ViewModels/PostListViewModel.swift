@@ -10,7 +10,7 @@ class PostListViewModel: ObservableObject {
     private var cancellationRetryTask: Task<Void, Never>?
     private let expiryCheckInterval: TimeInterval = 60
 
-    private let eventsEndpoint = URL(string: "https://www.canovari.com/api/events.php")!
+    private let eventsEndpoint = URL(string: "https://www.beavr.net/api/events.php")!
     private lazy var urlSession: URLSession = {
         let configuration = URLSessionConfiguration.default
         configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
