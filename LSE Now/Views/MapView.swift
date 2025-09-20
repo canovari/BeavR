@@ -16,20 +16,16 @@ struct MapView: View {
 
     @State private var shakeToggle = false
     @State private var timer: Timer?
+    @State private var selectedPost: Post?
 
-    // Only posts with coordinates + not ended + within 16h
+    // Only posts with coordinates that are still active
     private var postsWithCoords: [Post] {
         let now = Date()
-        let cutoff = now.addingTimeInterval(16 * 3600) // 16 hours ahead
 
         return vm.posts.filter { post in
             guard let _ = post.latitude, let _ = post.longitude else { return false }
 
-            // hide if expired based on end time or start time window
-            if post.isExpired(referenceDate: now) { return false }
-
-            // show only if start time within next 16h
-            return post.startTime <= cutoff
+            return !post.isExpired(referenceDate: now)
         }
     }
 
@@ -63,7 +59,7 @@ struct MapView: View {
                     locationManager.refreshLocation()
                 }
                 .onDisappear { stopTimer() }
-                .navigationDestination(for: Post.self) { post in
+                .navigationDestination(item: $selectedPost) { post in
                     PostDetailView(post: post)
                 }
         }
@@ -103,14 +99,20 @@ struct MapView: View {
                 let zIndexValue = zIndexFor(post: post)
 
                 Annotation(post.title, coordinate: coordinate) {
-                    PostAnnotationView(
-                        post: post,
-                        timeLabel: timeText,
-                        isUnder1Hour: isUnder1Hour,
-                        hasStarted: hasStarted,
-                        shakeToggle: shakeToggle,
-                        zIndexValue: zIndexValue
-                    )
+                    Button {
+                        selectedPost = post
+                    } label: {
+                        PostAnnotationView(
+                            post: post,
+                            timeLabel: timeText,
+                            isUnder1Hour: isUnder1Hour,
+                            hasStarted: hasStarted,
+                            shakeToggle: shakeToggle
+                        )
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .zIndex(zIndexValue)
                 }
                 .annotationTitles(.hidden)
             }
@@ -173,34 +175,29 @@ private struct PostAnnotationView: View {
     let isUnder1Hour: Bool
     let hasStarted: Bool
     let shakeToggle: Bool
-    let zIndexValue: Double
 
     var body: some View {
-        NavigationLink(value: post) {
-            VStack(spacing: 4) {
-                Text(post.category?.prefix(1) ?? "📍")
-                    .font(.title2)
+        VStack(spacing: 4) {
+            Text(post.category?.prefix(1) ?? "📍")
+                .font(.title2)
 
-                Text(timeLabel)
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(isUnder1Hour ? .red : .primary)
-            }
-            .padding(6)
-            .background(.ultraThinMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .shadow(radius: 3)
-            .opacity(hasStarted ? 0.6 : 1.0)
-            .offset(x: isUnder1Hour && shakeToggle ? -6 : 6)
-            .animation(
-                isUnder1Hour
-                ? .easeInOut(duration: 0.08).repeatCount(5, autoreverses: true)
-                : .default,
-                value: shakeToggle
-            )
+            Text(timeLabel)
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(isUnder1Hour ? .red : .primary)
         }
-        .buttonStyle(.plain)
-        .zIndex(zIndexValue)
+        .padding(6)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .shadow(radius: 3)
+        .opacity(hasStarted ? 0.6 : 1.0)
+        .offset(x: isUnder1Hour && shakeToggle ? -6 : 6)
+        .animation(
+            isUnder1Hour
+            ? .easeInOut(duration: 0.08).repeatCount(5, autoreverses: true)
+            : .default,
+            value: shakeToggle
+        )
     }
 }
 
