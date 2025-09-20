@@ -1,6 +1,5 @@
 import SwiftUI
 import MapKit
-import Combine
 
 struct MapView: View {
     @ObservedObject var vm: PostListViewModel
@@ -18,6 +17,7 @@ struct MapView: View {
     @State private var currentRegion: MKCoordinateRegion = defaultRegion
     @State private var shakeToggle = false
     @State private var timer: Timer?
+    @State private var usePinStyle = false
 
     private let pinZoomThreshold: CLLocationDegrees = 0.035
 
@@ -69,25 +69,29 @@ struct MapView: View {
                         let timeText = timeLabel(for: post.startTime, endTime: post.endTime)
                         let zIndexValue = zIndexFor(post: post)
                         let isSameDay = Calendar.current.isDateInToday(post.startTime)
-
                         Annotation(post.title, coordinate: coordinate) {
-                            if shouldUsePinStyle {
-                                EventPinAnnotationView(
-                                    post: post,
-                                    isSameDay: isSameDay,
-                                    zIndexValue: zIndexValue
-                                )
-                            } else {
-                                PostAnnotationView(
-                                    post: post,
-                                    timeLabel: timeText,
-                                    isUnder1Hour: isUnder1Hour,
-                                    hasStarted: hasStarted,
-                                    isSameDay: isSameDay,
-                                    shakeToggle: shakeToggle,
-                                    zIndexValue: zIndexValue
-                                )
+                            ZStack {
+                                if usePinStyle {
+                                    EventPinAnnotationView(
+                                        post: post,
+                                        isSameDay: isSameDay,
+                                        zIndexValue: zIndexValue
+                                    )
+                                    .transition(.scale.combined(with: .opacity))
+                                } else {
+                                    PostAnnotationView(
+                                        post: post,
+                                        timeLabel: timeText,
+                                        isUnder1Hour: isUnder1Hour,
+                                        hasStarted: hasStarted,
+                                        isSameDay: isSameDay,
+                                        shakeToggle: shakeToggle,
+                                        zIndexValue: zIndexValue
+                                    )
+                                    .transition(.scale.combined(with: .opacity))
+                                }
                             }
+                            .animation(.easeInOut(duration: 0.25), value: usePinStyle)
                         }
                         .annotationTitles(.hidden)
                     }
@@ -97,6 +101,7 @@ struct MapView: View {
                     vm.fetchPosts()
                     startTimer()
                     locationManager.refreshLocation()
+                    usePinStyle = shouldUsePinStyle(for: currentRegion)
                 }
                 .onDisappear { stopTimer() }
                 .onReceive(locationManager.$latestLocation.compactMap { $0 }) { location in
@@ -120,6 +125,14 @@ struct MapView: View {
                 .onMapCameraChange { context in
                     let region = context.region
                     currentRegion = region
+
+                    let newPinStyle = shouldUsePinStyle(for: region)
+                    if newPinStyle != usePinStyle {
+                        withAnimation(.easeInOut(duration: 0.25)) {
+                            usePinStyle = newPinStyle
+                        }
+                    }
+
                     updateLocationButtonVisibility()
                 }
 
@@ -154,9 +167,6 @@ struct MapView: View {
             }
             .toolbar(.hidden, for: .navigationBar)
         }
-        .navigationDestination(for: Post.self) { post in
-            PostDetailView(post: post)
-        }
     }
 
     private func updateLocationButtonVisibility() {
@@ -167,6 +177,11 @@ struct MapView: View {
         }
     }
 
+    private func shouldUsePinStyle(for region: MKCoordinateRegion) -> Bool {
+        region.span.latitudeDelta > pinZoomThreshold ||
+        region.span.longitudeDelta > pinZoomThreshold
+    }
+
     private func regionContains(region: MKCoordinateRegion, coordinate: CLLocationCoordinate2D) -> Bool {
         let minLat = region.center.latitude - region.span.latitudeDelta / 2
         let maxLat = region.center.latitude + region.span.latitudeDelta / 2
@@ -174,11 +189,6 @@ struct MapView: View {
         let maxLon = region.center.longitude + region.span.longitudeDelta / 2
         return (coordinate.latitude >= minLat && coordinate.latitude <= maxLat) &&
                (coordinate.longitude >= minLon && coordinate.longitude <= maxLon)
-    }
-
-    private var shouldUsePinStyle: Bool {
-        currentRegion.span.latitudeDelta > pinZoomThreshold ||
-        currentRegion.span.longitudeDelta > pinZoomThreshold
     }
 
     private func coordinate(for post: Post) -> CLLocationCoordinate2D? {
@@ -233,7 +243,7 @@ private struct PostAnnotationView: View {
     let zIndexValue: Double
 
     var body: some View {
-        NavigationLink(value: post) {
+        NavigationLink(destination: PostDetailView(post: post)) {
             VStack(spacing: 4) {
                 Text(post.category?.prefix(1) ?? "📍")
                     .font(.title2)
@@ -287,7 +297,7 @@ private struct EventPinAnnotationView: View {
     let zIndexValue: Double
 
     var body: some View {
-        NavigationLink(value: post) {
+        NavigationLink(destination: PostDetailView(post: post)) {
             EventPinView(post: post, isSameDay: isSameDay)
         }
         .buttonStyle(.plain)
@@ -300,53 +310,53 @@ private struct EventPinView: View {
     let isSameDay: Bool
 
     private var pinColor: Color {
-        isSameDay ? Color("LSERed") : Color.accentColor
+        isSameDay ? Color("LSERed") : .white
+    }
+
+    private var textColor: Color {
+        isSameDay ? .white : Color("LSERed")
+    }
+
+    private var strokeColor: Color {
+        isSameDay ? Color.white.opacity(0.35) : Color("LSERed").opacity(0.45)
+    }
+
+    private var shadowColor: Color {
+        isSameDay ? pinColor.opacity(0.35) : Color.black.opacity(0.15)
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            Circle()
-                .fill(pinGradient)
-                .frame(width: 34, height: 34)
-                .overlay(
-                    Text(post.category?.prefix(1) ?? "📍")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                )
-                .overlay(
-                    Circle()
-                        .stroke(Color.white.opacity(0.35), lineWidth: 2)
-                )
-                .shadow(color: pinColor.opacity(0.35), radius: 4, y: 2)
-
-            TrianglePointer()
-                .fill(pinColor)
-                .frame(width: 16, height: 10)
-                .shadow(color: pinColor.opacity(0.25), radius: 2, y: 1)
-        }
+        Circle()
+            .fill(pinGradient)
+            .frame(width: 34, height: 34)
+            .overlay(
+                Text(post.category?.prefix(1) ?? "📍")
+                    .font(.headline)
+                    .foregroundColor(textColor)
+            )
+            .overlay(
+                Circle()
+                    .stroke(strokeColor, lineWidth: 2)
+            )
+            .shadow(color: shadowColor, radius: 4, y: 2)
     }
 
     private var pinGradient: LinearGradient {
-        LinearGradient(
-            colors: [pinColor, pinColor.opacity(0.75)],
-            startPoint: .top,
-            endPoint: .bottom
-        )
+        if isSameDay {
+            return LinearGradient(
+                colors: [pinColor, pinColor.opacity(0.75)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        } else {
+            return LinearGradient(
+                colors: [.white, Color.white.opacity(0.85)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        }
     }
 }
-
-private struct TrianglePointer: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        path.move(to: CGPoint(x: rect.minX, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.midX, y: rect.maxY))
-        path.closeSubpath()
-        return path
-    }
-}
-
-
 private extension Date {
     func distance(to other: Date) -> TimeInterval {
         other.timeIntervalSince(self)

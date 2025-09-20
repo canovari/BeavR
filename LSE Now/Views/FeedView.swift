@@ -297,7 +297,7 @@ struct FilterSheet: View {
         "Pride 🏳️‍🌈", "Shows 🎵", "Sports 🏀", "Trivia 🎲", "Wellness 🧘"
     ]
 
-    private let radiusRange: ClosedRange<Double> = 1...50
+    private let radiusRange: ClosedRange<Double> = 1...20
 
     var body: some View {
         NavigationStack {
