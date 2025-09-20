@@ -170,20 +170,22 @@ final class WhiteboardViewModel: ObservableObject {
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .lowercased()
 
-        let fallbackAuthor: String?
-        if normalizedCreator.isEmpty {
-            let trimmedAuthor = pin.author?
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-            fallbackAuthor = (trimmedAuthor?.isEmpty == false) ? trimmedAuthor : nil
+        let sanitizedAuthor = WhiteboardDecoding.sanitized(pin.author)
+
+        let finalAuthor: String?
+        if let sanitizedAuthor, !sanitizedAuthor.isEmpty {
+            finalAuthor = sanitizedAuthor
+        } else if normalizedCreator.isEmpty {
+            finalAuthor = nil
         } else {
-            fallbackAuthor = normalizedCreator
+            finalAuthor = normalizedCreator
         }
 
         return WhiteboardPin(
             id: pin.id,
             emoji: pin.emoji,
             text: pin.text,
-            author: fallbackAuthor,
+            author: finalAuthor,
             creatorEmail: normalizedCreator.isEmpty ? pin.creatorEmail : normalizedCreator,
             gridRow: pin.gridRow,
             gridCol: pin.gridCol,
