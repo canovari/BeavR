@@ -10,6 +10,7 @@ struct WhiteboardView: View {
     @State private var replyTarget: WhiteboardPin?
     @State private var selectedPin: WhiteboardPin?
     @State private var showingInbox = false
+    @State private var showingHowItWorks = false
 
     private let rows = WhiteboardGridConfiguration.rows
     private let columns = WhiteboardGridConfiguration.columns
@@ -37,6 +38,8 @@ struct WhiteboardView: View {
                     VStack(spacing: 24) {
                         pinboardGrid
                             .padding(.top, 24)
+
+                        howItWorksButton
 
                         if viewModel.isLoading && viewModel.pins.isEmpty {
                             ProgressView()
@@ -112,6 +115,9 @@ struct WhiteboardView: View {
                     MissingSessionView()
                 }
             }
+            .sheet(isPresented: $showingHowItWorks) {
+                HowItWorksView()
+            }
             .sheet(isPresented: $showingInbox) {
                 if let token = activeToken {
                     MessagesInboxView(
@@ -136,6 +142,20 @@ struct WhiteboardView: View {
         TimelineView(.periodic(from: .now, by: 30)) { timeline in
             gridBody(referenceDate: timeline.date)
         }
+    }
+
+    private var howItWorksButton: some View {
+        Button {
+            showingHowItWorks = true
+        } label: {
+            Text("How it works")
+                .font(.headline)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.borderedProminent)
+        .controlSize(.large)
+        .padding(.horizontal, 16)
+        .accessibilityLabel("Learn how the Pinboard works")
     }
 
     @ViewBuilder
@@ -187,6 +207,41 @@ struct WhiteboardView: View {
         print("✅ [Refresh] Completed refreshPins() — new pin count: \(viewModel.pins.count)")
     }
 
+}
+
+private struct HowItWorksView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("📌 Welcome to the Pinboard")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+
+                    Text("The Pinboard is a shared space where everyone can post and interact. How it works:")
+
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Add a Pin → Tap an empty slot, pick 1–2 emojis, and write your text.")
+                        Text("Get Replies → Others can reply directly to your pin.")
+                        Text("Reply to Others → Join the conversation by replying to their pins — replies can be anonymous or include your name.")
+                        Text("Stay Engaged → The more you pin and reply, the more active the board becomes.")
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(24)
+            }
+            .navigationTitle("How it works")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") { dismiss() }
+                }
+            }
+        }
+    }
 }
 
 private struct WhiteboardPinCell: View {
@@ -376,8 +431,12 @@ private struct AddPinSheet: View {
         viewModel.pin(at: coordinate) != nil
     }
 
+    private var sanitizedEmojiText: String {
+        sanitizeEmojiInput(from: emoji)
+    }
+
     private var isSaveDisabled: Bool {
-        emoji.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+        sanitizedEmojiText.isEmpty ||
         text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
         slotOccupied
     }
@@ -389,6 +448,12 @@ private struct AddPinSheet: View {
                     TextField("Emoji", text: $emoji)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled(true)
+                        .onChange(of: emoji) { newValue in
+                            let sanitized = sanitizeEmojiInput(from: newValue)
+                            if sanitized != newValue {
+                                emoji = sanitized
+                            }
+                        }
 
                     TextField("Message", text: $text, axis: .vertical)
                         .lineLimit(2...4)
@@ -423,7 +488,7 @@ private struct AddPinSheet: View {
     }
 
     private func submit() {
-        let trimmedEmoji = emoji.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedEmoji = sanitizedEmojiText
         let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedAuthor = author.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -454,6 +519,29 @@ private struct AddPinSheet: View {
             } catch {
                 errorMessage = error.localizedDescription
             }
+        }
+    }
+
+    private func sanitizeEmojiInput(from input: String) -> String {
+        var result = ""
+
+        for character in input {
+            if isEmojiCharacter(character) {
+                result.append(character)
+                if result.count == 2 {
+                    break
+                }
+            }
+        }
+
+        return result
+    }
+
+    private func isEmojiCharacter(_ character: Character) -> Bool {
+        if character.unicodeScalars.count == 1 {
+            return character.unicodeScalars.first?.properties.isEmoji ?? false
+        } else {
+            return character.unicodeScalars.contains { $0.properties.isEmoji }
         }
     }
 }
