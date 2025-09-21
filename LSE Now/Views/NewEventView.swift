@@ -25,6 +25,12 @@ struct NewEventView: View {
                         }
 
                         NavigationLink {
+                            AddDealView()
+                        } label: {
+                            HubRectButton(icon: "tag.fill", title: "Add Deal")
+                        }
+
+                        NavigationLink {
                             MyEventsView()
                         } label: {
                             HubRectButton(icon: "calendar", title: "My Events")

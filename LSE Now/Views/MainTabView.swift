@@ -2,11 +2,13 @@ import SwiftUI
 import UIKit
 
 struct MainTabView: View {
-    @StateObject private var viewModel: PostListViewModel
+    @StateObject private var eventsViewModel: PostListViewModel
+    @StateObject private var dealsViewModel: DealListViewModel
     @State private var selection = 0
 
-    init(viewModel: PostListViewModel) {
-        _viewModel = StateObject(wrappedValue: viewModel)
+    init(eventsViewModel: PostListViewModel, dealsViewModel: DealListViewModel) {
+        _eventsViewModel = StateObject(wrappedValue: eventsViewModel)
+        _dealsViewModel = StateObject(wrappedValue: dealsViewModel)
 
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
@@ -18,11 +20,11 @@ struct MainTabView: View {
 
     var body: some View {
         TabView(selection: $selection) {
-            MapView(vm: viewModel)
+            MapView(vm: eventsViewModel)
                 .tag(0)
                 .tabItem { Label("Map", systemImage: "map") }
 
-            FeedView(vm: viewModel)
+            FeedView(vm: eventsViewModel)
                 .tag(1)
                 .tabItem { Label("Feed", systemImage: "list.bullet.rectangle") }
 
@@ -30,8 +32,12 @@ struct MainTabView: View {
                 .tag(2)
                 .tabItem { Label("Pinboard", systemImage: "square.grid.3x3.fill") }
 
-            NewEventView()
+            DealsView(viewModel: dealsViewModel)
                 .tag(3)
+                .tabItem { Label("Deals", systemImage: "tag") }
+
+            NewEventView()
+                .tag(4)
                 .tabItem { Label("New Event", systemImage: "plus.circle") }
         }
         .accentColor(Color("LSERed"))

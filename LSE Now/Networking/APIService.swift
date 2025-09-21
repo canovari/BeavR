@@ -131,6 +131,32 @@ final class APIService {
         _ = try await perform(request: request)
     }
 
+    // MARK: - Deals
+    func submitDeal(payload: DealSubmissionPayload, token: String, creatorEmail: String) async throws {
+        let endpoint = baseURL.appendingPathComponent("deals.php")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        setAuthorizationHeader(on: &request, token: token)
+
+        let requestPayload = DealSubmissionRequest(
+            name: payload.name,
+            type: payload.type,
+            discount: payload.discount,
+            description: payload.description,
+            location: payload.location,
+            startDate: payload.startDate,
+            endDate: payload.endDate,
+            creator: creatorEmail
+        )
+
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        request.httpBody = try encoder.encode(requestPayload)
+        _ = try await perform(request: request)
+    }
+
     // MARK: - Location (email instead of token)
     func updateUserLocation(email: String, latitude: Double, longitude: Double, timestamp: Date) async throws {
         let endpoint = baseURL.appendingPathComponent("user_location.php")
@@ -409,6 +435,27 @@ private struct EventSubmissionPayload: Encodable {
 
 private struct CancelEventPayload: Encodable {
     let id: Int
+}
+
+struct DealSubmissionPayload: Encodable {
+    let name: String
+    let type: String
+    let discount: String
+    let description: String
+    let location: String?
+    let startDate: Date
+    let endDate: Date?
+}
+
+private struct DealSubmissionRequest: Encodable {
+    let name: String
+    let type: String
+    let discount: String
+    let description: String
+    let location: String?
+    let startDate: Date
+    let endDate: Date?
+    let creator: String
 }
 
 private struct ErrorResponse: Decodable {
