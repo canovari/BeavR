@@ -6,7 +6,7 @@ struct PostListView: View {
     var body: some View {
         NavigationView {
             List(vm.posts) { post in
-                NavigationLink(destination: PostDetailView(post: post)) {
+                NavigationLink(destination: PostDetailView(post: post, viewModel: vm)) {
                     PostRowView(post: post)
                 }
             }

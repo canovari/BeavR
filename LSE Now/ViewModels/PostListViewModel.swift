@@ -4,6 +4,8 @@ import Foundation
 class PostListViewModel: ObservableObject {
     @Published var posts: [Post] = []
     @Published var isLoading: Bool = false
+    @Published var likeErrorMessage: String?
+    @Published private(set) var updatingLikeIDs: Set<Int> = []
 
     private var allPosts: [Post] = []
     private var expiryTimer: Timer?
@@ -11,6 +13,10 @@ class PostListViewModel: ObservableObject {
     private let expiryCheckInterval: TimeInterval = 60
 
     private let eventsEndpoint = URL(string: "https://www.beavr.net/api/events.php")!
+    private let apiService: APIService
+    private var authToken: String?
+    private var likeChangeObserver: NSObjectProtocol?
+    private var shouldReloadAfterCurrentFetch: Bool = false
     private lazy var urlSession: URLSession = {
         let configuration = URLSessionConfiguration.default
         configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
@@ -19,6 +25,21 @@ class PostListViewModel: ObservableObject {
         configuration.timeoutIntervalForResource = 30
         return URLSession(configuration: configuration)
     }()
+
+    init(apiService: APIService = .shared) {
+        self.apiService = apiService
+
+        likeChangeObserver = NotificationCenter.default.addObserver(
+            forName: .eventLikeStatusDidChange,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self else { return }
+            if let sender = notification.object as AnyObject?, sender === self { return }
+            guard let change = EventLikeChange.from(notification) else { return }
+            self.applyExternalLikeChange(change)
+        }
+    }
 
     private enum FetchError: LocalizedError {
         case invalidResponse
@@ -37,6 +58,23 @@ class PostListViewModel: ObservableObject {
     deinit {
         cancellationRetryTask?.cancel()
         expiryTimer?.invalidate()
+        if let likeChangeObserver {
+            NotificationCenter.default.removeObserver(likeChangeObserver)
+        }
+    }
+
+    func updateAuthToken(_ token: String?) {
+        let trimmed = token?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalized = (trimmed?.isEmpty ?? true) ? nil : trimmed
+
+        if normalized == authToken {
+            return
+        }
+
+        authToken = normalized
+        Task { [weak self] in
+            await self?.refreshPosts()
+        }
     }
 
     func fetchPosts() {
@@ -46,10 +84,21 @@ class PostListViewModel: ObservableObject {
     }
 
     func refreshPosts(allowRetryAfterCancellation: Bool = true) async {
-        guard !isLoading else { return }
+        if isLoading {
+            shouldReloadAfterCurrentFetch = true
+            return
+        }
 
         isLoading = true
-        defer { isLoading = false }
+        defer {
+            isLoading = false
+            if shouldReloadAfterCurrentFetch {
+                shouldReloadAfterCurrentFetch = false
+                Task { [weak self] in
+                    await self?.refreshPosts(allowRetryAfterCancellation: false)
+                }
+            }
+        }
 
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
@@ -87,6 +136,9 @@ class PostListViewModel: ObservableObject {
         request.cachePolicy = .reloadIgnoringLocalCacheData
         request.timeoutInterval = 15
         request.setValue("application/json", forHTTPHeaderField: "Accept")
+        if let token = authToken {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
 
         do {
             let (data, response) = try await urlSession.data(for: request, delegate: nil)
@@ -171,5 +223,90 @@ class PostListViewModel: ObservableObject {
     private func stopExpiryTimer() {
         expiryTimer?.invalidate()
         expiryTimer = nil
+    }
+
+    func isUpdatingLike(for eventID: Int) -> Bool {
+        updatingLikeIDs.contains(eventID)
+    }
+
+    func clearLikeError() {
+        likeErrorMessage = nil
+    }
+
+    func post(withID id: Int) -> Post? {
+        if let match = posts.first(where: { $0.id == id }) {
+            return match
+        }
+        return allPosts.first(where: { $0.id == id })
+    }
+
+    func toggleLike(for post: Post, token: String) async {
+        guard !updatingLikeIDs.contains(post.id) else { return }
+
+        updatingLikeIDs.insert(post.id)
+        defer { updatingLikeIDs.remove(post.id) }
+
+        likeErrorMessage = nil
+
+        let currentPost = self.post(withID: post.id) ?? post
+        let targetIsLiked = !currentPost.likedByMe
+
+        do {
+            if targetIsLiked {
+                try await apiService.likeEvent(id: post.id, token: token)
+            } else {
+                try await apiService.unlikeEvent(id: post.id, token: token)
+            }
+
+            let delta = targetIsLiked ? 1 : -1
+            let newCount = max(0, currentPost.likesCount + delta)
+            applyLocalLikeChange(eventID: post.id, isLiked: targetIsLiked, likeCount: newCount)
+
+            if let updated = self.post(withID: post.id) {
+                EventLikeChange.post(
+                    from: self,
+                    eventID: post.id,
+                    isLiked: targetIsLiked,
+                    likeCount: updated.likesCount,
+                    post: updated
+                )
+            } else {
+                EventLikeChange.post(
+                    from: self,
+                    eventID: post.id,
+                    isLiked: targetIsLiked,
+                    likeCount: newCount,
+                    post: nil
+                )
+            }
+        } catch {
+            likeErrorMessage = error.localizedDescription
+        }
+    }
+
+    private func applyLocalLikeChange(eventID: Int, isLiked: Bool, likeCount: Int) {
+        let sanitizedCount = max(0, likeCount)
+
+        func update(list: inout [Post]) {
+            guard let index = list.firstIndex(where: { $0.id == eventID }) else { return }
+            list[index] = list[index].updatingLikeState(likesCount: sanitizedCount, likedByMe: isLiked)
+        }
+
+        update(list: &allPosts)
+        update(list: &posts)
+    }
+
+    private func applyExternalLikeChange(_ change: EventLikeChange) {
+        if let updatedPost = change.post {
+            func update(list: inout [Post]) {
+                guard let index = list.firstIndex(where: { $0.id == change.eventID }) else { return }
+                list[index] = updatedPost
+            }
+
+            update(list: &allPosts)
+            update(list: &posts)
+        } else {
+            applyLocalLikeChange(eventID: change.eventID, isLiked: change.isLiked, likeCount: change.likeCount)
+        }
     }
 }

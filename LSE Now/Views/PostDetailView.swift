@@ -3,58 +3,56 @@ import MapKit
 import UIKit
 
 struct PostDetailView: View {
-    let post: Post
+    @EnvironmentObject private var authViewModel: AuthViewModel
+
+    private let viewModel: PostListViewModel?
+    @State private var currentPost: Post
+    @State private var showLoginAlert = false
+
+    init(post: Post, viewModel: PostListViewModel?) {
+        self.viewModel = viewModel
+        _currentPost = State(initialValue: post)
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
+                headerSection
 
-                // --- Title
-                Text(post.title)
-                    .font(.largeTitle)
-                    .bold()
-                    .multilineTextAlignment(.leading)
-
-                // --- Date & Time
                 Label {
-                    Text(post.conciseScheduleString())
+                    Text(currentPost.conciseScheduleString())
                 } icon: {
                     Image(systemName: "calendar")
                 }
                 .foregroundColor(.secondary)
                 .font(.subheadline)
 
-                // --- Location text
-                if let place = post.primaryLocationLine ?? post.location, !place.isEmpty {
+                if let place = currentPost.primaryLocationLine ?? currentPost.location, !place.isEmpty {
                     Label(place, systemImage: "mappin.and.ellipse")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .lineLimit(2)
                 }
 
-                // --- Organization
-                if let org = post.organization, !org.isEmpty {
-                    organizationView(name: org, contact: post.contact)
+                if let org = currentPost.organization, !org.isEmpty {
+                    organizationView(name: org, contact: currentPost.contact)
                 }
 
                 Divider()
 
-                // --- Category
-                if let category = post.category {
+                if let category = currentPost.category {
                     Text(category)
                         .font(.headline)
                         .foregroundColor(Color("LSERed"))
                 }
 
-                // --- Description (plain text)
-                if let desc = post.description, !desc.isEmpty {
+                if let desc = currentPost.description, !desc.isEmpty {
                     descriptionView(for: desc)
                 }
 
-                // --- Get Directions (moved here)
-                if let lat = post.latitude, let lon = post.longitude {
+                if let lat = currentPost.latitude, let lon = currentPost.longitude {
                     Button(action: {
-                        openInMaps(latitude: lat, longitude: lon, name: post.title)
+                        openInMaps(latitude: lat, longitude: lon, name: currentPost.title)
                     }) {
                         Text("Get Directions")
                             .font(.subheadline)
@@ -62,42 +60,67 @@ struct PostDetailView: View {
                     }
                 }
 
-                // --- Map Preview
-                if let lat = post.latitude, let lon = post.longitude {
-                    let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-                    let region = MKCoordinateRegion(
-                        center: coordinate,
-                        span: MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
-                    )
-
-                    Group {
-                        if #available(iOS 17.0, *) {
-                            Map(position: .constant(.region(region))) {
-                                Marker(post.title, coordinate: coordinate)
-                            }
-                        } else {
-                            Map(
-                                coordinateRegion: .constant(region),
-                                annotationItems: [MapAnnotationItem(coordinate: coordinate)]
-                            ) { item in
-                                MapAnnotation(coordinate: item.coordinate) {
-                                    Image(systemName: "mappin.circle.fill")
-                                        .foregroundColor(Color("LSERed"))
-                                        .font(.title2)
-                                }
-                            }
-                        }
-                    }
-                    .frame(height: 200)
-                    .cornerRadius(12)
+                if let lat = currentPost.latitude, let lon = currentPost.longitude {
+                    mapPreview(latitude: lat, longitude: lon)
                 }
             }
             .padding()
         }
-        .background(Color(.systemGroupedBackground)) // ✅ same as Explore/New Event
+        .background(Color(.systemGroupedBackground))
         .navigationTitle("Event Details")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.visible, for: .navigationBar)
+        .alert("Log In Required", isPresented: $showLoginAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Log in with your LSE account to save events.")
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .eventLikeStatusDidChange)) { notification in
+            guard let change = EventLikeChange.from(notification), change.eventID == currentPost.id else { return }
+            if let updated = change.post {
+                currentPost = updated
+            } else {
+                currentPost = currentPost.updatingLikeState(
+                    likesCount: change.likeCount,
+                    likedByMe: change.isLiked
+                )
+            }
+        }
+    }
+
+    private var headerSection: some View {
+        HStack(alignment: .top, spacing: 16) {
+            Text(currentPost.title)
+                .font(.largeTitle)
+                .bold()
+                .multilineTextAlignment(.leading)
+
+            Spacer(minLength: 12)
+
+            EventLikeButton(
+                isLiked: currentPost.likedByMe,
+                likeCount: currentPost.likesCount,
+                isLoading: isUpdatingLike,
+                action: toggleLike
+            )
+        }
+    }
+
+    private var isUpdatingLike: Bool {
+        viewModel?.isUpdatingLike(for: currentPost.id) ?? false
+    }
+
+    private func toggleLike() {
+        guard let viewModel else { return }
+
+        guard let token = authViewModel.token else {
+            showLoginAlert = true
+            return
+        }
+
+        Task {
+            await viewModel.toggleLike(for: currentPost, token: token)
+        }
     }
 
     @ViewBuilder
@@ -147,7 +170,35 @@ struct PostDetailView: View {
         return AttributedString(attributed)
     }
 
-    // MARK: - Open Apple Maps
+    private func mapPreview(latitude: Double, longitude: Double) -> some View {
+        let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        let region = MKCoordinateRegion(
+            center: coordinate,
+            span: MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
+        )
+
+        return Group {
+            if #available(iOS 17.0, *) {
+                Map(position: .constant(.region(region))) {
+                    Marker(currentPost.title, coordinate: coordinate)
+                }
+            } else {
+                Map(
+                    coordinateRegion: .constant(region),
+                    annotationItems: [MapAnnotationItem(coordinate: coordinate)]
+                ) { item in
+                    MapAnnotation(coordinate: item.coordinate) {
+                        Image(systemName: "mappin.circle.fill")
+                            .foregroundColor(Color("LSERed"))
+                            .font(.title2)
+                    }
+                }
+            }
+        }
+        .frame(height: 200)
+        .cornerRadius(12)
+    }
+
     private func openInMaps(latitude: Double, longitude: Double, name: String) {
         let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
         let placemark = MKPlacemark(coordinate: coordinate)
@@ -158,7 +209,6 @@ struct PostDetailView: View {
         ])
     }
 
-    // MARK: - Contact Handling
     private func handleContact(_ contact: ContactInfo) {
         switch contact.type.lowercased() {
         case "phone":
@@ -217,7 +267,6 @@ struct PostDetailView: View {
         guard !handle.isEmpty else { return nil }
         return URL(string: "https://instagram.com/\(handle)")
     }
-
 }
 
 private struct MapAnnotationItem: Identifiable {

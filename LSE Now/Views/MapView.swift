@@ -173,7 +173,7 @@ struct MapView: View {
             }
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(item: $selectedPost) { post in
-                PostDetailView(post: post)
+                PostDetailView(post: post, viewModel: vm)
             }
         }
     }

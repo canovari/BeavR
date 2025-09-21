@@ -119,6 +119,47 @@ final class APIService {
         return try decoder.decode([Post].self, from: data)
     }
 
+    func fetchLikedEvents(token: String) async throws -> [Post] {
+        var components = URLComponents(url: baseURL.appendingPathComponent("events.php"), resolvingAgainstBaseURL: false)
+        components?.queryItems = [URLQueryItem(name: "liked", value: "1")]
+
+        guard let url = components?.url else { throw APIServiceError.invalidResponse }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        setAuthorizationHeader(on: &request, token: token)
+
+        let data = try await perform(request: request)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode([Post].self, from: data)
+    }
+
+    func likeEvent(id: Int, token: String) async throws {
+        let endpoint = baseURL.appendingPathComponent("event_likes.php")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        setAuthorizationHeader(on: &request, token: token)
+
+        let encoder = JSONEncoder()
+        request.httpBody = try encoder.encode(EventLikePayload(eventId: id))
+        _ = try await perform(request: request)
+    }
+
+    func unlikeEvent(id: Int, token: String) async throws {
+        let endpoint = baseURL.appendingPathComponent("event_likes.php")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "DELETE"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        setAuthorizationHeader(on: &request, token: token)
+
+        let encoder = JSONEncoder()
+        request.httpBody = try encoder.encode(EventLikePayload(eventId: id))
+        _ = try await perform(request: request)
+    }
+
     func cancelEvent(id: Int, token: String) async throws {
         let endpoint = baseURL.appendingPathComponent("events.php")
         var request = URLRequest(url: endpoint)
@@ -435,6 +476,10 @@ private struct EventSubmissionPayload: Encodable {
 
 private struct CancelEventPayload: Encodable {
     let id: Int
+}
+
+private struct EventLikePayload: Encodable {
+    let eventId: Int
 }
 
 struct DealSubmissionPayload: Encodable {

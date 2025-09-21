@@ -32,33 +32,107 @@ switch ($method) {
 
 function handleGet(PDO $pdo): void
 {
-    if (isset($_GET['mine']) && (string)$_GET['mine'] === '1') {
-        $user = requireAuth($pdo);
+    $maybeUser = tryAuth($pdo);
 
-        $stmt = $pdo->prepare(
-            "SELECT * FROM events
-             WHERE (creator_user_id = :user_id)
-                OR (LOWER(creator) = :creator_email)
-             ORDER BY start_time DESC"
-        );
-        $stmt->execute([
-            ':user_id' => $user['id'],
-            ':creator_email' => strtolower($user['email']),
-        ]);
-        $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        respondWithJson(array_map('mapEventRow', $events));
+    if (isset($_GET['mine']) && (string)$_GET['mine'] === '1') {
+        $user = $maybeUser ?? requireAuth($pdo);
+        respondWithJson(fetchOwnedEvents($pdo, $user));
     }
 
-    // Public feed: only approved events that haven't ended yet
-    $stmt = $pdo->prepare(
-        "SELECT * FROM events
-         WHERE status = 'approved'
-           AND (end_time IS NULL OR end_time >= UTC_TIMESTAMP())
-         ORDER BY start_time ASC"
-    );
+    if (isset($_GET['liked']) && (string)$_GET['liked'] === '1') {
+        $user = $maybeUser ?? requireAuth($pdo);
+        respondWithJson(fetchLikedEvents($pdo, $user));
+    }
+
+    respondWithJson(fetchPublicEvents($pdo, $maybeUser));
+}
+
+function fetchPublicEvents(PDO $pdo, ?array $user): array
+{
+    $sql = "SELECT e.*, COALESCE(l.like_count, 0) AS like_count,
+                   CASE WHEN ul.user_id IS NULL THEN 0 ELSE 1 END AS liked_by_me
+            FROM events e
+            LEFT JOIN (
+                SELECT event_id, COUNT(*) AS like_count
+                FROM event_likes
+                GROUP BY event_id
+            ) l ON l.event_id = e.id
+            LEFT JOIN event_likes ul
+                ON ul.event_id = e.id AND ul.user_id = :user_id
+            WHERE e.status = 'approved'
+              AND (e.end_time IS NULL OR e.end_time >= UTC_TIMESTAMP())
+            ORDER BY e.start_time ASC";
+
+    $userId = $user['id'] ?? null;
+    return executeEventQuery($pdo, $sql, [
+        ':user_id' => $userId,
+    ]);
+}
+
+function fetchOwnedEvents(PDO $pdo, array $user): array
+{
+    $sql = "SELECT e.*, COALESCE(l.like_count, 0) AS like_count,
+                   CASE WHEN ul.user_id IS NULL THEN 0 ELSE 1 END AS liked_by_me
+            FROM events e
+            LEFT JOIN (
+                SELECT event_id, COUNT(*) AS like_count
+                FROM event_likes
+                GROUP BY event_id
+            ) l ON l.event_id = e.id
+            LEFT JOIN event_likes ul
+                ON ul.event_id = e.id AND ul.user_id = :user_id
+            WHERE (e.creator_user_id = :user_id)
+               OR (LOWER(e.creator) = :creator_email)
+            ORDER BY e.start_time DESC";
+
+    return executeEventQuery($pdo, $sql, [
+        ':user_id' => $user['id'],
+        ':creator_email' => $user['email'],
+    ]);
+}
+
+function fetchLikedEvents(PDO $pdo, array $user): array
+{
+    $sql = "SELECT e.*, COALESCE(l.like_count, 0) AS like_count,
+                   CASE WHEN ul.user_id IS NULL THEN 0 ELSE 1 END AS liked_by_me
+            FROM event_likes el
+            INNER JOIN events e ON e.id = el.event_id
+            LEFT JOIN (
+                SELECT event_id, COUNT(*) AS like_count
+                FROM event_likes
+                GROUP BY event_id
+            ) l ON l.event_id = e.id
+            LEFT JOIN event_likes ul
+                ON ul.event_id = e.id AND ul.user_id = :user_id
+            WHERE el.user_id = :user_id
+              AND e.status = 'approved'
+              AND (e.end_time IS NULL OR e.end_time >= UTC_TIMESTAMP())
+            ORDER BY e.start_time ASC";
+
+    return executeEventQuery($pdo, $sql, [
+        ':user_id' => $user['id'],
+    ]);
+}
+
+function executeEventQuery(PDO $pdo, string $sql, array $params): array
+{
+    $stmt = $pdo->prepare($sql);
+
+    foreach ($params as $key => $value) {
+        if ($key === ':user_id') {
+            if ($value === null) {
+                $stmt->bindValue($key, null, PDO::PARAM_NULL);
+            } else {
+                $stmt->bindValue($key, (int)$value, PDO::PARAM_INT);
+            }
+        } else {
+            $stmt->bindValue($key, $value);
+        }
+    }
+
     $stmt->execute();
     $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    respondWithJson(array_map('mapEventRow', $events));
+    return array_map('mapEventRow', $events);
 }
 
 function handlePost(PDO $pdo): void
@@ -195,12 +269,33 @@ function requireAuth(PDO $pdo): array
         respondWithError(401, 'Missing bearer token.');
     }
 
+    $user = findUserByToken($pdo, $token);
+
+    if ($user === null) {
+        respondWithError(401, 'Invalid or expired token.');
+    }
+
+    return $user;
+}
+
+function tryAuth(PDO $pdo): ?array
+{
+    $token = extractBearerToken();
+    if ($token === null) {
+        return null;
+    }
+
+    return findUserByToken($pdo, $token);
+}
+
+function findUserByToken(PDO $pdo, string $token): ?array
+{
     $stmt = $pdo->prepare('SELECT id, email FROM users WHERE login_token = :token LIMIT 1');
     $stmt->execute([':token' => $token]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$user) {
-        respondWithError(401, 'Invalid or expired token.');
+        return null;
     }
 
     return [
@@ -289,6 +384,8 @@ function mapEventRow(array $row): array
         'longitude' => isset($row['longitude']) ? (float)$row['longitude'] : null,
         'creator' => $row['creator'] ?? null,
         'contact' => buildContact($row),
+        'likesCount' => isset($row['like_count']) ? (int)$row['like_count'] : 0,
+        'likedByMe' => isset($row['liked_by_me']) ? ((int)$row['liked_by_me'] === 1) : false,
         'createdAt' => formatDateForJson($row['created_at'] ?? null),
         'updatedAt' => formatDateForJson($row['updated_at'] ?? null),
     ];

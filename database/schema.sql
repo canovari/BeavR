@@ -66,6 +66,31 @@ INSERT INTO `events` (`id`, `title`, `start_time`, `end_time`, `location`, `desc
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `event_likes`
+--
+
+CREATE TABLE `event_likes` (
+  `event_id` int(10) UNSIGNED NOT NULL,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`event_id`, `user_id`),
+  KEY `event_likes_user_id_index` (`user_id`),
+  CONSTRAINT `event_likes_event_fk` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `event_likes_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `event_likes`
+--
+
+INSERT INTO `event_likes` (`event_id`, `user_id`, `created_at`) VALUES
+(8, 1, '2025-09-20 12:00:00'),
+(9, 1, '2025-09-20 12:05:00'),
+(10, 1, '2025-09-20 12:10:00');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `deals`
 --
 

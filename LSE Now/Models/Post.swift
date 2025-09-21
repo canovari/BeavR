@@ -15,6 +15,8 @@ struct Post: Identifiable, Codable, Hashable {
     let longitude: Double?
     let creator: String?
     let contact: ContactInfo?   // ✅ Reference only, don’t redeclare
+    let likesCount: Int
+    let likedByMe: Bool
 
     static func == (lhs: Post, rhs: Post) -> Bool {
         lhs.id == rhs.id
@@ -54,7 +56,70 @@ struct Post: Identifiable, Codable, Hashable {
             latitude: latitude,
             longitude: longitude,
             creator: creator,
-            contact: contact
+            contact: contact,
+            likesCount: likesCount,
+            likedByMe: likedByMe
         )
+    }
+}
+
+extension Post {
+    func updatingLikeState(likesCount: Int, likedByMe: Bool) -> Post {
+        Post(
+            id: id,
+            title: title,
+            startTime: startTime,
+            endTime: endTime,
+            location: location,
+            description: description,
+            organization: organization,
+            category: category,
+            imageUrl: imageUrl,
+            status: status,
+            latitude: latitude,
+            longitude: longitude,
+            creator: creator,
+            contact: contact,
+            likesCount: likesCount,
+            likedByMe: likedByMe
+        )
+    }
+}
+
+extension Notification.Name {
+    static let eventLikeStatusDidChange = Notification.Name("EventLikeStatusDidChangeNotification")
+}
+
+struct EventLikeChange {
+    let eventID: Int
+    let isLiked: Bool
+    let likeCount: Int
+    let post: Post?
+
+    static func post(from sender: AnyObject?, eventID: Int, isLiked: Bool, likeCount: Int, post: Post?) {
+        NotificationCenter.default.post(
+            name: .eventLikeStatusDidChange,
+            object: sender,
+            userInfo: [
+                "eventID": eventID,
+                "isLiked": isLiked,
+                "likeCount": likeCount,
+                "post": post as Any
+            ]
+        )
+    }
+
+    static func from(_ notification: Notification) -> EventLikeChange? {
+        guard
+            let userInfo = notification.userInfo,
+            let eventID = userInfo["eventID"] as? Int,
+            let isLiked = userInfo["isLiked"] as? Bool,
+            let likeCount = userInfo["likeCount"] as? Int
+        else {
+            return nil
+        }
+
+        let post = userInfo["post"] as? Post
+        return EventLikeChange(eventID: eventID, isLiked: isLiked, likeCount: likeCount, post: post)
     }
 }
