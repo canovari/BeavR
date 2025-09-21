@@ -20,6 +20,7 @@ enum FeedSortOption: String, CaseIterable, Identifiable {
 struct FeedView: View {
     @ObservedObject var vm: PostListViewModel
     @EnvironmentObject private var locationManager: LocationManager
+    @EnvironmentObject private var authViewModel: AuthViewModel
 
     @State private var showFilterSheet = false
     @State private var selectedCategories: Set<String> = Set(FilterSheet.categories)
@@ -27,9 +28,10 @@ struct FeedView: View {
     @State private var searchText: String = ""
     @State private var sortOption: FeedSortOption = .time
     @State private var radiusMiles: Double = 5
-    
+
     // Single animation driver for all live indicators
     @State private var blink = false
+    @State private var activeAlert: FeedAlert?
 
     private var isLocationAccessAuthorized: Bool {
         switch locationManager.authorizationStatus {
@@ -116,20 +118,20 @@ struct FeedView: View {
                         }
 
                         ForEach(filteredPosts) { post in
-                            NavigationLink(destination: PostDetailView(post: post)) {
+                            NavigationLink(destination: PostDetailView(post: post, viewModel: vm)) {
                                 ZStack(alignment: .topTrailing) {
                                     // Background card
                                     VStack(alignment: .leading, spacing: 6) {
                                         Text("\(categoryEmoji(for: post.category)) \(post.title)")
                                             .font(.headline)
                                             .foregroundColor(.primary)
-                                        
+
                                         if let org = post.organization, !org.isEmpty {
                                             Text("by \(org)")
                                                 .font(.subheadline)
                                                 .foregroundColor(.secondary)
                                         }
-                                        
+
                                         dateOrLiveView(for: post)
                                             .font(.subheadline)
                                     }
@@ -138,6 +140,14 @@ struct FeedView: View {
                                     .background(Color(.systemBackground))
                                     .cornerRadius(12)
                                     .shadow(radius: 1)
+
+                                    EventLikeButton(
+                                        isLiked: post.likedByMe,
+                                        likeCount: post.likesCount,
+                                        isLoading: vm.isUpdatingLike(for: post.id),
+                                        action: { handleLike(for: post) }
+                                    )
+                                    .padding(12)
                                 }
                             }
                             .buttonStyle(PlainButtonStyle())
@@ -173,6 +183,17 @@ struct FeedView: View {
                     radiusMiles: $radiusMiles
                 )
             }
+            .alert(item: $activeAlert) { alert in
+                Alert(
+                    title: Text(alert.title),
+                    message: Text(alert.message),
+                    dismissButton: .default(Text("OK")) {
+                        if case .likeError = alert {
+                            vm.clearLikeError()
+                        }
+                    }
+                )
+            }
             .onAppear {
                 // Start blinking loop
                 blink = true
@@ -184,6 +205,10 @@ struct FeedView: View {
                 if newValue == .location {
                     locationManager.refreshLocation()
                 }
+            }
+            .onChange(of: vm.likeErrorMessage) { _, message in
+                guard let message else { return }
+                activeAlert = .likeError(id: UUID(), message: message)
             }
         }
     }
@@ -204,6 +229,17 @@ struct FeedView: View {
     }
 
     // MARK: - Helpers
+    private func handleLike(for post: Post) {
+        guard let token = authViewModel.token else {
+            activeAlert = .login(id: UUID())
+            return
+        }
+
+        Task {
+            await vm.toggleLike(for: post, token: token)
+        }
+    }
+
     private func eventIsOngoing(post: Post) -> Bool {
         let now = Date()
         guard now >= post.startTime else { return false }
@@ -264,6 +300,36 @@ struct FeedView: View {
             return "📍"
         }
         return String(first)
+    }
+
+    private enum FeedAlert: Identifiable {
+        case login(id: UUID)
+        case likeError(id: UUID, message: String)
+
+        var id: UUID {
+            switch self {
+            case .login(let id), .likeError(let id, _):
+                return id
+            }
+        }
+
+        var title: String {
+            switch self {
+            case .login:
+                return "Log In Required"
+            case .likeError:
+                return "Unable to Save Event"
+            }
+        }
+
+        var message: String {
+            switch self {
+            case .login:
+                return "Sign in with your LSE email to like events."
+            case .likeError(_, let message):
+                return message
+            }
+        }
     }
 }
 

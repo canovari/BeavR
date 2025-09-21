@@ -106,8 +106,10 @@ struct HubRectButton: View {
 // MARK: - Placeholder Views
 struct MyEventsView: View {
     @EnvironmentObject private var authViewModel: AuthViewModel
+    @EnvironmentObject private var eventsViewModel: PostListViewModel
     @StateObject private var viewModel = MyEventsViewModel()
-    @State private var alertMessage: String?
+    @State private var selectedTab: MyEventsViewModel.Tab = .liked
+    @State private var activeAlert: AlertType?
 
     var body: some View {
         Group {
@@ -124,48 +126,85 @@ struct MyEventsView: View {
                 await viewModel.loadEvents(token: token, reason: .initial)
             }
         }
-        .onChange(of: viewModel.errorMessage) { message in
-            alertMessage = message
+        .onChange(of: viewModel.errorMessage) { _, message in
+            guard let message else { return }
+            activeAlert = .general(id: UUID(), message: message)
         }
-        .alert("Something Went Wrong", isPresented: Binding(
-            get: { alertMessage != nil },
-            set: { newValue in
-                if !newValue {
-                    alertMessage = nil
-                    viewModel.clearError()
+        .onChange(of: viewModel.likeErrorMessage) { _, message in
+            guard let message else { return }
+            activeAlert = .like(id: UUID(), message: message)
+        }
+        .alert(item: $activeAlert) { alert in
+            Alert(
+                title: Text(alert.title),
+                message: Text(alert.message),
+                dismissButton: .default(Text("OK")) {
+                    switch alert {
+                    case .general:
+                        viewModel.clearError()
+                    case .like:
+                        viewModel.clearLikeError()
+                    }
                 }
-            }
-        )) {
-            Button("OK", role: .cancel) {
-                alertMessage = nil
-                viewModel.clearError()
-            }
-        } message: {
-            Text(alertMessage ?? "An unknown error occurred.")
+            )
         }
     }
 
-    @ViewBuilder
     private func eventsList(token: String) -> some View {
-        List {
-            ForEach(viewModel.events) { event in
-                let display = statusDisplay(for: event)
+        let events = viewModel.events(for: selectedTab)
 
-                MyEventRow(
-                    post: event,
-                    status: display,
-                    isCancelling: viewModel.isCancelling(eventID: event.id)
-                )
-                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                    if display.kind == .pending {
-                        Button(role: .destructive) {
-                            Task {
-                                await viewModel.cancel(event: event, token: token)
-                            }
+        return List {
+            Section {
+                Picker("Event Type", selection: $selectedTab) {
+                    ForEach(MyEventsViewModel.Tab.allCases) { tab in
+                        Text(tab.title).tag(tab)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+            .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 8, trailing: 16))
+            .listRowBackground(Color.clear)
+
+            Section {
+                ForEach(events) { event in
+                    switch selectedTab {
+                    case .liked:
+                        NavigationLink {
+                            PostDetailView(post: event, viewModel: eventsViewModel)
                         } label: {
-                            Label("Cancel", systemImage: "xmark.circle")
+                            LikedEventRow(
+                                post: event,
+                                isUpdatingLike: viewModel.isUpdatingLike(for: event.id),
+                                onToggleLike: {
+                                    Task { await viewModel.toggleLike(for: event, token: token) }
+                                }
+                            )
                         }
-                        .disabled(viewModel.isCancelling(eventID: event.id))
+                        .buttonStyle(.plain)
+                    case .submitted:
+                        let display = statusDisplay(for: event)
+
+                        MyEventRow(
+                            post: event,
+                            status: display,
+                            isCancelling: viewModel.isCancelling(eventID: event.id),
+                            isUpdatingLike: viewModel.isUpdatingLike(for: event.id),
+                            onToggleLike: {
+                                Task { await viewModel.toggleLike(for: event, token: token) }
+                            }
+                        )
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            if display.kind == .pending {
+                                Button(role: .destructive) {
+                                    Task {
+                                        await viewModel.cancel(event: event, token: token)
+                                    }
+                                } label: {
+                                    Label("Cancel", systemImage: "xmark.circle")
+                                }
+                                .disabled(viewModel.isCancelling(eventID: event.id))
+                            }
+                        }
                     }
                 }
             }
@@ -175,22 +214,23 @@ struct MyEventsView: View {
             await viewModel.refresh(token: token)
         }
         .overlay {
-            if viewModel.isLoading && viewModel.events.isEmpty {
+            if viewModel.isLoading && events.isEmpty {
                 ProgressView("Loading events...")
                     .allowsHitTesting(false)
-            } else if viewModel.events.isEmpty {
-                emptyState
+            } else if events.isEmpty {
+                emptyState(for: selectedTab)
                     .allowsHitTesting(false)
             }
         }
         .overlay(alignment: .top) {
-            if viewModel.isRefreshing && !viewModel.events.isEmpty {
+            if viewModel.isRefreshing && !events.isEmpty {
                 ProgressView()
                     .progressViewStyle(.circular)
                     .padding(.top, 12)
                     .allowsHitTesting(false)
             }
         }
+        .animation(.easeInOut(duration: 0.2), value: selectedTab)
     }
 
     private var loggedOutState: some View {
@@ -213,21 +253,38 @@ struct MyEventsView: View {
         .background(Color(.systemGroupedBackground))
     }
 
-    private var emptyState: some View {
+    private func emptyState(for tab: MyEventsViewModel.Tab) -> some View {
         VStack(spacing: 12) {
-            Image(systemName: "calendar")
-                .font(.system(size: 48))
-                .foregroundColor(.secondary)
+            switch tab {
+            case .liked:
+                Image(systemName: "heart")
+                    .font(.system(size: 48))
+                    .foregroundColor(.secondary)
 
-            Text("No events yet")
-                .font(.headline)
-                .foregroundColor(.primary)
+                Text("No liked events yet")
+                    .font(.headline)
+                    .foregroundColor(.primary)
 
-            Text("Events you submit will show up here so you can track their status across devices.")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
+                Text("Tap the heart on an event to save it here for quick access.")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+            case .submitted:
+                Image(systemName: "calendar")
+                    .font(.system(size: 48))
+                    .foregroundColor(.secondary)
+
+                Text("No events yet")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+
+                Text("Events you submit will show up here so you can track their status across devices.")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemGroupedBackground))
@@ -247,6 +304,33 @@ struct MyEventsView: View {
             return StatusDisplay(title: raw.uppercased(), kind: .other(raw), color: .secondary)
         }
     }
+    private enum AlertType: Identifiable {
+        case general(id: UUID, message: String)
+        case like(id: UUID, message: String)
+
+        var id: UUID {
+            switch self {
+            case .general(let id, _), .like(let id, _):
+                return id
+            }
+        }
+
+        var title: String {
+            switch self {
+            case .general:
+                return "Something Went Wrong"
+            case .like:
+                return "Unable to Save Event"
+            }
+        }
+
+        var message: String {
+            switch self {
+            case .general(_, let message), .like(_, let message):
+                return message
+            }
+        }
+    }
 }
 
 private struct StatusDisplay {
@@ -259,10 +343,12 @@ private struct MyEventRow: View {
     let post: Post
     let status: StatusDisplay
     let isCancelling: Bool
+    let isUpdatingLike: Bool
+    let onToggleLike: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .firstTextBaseline) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(post.title)
                     .font(.headline)
                     .foregroundColor(.primary)
@@ -270,22 +356,29 @@ private struct MyEventRow: View {
 
                 Spacer()
 
-                HStack(spacing: 8) {
-                    if isCancelling {
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                            .scaleEffect(0.75)
-                    }
+                EventLikeButton(
+                    isLiked: post.likedByMe,
+                    likeCount: post.likesCount,
+                    isLoading: isUpdatingLike,
+                    action: onToggleLike
+                )
+            }
 
-                    Text(status.title)
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(status.color)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 4)
-                        .background(status.color.opacity(0.15))
-                        .clipShape(Capsule())
+            HStack(spacing: 8) {
+                if isCancelling {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .scaleEffect(0.75)
                 }
+
+                Text(status.title)
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(status.color)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(status.color.opacity(0.15))
+                    .clipShape(Capsule())
             }
 
             Text(post.conciseScheduleString())
@@ -300,6 +393,48 @@ private struct MyEventRow: View {
             }
         }
         .padding(.vertical, 6)
+    }
+}
+
+private struct LikedEventRow: View {
+    let post: Post
+    let isUpdatingLike: Bool
+    let onToggleLike: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(post.title)
+                .font(.headline)
+                .foregroundColor(.primary)
+                .multilineTextAlignment(.leading)
+
+            Text(post.conciseScheduleString())
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+
+            if let organization = post.organization, !organization.isEmpty {
+                Text("by \(organization)")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+            }
+
+            if let location = post.primaryLocationLine ?? post.location, !location.isEmpty {
+                Text(location)
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 6)
+        .overlay(alignment: .topTrailing) {
+            EventLikeButton(
+                isLiked: post.likedByMe,
+                likeCount: post.likesCount,
+                isLoading: isUpdatingLike,
+                action: onToggleLike
+            )
+        }
     }
 }
 

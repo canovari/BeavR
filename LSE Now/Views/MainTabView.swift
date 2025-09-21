@@ -37,6 +37,7 @@ struct MainTabView: View {
                 .tabItem { Label("Deals", systemImage: "tag") }
 
             NewEventView()
+                .environmentObject(eventsViewModel)
                 .tag(4)
                 .tabItem { Label("New Event", systemImage: "plus.circle") }
         }

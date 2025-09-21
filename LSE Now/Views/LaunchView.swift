@@ -31,6 +31,7 @@ struct LaunchView: View {
             viewModel.fetchPosts()
             dealsViewModel.fetchDeals()
             authViewModel.loadExistingSession()
+            viewModel.updateAuthToken(authViewModel.token)
 
             if authViewModel.isLoggedIn {
                 locationManager.handleLoginStateChange(
@@ -74,6 +75,9 @@ struct LaunchView: View {
             } else {
                 locationManager.handleLoginStateChange(isLoggedIn: false, emailProvider: nil)
             }
+        }
+        .onChange(of: authViewModel.token) { _, token in
+            viewModel.updateAuthToken(token)
         }
         .onChange(of: scenePhase) { _, newPhase in
             locationManager.updateAppActivity(isActive: newPhase == .active)
