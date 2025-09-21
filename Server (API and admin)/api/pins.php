@@ -1,8 +1,27 @@
 <?php
 require_once __DIR__ . "/../config.php"; // adjust path if needed
 
+const PIN_LIFETIME_SECONDS = 8 * 60 * 60;
+
+function pruneExpiredPins(PDO $pdo, int $lifetimeSeconds): void
+{
+    $lifetimeSeconds = max(0, $lifetimeSeconds);
+    if ($lifetimeSeconds === 0) {
+        return;
+    }
+
+    $cleanupQuery = sprintf(
+        "DELETE FROM pins WHERE created_at <= (NOW() - INTERVAL %d SECOND)",
+        $lifetimeSeconds
+    );
+
+    $pdo->exec($cleanupQuery);
+}
+
 $pdo = getPDO();
 header("Content-Type: application/json");
+
+pruneExpiredPins($pdo, PIN_LIFETIME_SECONDS);
 
 $method = $_SERVER["REQUEST_METHOD"];
 
