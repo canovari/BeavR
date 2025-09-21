@@ -78,7 +78,8 @@ struct MapView: View {
                                     if usePinStyle {
                                         EventPinView(
                                             post: post,
-                                            isSameDay: isSameDay
+                                            isSameDay: isSameDay,
+                                            hasStarted: hasStarted
                                         )
                                         .transition(.scale.combined(with: .opacity))
                                     } else {
@@ -297,6 +298,7 @@ private struct PostAnnotationView: View {
 private struct EventPinView: View {
     let post: Post
     let isSameDay: Bool
+    let hasStarted: Bool
 
     private var pinColor: Color {
         isSameDay ? Color("LSERed") : .white
@@ -328,6 +330,7 @@ private struct EventPinView: View {
                     .stroke(strokeColor, lineWidth: 2)
             )
             .shadow(color: shadowColor, radius: 4, y: 2)
+            .opacity(hasStarted ? 0.6 : 1.0)
     }
 
     private var pinGradient: LinearGradient {
