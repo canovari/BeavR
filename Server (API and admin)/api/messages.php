@@ -210,7 +210,8 @@ function createMessage(PDO $pdo): void
                 $senderEmail,
                 (int) $row['pin_id'],
                 $formattedMessage['message'] ?? '',
-                $messageId
+                $messageId,
+                $formattedMessage['author'] ?? null
             );
         } catch (Throwable $notifyException) {
             logMessage('⚠️ Notification send failed → ' . $notifyException->getMessage());
