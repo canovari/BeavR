@@ -10,14 +10,26 @@ final class NotificationService
     private const VALID_PLATFORMS = [self::PLATFORM_IOS];
     private const VALID_ENVIRONMENTS = ['sandbox', 'production'];
 
-    private PDO $pdo;
-    private string $logFile;
+    /** @var PDO */
+    private $pdo;
 
-    private ?string $apnsKeyId;
-    private ?string $apnsTeamId;
-    private ?string $apnsBundleId;
-    private ?string $apnsAuthKey;
-    private bool $apnsUseSandbox;
+    /** @var string */
+    private $logFile;
+
+    /** @var string|null */
+    private $apnsKeyId;
+
+    /** @var string|null */
+    private $apnsTeamId;
+
+    /** @var string|null */
+    private $apnsBundleId;
+
+    /** @var string|null */
+    private $apnsAuthKey;
+
+    /** @var bool */
+    private $apnsUseSandbox;
 
     /** @var OpenSSLAsymmetricKey|resource|null */
     private $apnsPrivateKeyResource = null;
