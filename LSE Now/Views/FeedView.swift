@@ -216,14 +216,15 @@ struct FeedView: View {
             HStack(spacing: 6) {
                 ZStack {
                     Circle()
-                        .fill(Color.red.opacity(0.2))
-                        .frame(width: 14, height: 14)
-                        .scaleEffect(blink ? 1.2 : 0.8)
-                        .opacity(blink ? 0.2 : 0.8)
+                        .fill(Color("LSERed").opacity(0.45))
+                        .frame(width: 16, height: 16)
+                        .scaleEffect(blink ? 1.45 : 0.95)
+                        .opacity(blink ? 0.35 : 0.85)
 
                     Circle()
-                        .fill(Color.red)
+                        .fill(Color("LSERed"))
                         .frame(width: 8, height: 8)
+                        .shadow(color: Color("LSERed").opacity(0.5), radius: 2)
                 }
                 .animation(.easeInOut(duration: 1).repeatForever(autoreverses: true), value: blink)
 
