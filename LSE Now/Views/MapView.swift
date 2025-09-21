@@ -102,6 +102,12 @@ struct MapView: View {
                         .annotationTitles(.hidden)
                     }
                 }
+                .mapControls {
+                    MapCompass()
+                }
+                .overlay(alignment: .bottomTrailing) {
+                    mapLegend
+                }
                 .ignoresSafeArea()
                 .onAppear {
                     vm.fetchPosts()
@@ -221,6 +227,18 @@ struct MapView: View {
     private func stopTimer() {
         timer?.invalidate()
         timer = nil
+    }
+
+    @ViewBuilder
+    private var mapLegend: some View {
+        if #available(iOS 17.0, *) {
+            MapScaleView()
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(.thinMaterial, in: Capsule())
+                .padding(.trailing, 12)
+                .padding(.bottom, 20)
+        }
     }
 
     private func timeLabel(for start: Date, endTime: Date?) -> String {

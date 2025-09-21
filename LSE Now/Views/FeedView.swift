@@ -119,36 +119,36 @@ struct FeedView: View {
 
                         ForEach(filteredPosts) { post in
                             NavigationLink(destination: PostDetailView(post: post, viewModel: vm)) {
-                                ZStack(alignment: .topTrailing) {
-                                    // Background card
-                                    VStack(alignment: .leading, spacing: 6) {
-                                        Text("\(categoryEmoji(for: post.category)) \(post.title)")
-                                            .font(.headline)
-                                            .foregroundColor(.primary)
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("\(categoryEmoji(for: post.category)) \(post.title)")
+                                        .font(.headline)
+                                        .foregroundColor(.primary)
 
-                                        if let org = post.organization, !org.isEmpty {
-                                            Text("by \(org)")
-                                                .font(.subheadline)
-                                                .foregroundColor(.secondary)
-                                        }
-
-                                        dateOrLiveView(for: post)
+                                    if let org = post.organization, !org.isEmpty {
+                                        Text("by \(org)")
                                             .font(.subheadline)
+                                            .foregroundColor(.secondary)
                                     }
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding()
-                                    .background(Color(.systemBackground))
-                                    .cornerRadius(12)
-                                    .shadow(radius: 1)
 
-                                    EventLikeButton(
-                                        isLiked: post.likedByMe,
-                                        likeCount: post.likesCount,
-                                        isLoading: vm.isUpdatingLike(for: post.id),
-                                        action: { handleLike(for: post) }
-                                    )
-                                    .padding(12)
+                                    dateOrLiveView(for: post)
+                                        .font(.subheadline)
+
+                                    HStack {
+                                        Spacer()
+                                        EventLikeButton(
+                                            isLiked: post.likedByMe,
+                                            likeCount: post.likesCount,
+                                            isLoading: vm.isUpdatingLike(for: post.id),
+                                            action: { handleLike(for: post) }
+                                        )
+                                        .padding(.top, 8)
+                                    }
                                 }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding()
+                                .background(Color(.systemBackground))
+                                .cornerRadius(12)
+                                .shadow(radius: 1)
                             }
                             .buttonStyle(PlainButtonStyle())
                         }

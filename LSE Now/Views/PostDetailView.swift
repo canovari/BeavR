@@ -89,7 +89,7 @@ struct PostDetailView: View {
     }
 
     private var headerSection: some View {
-        HStack(alignment: .top, spacing: 16) {
+        HStack(alignment: .firstTextBaseline, spacing: 16) {
             Text(currentPost.title)
                 .font(.largeTitle)
                 .bold()
@@ -101,8 +101,12 @@ struct PostDetailView: View {
                 isLiked: currentPost.likedByMe,
                 likeCount: currentPost.likesCount,
                 isLoading: isUpdatingLike,
-                action: toggleLike
+                action: toggleLike,
+                iconSize: 22
             )
+            .alignmentGuide(.firstTextBaseline) { context in
+                context[VerticalAlignment.center]
+            }
         }
     }
 
@@ -118,8 +122,27 @@ struct PostDetailView: View {
             return
         }
 
+        let originalPost = currentPost
+        let targetIsLiked = !originalPost.likedByMe
+        let delta = targetIsLiked ? 1 : -1
+        let updatedCount = max(0, originalPost.likesCount + delta)
+
+        withAnimation(.easeInOut(duration: 0.2)) {
+            currentPost = originalPost.updatingLikeState(
+                likesCount: updatedCount,
+                likedByMe: targetIsLiked
+            )
+        }
+
         Task {
-            await viewModel.toggleLike(for: currentPost, token: token)
+            await viewModel.toggleLike(for: originalPost, token: token)
+            await MainActor.run {
+                if let message = viewModel.likeErrorMessage, !message.isEmpty {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        currentPost = originalPost
+                    }
+                }
+            }
         }
     }
 
