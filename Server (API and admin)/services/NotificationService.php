@@ -124,23 +124,36 @@ final class NotificationService
         $this->log("Unregistered device token for {$normalizedEmail}.");
     }
 
-    public function sendMessageReplyNotification(string $receiverEmail, string $senderEmail, int $pinId, string $messageText, int $messageId): void
+    public function sendMessageReplyNotification(
+        string $receiverEmail,
+        string $senderEmail,
+        int $pinId,
+        string $messageText,
+        int $messageId,
+        ?string $messageAuthor = null
+    ): void
     {
         $receiver = $this->normalizeEmail($receiverEmail);
         if ($receiver === '') {
             return;
         }
 
-        $senderDescriptor = $this->displayNameForEmail($senderEmail);
-        $title = "New reply from {$senderDescriptor}";
-        $body = $this->truncate($messageText, 140);
+        $senderDescriptor = $this->resolveSenderDescriptor($senderEmail, $messageAuthor);
+        $title = "📌 {$senderDescriptor} replied to your pin!";
+        $body = 'Check out what they said 👀';
 
         $extra = [
             'type' => 'message.reply',
             'pinId' => $pinId,
             'messageId' => $messageId,
             'senderEmail' => $this->normalizeEmail($senderEmail),
+            'senderName' => $senderDescriptor,
+            'messagePreview' => $this->truncate($messageText, 140),
         ];
+
+        if ($messageAuthor !== null && trim($messageAuthor) !== '') {
+            $extra['author'] = trim($messageAuthor);
+        }
 
         $options = [
             'threadId' => 'whiteboard-replies',
@@ -448,6 +461,16 @@ final class NotificationService
         }
 
         return mb_substr($trimmed, 0, $maxLength - 1) . '…';
+    }
+
+    private function resolveSenderDescriptor(string $senderEmail, ?string $author): string
+    {
+        $normalizedAuthor = $author !== null ? trim($author) : '';
+        if ($normalizedAuthor !== '') {
+            return $normalizedAuthor;
+        }
+
+        return $this->displayNameForEmail($senderEmail);
     }
 
     private function displayNameForEmail(string $email): string
