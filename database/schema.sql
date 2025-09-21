@@ -66,6 +66,36 @@ INSERT INTO `events` (`id`, `title`, `start_time`, `end_time`, `location`, `desc
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `deals`
+--
+
+CREATE TABLE `deals` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` enum('service','good') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'service',
+  `discount` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `location` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime DEFAULT NULL,
+  `status` enum('pending','approved','declined') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `creator` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `creator_user_id` int(10) UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `deals`
+--
+
+INSERT INTO `deals` (`id`, `name`, `type`, `discount`, `description`, `location`, `start_date`, `end_date`, `status`, `creator`, `creator_user_id`, `created_at`, `updated_at`)
+VALUES
+(1, 'Campus Coffee Happy Hour', 'service', 'Buy 1 get 1 free', 'Bring a friend after 3pm and enjoy a free drink of equal or lesser value.', 'Campus Coffee Cart', '2025-09-20 15:00:00', '2025-10-20 18:00:00', 'approved', 'admin@lse.ac.uk', 1, '2025-09-20 15:10:00', '2025-09-20 15:10:00');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `messages`
 --
 
@@ -215,6 +245,15 @@ ALTER TABLE `events`
   ADD KEY `fk_events_creator_user` (`creator_user_id`);
 
 --
+-- Indexes for table `deals`
+--
+ALTER TABLE `deals`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_deals_status` (`status`),
+  ADD KEY `idx_deals_creator` (`creator`),
+  ADD KEY `idx_deals_start_date` (`start_date`);
+
+--
 -- Indexes for table `messages`
 --
 ALTER TABLE `messages`
@@ -268,6 +307,12 @@ ALTER TABLE `notification_log`
 --
 ALTER TABLE `events`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+
+--
+-- AUTO_INCREMENT for table `deals`
+--
+ALTER TABLE `deals`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `messages`

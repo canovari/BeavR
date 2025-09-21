@@ -11,6 +11,10 @@ $pdo = getPDO();
 // Get selected tab (pending / live / old / map / users)
 $tab = $_GET["tab"] ?? "pending";
 
+$events = [];
+$deals = [];
+$liveUsers = [];
+
 switch ($tab) {
     case "live":
         $stmt = $pdo->prepare("SELECT * FROM events WHERE status = 'approved' AND end_time >= NOW() ORDER BY start_time ASC");
@@ -26,6 +30,7 @@ switch ($tab) {
 
     case "map":
         $events = [];
+        $deals = [];
         break;
 
     case "users":
@@ -37,6 +42,31 @@ switch ($tab) {
         $stmt->execute();
         $liveUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $events = [];
+        $deals = [];
+        break;
+
+    case "deals_pending":
+        $stmt = $pdo->prepare("SELECT * FROM deals WHERE status = 'pending' ORDER BY start_date ASC");
+        $stmt->execute();
+        $deals = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        break;
+
+    case "deals_live":
+        $stmt = $pdo->prepare("SELECT * FROM deals WHERE status = 'approved' AND (end_date IS NULL OR end_date >= NOW()) ORDER BY start_date ASC");
+        $stmt->execute();
+        $deals = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        break;
+
+    case "deals_past":
+        $stmt = $pdo->prepare("SELECT * FROM deals WHERE status = 'approved' AND end_date < NOW() ORDER BY end_date DESC");
+        $stmt->execute();
+        $deals = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        break;
+
+    case "deals_declined":
+        $stmt = $pdo->prepare("SELECT * FROM deals WHERE status = 'declined' ORDER BY updated_at DESC");
+        $stmt->execute();
+        $deals = $stmt->fetchAll(PDO::FETCH_ASSOC);
         break;
 
     default:
@@ -59,6 +89,7 @@ switch ($tab) {
         th { background: #f4f4f4; }
         .approve-btn { background: green; color: white; border: none; padding: 6px 12px; cursor: pointer; }
         .revert-btn { background: orange; color: white; border: none; padding: 6px 12px; cursor: pointer; }
+        .decline-btn { background: #b00020; color: white; border: none; padding: 6px 12px; cursor: pointer; }
         .details-btn { background: blue; color: white; border: none; padding: 6px 12px; cursor: pointer; text-decoration: none; }
         #map { height: 600px; margin-top: 20px; }
     </style>
@@ -74,11 +105,17 @@ switch ($tab) {
         <a href="?tab=pending" <?= $tab === "pending" ? "style='color:red'" : "" ?>>Pending</a>
         <a href="?tab=live" <?= $tab === "live" ? "style='color:red'" : "" ?>>Live</a>
         <a href="?tab=old" <?= $tab === "old" ? "style='color:red'" : "" ?>>Old</a>
+        <a href="?tab=deals_pending" <?= $tab === "deals_pending" ? "style='color:red'" : "" ?>>Deals Pending</a>
+        <a href="?tab=deals_live" <?= $tab === "deals_live" ? "style='color:red'" : "" ?>>Deals Active</a>
+        <a href="?tab=deals_past" <?= $tab === "deals_past" ? "style='color:red'" : "" ?>>Deals Past</a>
+        <a href="?tab=deals_declined" <?= $tab === "deals_declined" ? "style='color:red'" : "" ?>>Deals Declined</a>
         <a href="?tab=map" <?= $tab === "map" ? "style='color:red'" : "" ?>>Live Users Map</a>
         <a href="?tab=users" <?= $tab === "users" ? "style='color:red'" : "" ?>>Live Users</a>
         <a href="notifications.php">Notifications</a>
         <a href="logout.php" style="float:right">Logout</a>
     </nav>
+
+    <?php $isDealsTab = strpos($tab, 'deals_') === 0; ?>
 
     <?php if ($tab === "map"): ?>
         <div id="map"></div>
@@ -126,6 +163,53 @@ switch ($tab) {
                 <?php endforeach; ?>
             <?php else: ?>
                 <tr><td colspan="5">No users active in the last minute.</td></tr>
+            <?php endif; ?>
+        </table>
+
+    <?php elseif ($isDealsTab): ?>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Discount</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            <?php if (!empty($deals)): ?>
+                <?php foreach ($deals as $d): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($d['id']) ?></td>
+                        <td><?= htmlspecialchars($d['name'] ?? '') ?></td>
+                        <td><?= htmlspecialchars(isset($d['type']) ? ucfirst((string)$d['type']) : '') ?></td>
+                        <td><?= htmlspecialchars($d['discount'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($d['start_date'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($d['end_date'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($d['status'] ?? '') ?></td>
+                        <td>
+                            <a class="details-btn" href="deal_details.php?id=<?= $d['id'] ?>">Details</a>
+                            <?php if ($tab === "deals_pending"): ?>
+                                <form action="deals_approve.php" method="post" style="display:inline">
+                                    <input type="hidden" name="id" value="<?= $d['id'] ?>">
+                                    <button type="submit" class="approve-btn">Approve</button>
+                                </form>
+                                <form action="deals_decline.php" method="post" style="display:inline">
+                                    <input type="hidden" name="id" value="<?= $d['id'] ?>">
+                                    <button type="submit" class="decline-btn">Decline</button>
+                                </form>
+                            <?php elseif ($tab === "deals_live"): ?>
+                                <form action="deals_decline.php" method="post" style="display:inline">
+                                    <input type="hidden" name="id" value="<?= $d['id'] ?>">
+                                    <button type="submit" class="decline-btn">Decline</button>
+                                </form>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <tr><td colspan="8">No deals to display.</td></tr>
             <?php endif; ?>
         </table>
 

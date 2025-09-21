@@ -6,6 +6,7 @@ struct LaunchView: View {
     @State private var fadeBackground = false
     @State private var hideLaunchContent = false
     @StateObject private var viewModel = PostListViewModel() // preload in background
+    @StateObject private var dealsViewModel = DealListViewModel()
     @StateObject private var authViewModel = AuthViewModel()
     @EnvironmentObject private var locationManager: LocationManager
     @Environment(\.scenePhase) private var scenePhase
@@ -13,7 +14,7 @@ struct LaunchView: View {
     var body: some View {
         ZStack {
             if authViewModel.isLoggedIn {
-                MainTabView(viewModel: viewModel)
+                MainTabView(eventsViewModel: viewModel, dealsViewModel: dealsViewModel)
                     .environmentObject(authViewModel)
             } else {
                 LoginFlowView(viewModel: authViewModel)
@@ -28,6 +29,7 @@ struct LaunchView: View {
         .onAppear {
             // Preload
             viewModel.fetchPosts()
+            dealsViewModel.fetchDeals()
             authViewModel.loadExistingSession()
 
             if authViewModel.isLoggedIn {
