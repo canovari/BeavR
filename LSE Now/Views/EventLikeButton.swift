@@ -5,8 +5,10 @@ struct EventLikeButton: View {
     let likeCount: Int
     let isLoading: Bool
     let action: () -> Void
+    var iconSize: CGFloat = 18
 
     @State private var animate = false
+    @State private var showCount = false
 
     var body: some View {
         Button {
@@ -21,19 +23,22 @@ struct EventLikeButton: View {
                             .scaleEffect(0.6)
                     } else {
                         Image(systemName: isLiked ? "heart.fill" : "heart")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: iconSize, weight: .semibold))
                             .foregroundColor(isLiked ? Color("LSERed") : .secondary)
                     }
                 }
 
-                Text("\(likeCount)")
-                    .font(.footnote)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.primary)
+                if showCount {
+                    Text("\(sanitizedLikeCount)")
+                        .font(.footnote)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                        .transition(.move(edge: .trailing).combined(with: .opacity))
+                }
             }
-            .padding(.horizontal, 10)
+            .padding(.horizontal, 6)
             .padding(.vertical, 6)
-            .background(.ultraThinMaterial, in: Capsule())
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .scaleEffect(animate ? 1.15 : 1.0)
@@ -46,9 +51,35 @@ struct EventLikeButton: View {
                 animate = false
             }
         }
+        .onAppear {
+            showCount = sanitizedLikeCount > 0
+        }
+        .onChange(of: likeCount) { newValue in
+            let sanitizedValue = max(newValue, 0)
+            let shouldShow = sanitizedValue > 0
+
+            let animation: Animation = shouldShow && !showCount
+                ? .spring(response: 0.35, dampingFraction: 0.7, blendDuration: 0.2)
+                : .easeInOut(duration: 0.2)
+
+            withAnimation(animation) {
+                showCount = shouldShow
+            }
+        }
         .animation(.easeInOut(duration: 0.2), value: isLoading)
         .disabled(isLoading)
         .accessibilityLabel(Text(isLiked ? "Unlike event" : "Like event"))
-        .accessibilityValue(Text("\(likeCount) likes"))
+        .accessibilityValue(Text(accessibilityValueText))
+    }
+
+    private var sanitizedLikeCount: Int {
+        max(likeCount, 0)
+    }
+
+    private var accessibilityValueText: String {
+        if sanitizedLikeCount == 0 {
+            return "No likes yet"
+        }
+        return "\(sanitizedLikeCount) likes"
     }
 }
