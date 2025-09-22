@@ -5,6 +5,7 @@ struct MessagesInboxView: View {
     @ObservedObject var viewModel: MessagesInboxViewModel
 
     let token: String
+    @Binding var hasUnreadMessages: Bool
 
     @State private var selectedFolder: MessagesInboxViewModel.Folder = .received
 
@@ -26,8 +27,25 @@ struct MessagesInboxView: View {
                 Spacer(minLength: 0)
             }
             .background(Color(.systemGroupedBackground).ignoresSafeArea())
-            .navigationTitle("Messages")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Messages")
+                        .font(.headline)
+                        .overlay(alignment: .topTrailing) {
+                            if hasUnreadMessages {
+                                Circle()
+                                    .fill(Color.red)
+                                    .frame(width: 10, height: 10)
+                                    .offset(x: 8, y: -8)
+                            }
+                        }
+                        .accessibilityLabel(
+                            hasUnreadMessages
+                                ? "Messages, new messages available"
+                                : "Messages"
+                        )
+                }
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close") { dismiss() }
                 }
@@ -59,6 +77,9 @@ struct MessagesInboxView: View {
                 Text(viewModel.errorMessage ?? "")
             }
         }
+        .onAppear {
+            hasUnreadMessages = false
+        }
     }
 
     @ViewBuilder
@@ -87,6 +108,8 @@ struct MessagesInboxView: View {
                 }
             }
             .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            .background(Color(.systemGroupedBackground))
             .refreshable {
                 await viewModel.fetchMessages(folder: selectedFolder, token: token)
             }
