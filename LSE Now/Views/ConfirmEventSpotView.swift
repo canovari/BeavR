@@ -11,6 +11,7 @@ struct ConfirmEventSpotView: View {
     @State private var currentSearch: MKLocalSearch?
     @State private var shouldSkipNextReverseGeocode = false
     @State private var isGeocoding = false
+    @State private var hasPendingSearch = false
     @StateObject private var locationSearchCompleter = LocationSearchCompleter()
     @FocusState private var isAddressFieldFocused: Bool
 
@@ -22,6 +23,8 @@ struct ConfirmEventSpotView: View {
     @EnvironmentObject private var locationManager: LocationManager
 
     private let defaultSpan = MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
+    private let mapHeight: CGFloat = 280
+    private let minimumSearchSpanDelta: CLLocationDegrees = 0.02
 
     private var shouldShowSuggestions: Bool {
         isAddressFieldFocused && !locationSearchCompleter.suggestions.isEmpty
@@ -114,39 +117,33 @@ struct ConfirmEventSpotView: View {
     }
 
     private var searchSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 8) {
-                TextField("Search for a place or address", text: $locationText)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .submitLabel(.search)
-                    .autocorrectionDisabled(true)
-                    .textInputAutocapitalization(.words)
-                    .focused($isAddressFieldFocused)
-                    .onSubmit {
-                        isAddressFieldFocused = false
-                        searchForAddress()
-                    }
-
-                Button {
+        HStack(spacing: 8) {
+            TextField("Search for a place or address", text: $locationText)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .submitLabel(.search)
+                .autocorrectionDisabled(true)
+                .textInputAutocapitalization(.words)
+                .focused($isAddressFieldFocused)
+                .onSubmit {
                     isAddressFieldFocused = false
                     searchForAddress()
-                } label: {
-                    if isGeocoding {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle())
-                    } else {
-                        Image(systemName: "magnifyingglass")
-                    }
                 }
-                .frame(width: 44, height: 44)
-                .background(Color(.systemGray5))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .disabled(locationText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isGeocoding)
-            }
 
-            if shouldShowSuggestions {
-                suggestionList
+            Button {
+                isAddressFieldFocused = false
+                searchForAddress()
+            } label: {
+                if isGeocoding {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                } else {
+                    Image(systemName: "magnifyingglass")
+                }
             }
+            .frame(width: 44, height: 44)
+            .background(Color(.systemGray5))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .disabled(locationText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isGeocoding)
         }
     }
 
@@ -180,6 +177,7 @@ struct ConfirmEventSpotView: View {
     }
 
     private func applySuggestion(_ suggestion: LocationSuggestion) {
+        hasPendingSearch = false
         isAddressFieldFocused = false
 
         let suggestionText = suggestion.displayText
@@ -216,27 +214,34 @@ struct ConfirmEventSpotView: View {
     }
 
     private var mapContent: some View {
-        ZStack {
-            Map(position: $cameraPosition, interactionModes: .all) {
-                if isLocationAuthorized {
-                    UserAnnotation()
-                }
+        Map(position: $cameraPosition, interactionModes: .all) {
+            if isLocationAuthorized {
+                UserAnnotation()
             }
-            .frame(height: 360)
-            .cornerRadius(12)
-            .shadow(radius: 3)
-            .onMapCameraChange { context in
-                guard let newRegion = context.region as MKCoordinateRegion? else { return }
-                region = newRegion
-                locationSearchCompleter.updateRegion(newRegion)
-                regionCenterChanged(to: newRegion.center)
+        }
+        .frame(height: mapHeight)
+        .cornerRadius(12)
+        .shadow(radius: 3)
+        .onMapCameraChange { context in
+            guard let newRegion = context.region as MKCoordinateRegion? else { return }
+            region = newRegion
+            locationSearchCompleter.updateRegion(newRegion)
+            regionCenterChanged(to: newRegion.center)
+        }
+        .mapControls {
+            if isLocationAuthorized {
+                MapUserLocationButton()
             }
-            .mapControls {
-                if isLocationAuthorized {
-                    MapUserLocationButton()
-                }
+        }
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 1).onChanged { _ in
+                dismissKeyboard()
             }
-
+        )
+        .onTapGesture {
+            dismissKeyboard()
+        }
+        .overlay(alignment: .center) {
             Circle()
                 .fill(Color("LSERed"))
                 .frame(width: 14, height: 14)
@@ -244,6 +249,14 @@ struct ConfirmEventSpotView: View {
                     Circle().stroke(Color.white, lineWidth: 2)
                 )
                 .shadow(radius: 1)
+        }
+        .overlay(alignment: .top) {
+            if shouldShowSuggestions {
+                suggestionList
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 12)
+                    .padding(.top, 12)
+            }
         }
     }
 
@@ -290,6 +303,7 @@ struct ConfirmEventSpotView: View {
     }
 
     private func searchForAddress(query providedQuery: String? = nil) {
+        hasPendingSearch = false
         let rawQuery = providedQuery ?? locationText
         let query = rawQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else { return }
@@ -305,7 +319,7 @@ struct ConfirmEventSpotView: View {
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = query
         request.resultTypes = [.address, .pointOfInterest]
-        request.region = region
+        request.region = normalizedRegion(for: region)
 
         let search = MKLocalSearch(request: request)
         currentSearch = search
@@ -347,18 +361,34 @@ struct ConfirmEventSpotView: View {
                     return
                 }
 
-                defer { isGeocoding = false }
+                if self.isAddressFieldFocused {
+                    self.isGeocoding = false
+                    return
+                }
+
+                defer { self.isGeocoding = false }
 
                 guard let placemark = placemarks?.first,
                       let location = placemark.location,
                       error == nil else {
-                    searchError = "Unable to find that place. Try again."
+                    self.searchError = "Unable to find that place. Try again."
                     return
                 }
 
-                updateMap(for: location.coordinate, with: placemark)
+                self.updateMap(for: location.coordinate, with: placemark)
             }
         }
+    }
+
+    private func normalizedRegion(for region: MKCoordinateRegion) -> MKCoordinateRegion {
+        let span = region.span
+        let latitudeDelta = max(span.latitudeDelta, minimumSearchSpanDelta)
+        let longitudeDelta = max(span.longitudeDelta, minimumSearchSpanDelta)
+
+        return MKCoordinateRegion(
+            center: region.center,
+            span: MKCoordinateSpan(latitudeDelta: latitudeDelta, longitudeDelta: longitudeDelta)
+        )
     }
 
     private func updateMap(for coordinate: CLLocationCoordinate2D, with placemark: CLPlacemark?) {
@@ -380,10 +410,13 @@ struct ConfirmEventSpotView: View {
 
         locationSearchCompleter.updateRegion(newRegion)
 
-        if let placemark {
-            locationText = formattedAddress(from: placemark)
-        } else {
-            locationText = fallbackAddress(for: targetCoordinate)
+        if !isAddressFieldFocused {
+            if let placemark {
+                locationText = formattedAddress(from: placemark)
+            } else {
+                locationText = fallbackAddress(for: targetCoordinate)
+            }
+            hasPendingSearch = false
         }
 
         searchError = nil
@@ -418,15 +451,21 @@ struct ConfirmEventSpotView: View {
                     return
                 }
 
-                isGeocoding = false
+                if self.isAddressFieldFocused {
+                    self.isGeocoding = false
+                    return
+                }
+
+                self.isGeocoding = false
 
                 if let placemark = placemarks?.first, error == nil {
-                    locationText = formattedAddress(from: placemark)
-                    searchError = nil
+                    self.locationText = self.formattedAddress(from: placemark)
+                    self.searchError = nil
+                    self.hasPendingSearch = false
                 } else {
-                    searchError = "We couldn't determine an address here."
-                    if locationText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        locationText = fallbackAddress(for: coordinate)
+                    self.searchError = "We couldn't determine an address here."
+                    if self.locationText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        self.locationText = self.fallbackAddress(for: coordinate)
                     }
                 }
             }
@@ -447,6 +486,12 @@ struct ConfirmEventSpotView: View {
     private func handleLocationTextChange(_ newValue: String) {
         let trimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
 
+        if isAddressFieldFocused {
+            hasPendingSearch = !trimmed.isEmpty
+        } else {
+            hasPendingSearch = false
+        }
+
         if trimmed.isEmpty {
             locationSearchCompleter.clear()
             return
@@ -466,7 +511,26 @@ struct ConfirmEventSpotView: View {
                 locationSearchCompleter.update(query: trimmed)
             }
         } else {
+            performSearchForPendingTextIfNeeded()
             locationSearchCompleter.clear()
+        }
+    }
+
+    private func performSearchForPendingTextIfNeeded() {
+        guard hasPendingSearch else { return }
+
+        let trimmed = locationText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            hasPendingSearch = false
+            return
+        }
+
+        searchForAddress(query: trimmed)
+    }
+
+    private func dismissKeyboard() {
+        if isAddressFieldFocused {
+            isAddressFieldFocused = false
         }
     }
 
