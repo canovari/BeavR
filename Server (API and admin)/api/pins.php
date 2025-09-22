@@ -124,6 +124,68 @@ if ($method === "POST") {
     exit;
 }
 
+if ($method === "DELETE") {
+    $token = extractBearerToken();
+    if ($token === null) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Missing bearer token.']);
+        exit;
+    }
+
+    $user = fetchUserByToken($pdo, $token);
+    if ($user === null) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Invalid or expired token.']);
+        exit;
+    }
+
+    if (userIsBanned($user)) {
+        http_response_code(403);
+        echo json_encode(['error' => ACCOUNT_SUSPENDED_MESSAGE]);
+        exit;
+    }
+
+    $payload = json_decode(file_get_contents('php://input'), true);
+
+    if (!$payload || !isset($payload['id'])) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Missing pin id.']);
+        exit;
+    }
+
+    $pinId = (int) $payload['id'];
+    if ($pinId <= 0) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Invalid pin id.']);
+        exit;
+    }
+
+    $stmt = $pdo->prepare('SELECT creator_email FROM pins WHERE id = :id LIMIT 1');
+    $stmt->execute([':id' => $pinId]);
+    $pin = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$pin) {
+        http_response_code(404);
+        echo json_encode(['error' => 'Pin not found.']);
+        exit;
+    }
+
+    $creatorEmail = strtolower(trim((string) $pin['creator_email']));
+    $requesterEmail = strtolower(trim((string) $user['email']));
+
+    if ($creatorEmail === '' || $creatorEmail !== $requesterEmail) {
+        http_response_code(403);
+        echo json_encode(['error' => 'You can only delete pins you created.']);
+        exit;
+    }
+
+    $deleteStmt = $pdo->prepare('DELETE FROM pins WHERE id = :id LIMIT 1');
+    $deleteStmt->execute([':id' => $pinId]);
+
+    echo json_encode(['success' => true]);
+    exit;
+}
+
 http_response_code(405);
 echo json_encode(["error" => "Method not allowed"]);
 

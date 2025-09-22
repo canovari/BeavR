@@ -267,6 +267,20 @@ final class APIService {
         return try decoder.decode(WhiteboardPin.self, from: data)
     }
 
+    func deletePin(id: Int, token: String) async throws {
+        let endpoint = baseURL.appendingPathComponent("pins.php")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "DELETE"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        setAuthorizationHeader(on: &request, token: token)
+
+        let encoder = JSONEncoder()
+        request.httpBody = try encoder.encode(DeletePinRequest(id: id))
+
+        _ = try await perform(request: request)
+    }
+
     // MARK: - Messages
     func sendPinReply(payload: PinReplyPayload, token: String) async throws -> WhiteboardMessage {
         let endpoint = baseURL.appendingPathComponent("messages.php")
@@ -521,6 +535,10 @@ struct CreatePinRequest: Encodable {
     let creatorEmail: String
     let gridRow: Int
     let gridCol: Int
+}
+
+private struct DeletePinRequest: Encodable {
+    let id: Int
 }
 
 struct PinReplyPayload: Encodable {
