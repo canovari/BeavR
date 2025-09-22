@@ -48,7 +48,7 @@ struct EventLikeButton: View {
                 }
             }
             .padding(.horizontal, 6)
-            .padding(.vertical, 6)
+            .padding(.vertical, 4)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

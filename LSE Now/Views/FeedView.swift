@@ -130,7 +130,7 @@ struct FeedView: View {
                                             .foregroundColor(.secondary)
                                     }
 
-                                    HStack(alignment: .firstTextBaseline) {
+                                    HStack {
                                         dateOrLiveView(for: post)
                                             .font(.subheadline)
 
@@ -142,9 +142,6 @@ struct FeedView: View {
                                             isLoading: vm.isUpdatingLike(for: post.id),
                                             action: { handleLike(for: post) }
                                         )
-                                        .alignmentGuide(.firstTextBaseline) { context in
-                                            context[VerticalAlignment.center] - 1
-                                        }
                                     }
                                     .padding(.top, 8)
                                 }
