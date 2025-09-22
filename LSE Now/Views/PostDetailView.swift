@@ -1,16 +1,17 @@
 import SwiftUI
 import MapKit
 import UIKit
+import Combine
 
 struct PostDetailView: View {
     @EnvironmentObject private var authViewModel: AuthViewModel
 
-    private let viewModel: PostListViewModel?
+    @ObservedObject private var viewModel: PostListViewModel
     @State private var currentPost: Post
     @State private var showLoginAlert = false
 
-    init(post: Post, viewModel: PostListViewModel?) {
-        self.viewModel = viewModel
+    init(post: Post, viewModel: PostListViewModel) {
+        _viewModel = ObservedObject(wrappedValue: viewModel)
         _currentPost = State(initialValue: post)
     }
 
@@ -86,6 +87,11 @@ struct PostDetailView: View {
                 )
             }
         }
+        .onReceive(viewModel.$posts) { _ in
+            if let updatedPost = viewModel.post(withID: currentPost.id) {
+                currentPost = updatedPost
+            }
+        }
     }
 
     private var headerSection: some View {
@@ -111,12 +117,10 @@ struct PostDetailView: View {
     }
 
     private var isUpdatingLike: Bool {
-        viewModel?.isUpdatingLike(for: currentPost.id) ?? false
+        viewModel.isUpdatingLike(for: currentPost.id)
     }
 
     private func toggleLike() {
-        guard let viewModel else { return }
-
         guard let token = authViewModel.token else {
             showLoginAlert = true
             return

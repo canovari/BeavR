@@ -10,6 +10,7 @@ struct EventLikeButton: View {
     @State private var heartOpacity = 1.0
     @State private var fadeAnimationID = 0
     @State private var showCount = false
+    @State private var maxCountDigits = 1
 
     var body: some View {
         Button {
@@ -21,7 +22,7 @@ struct EventLikeButton: View {
                     if isLoading {
                         ProgressView()
                             .progressViewStyle(.circular)
-                            .scaleEffect(0.6)
+                            .scaleEffect(progressScale)
                     } else {
                         Image(systemName: isLiked ? "heart.fill" : "heart")
                             .font(.system(size: iconSize, weight: .semibold))
@@ -29,13 +30,21 @@ struct EventLikeButton: View {
                             .opacity(heartOpacity)
                     }
                 }
+                .frame(width: iconFrameSize, height: iconFrameSize)
 
-                if showCount {
-                    Text("\(sanitizedLikeCount)")
+                ZStack(alignment: .trailing) {
+                    if showCount {
+                        Text("\(sanitizedLikeCount)")
+                            .font(.footnote)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+                            .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .trailing)))
+                    }
+
+                    Text(countPlaceholder)
                         .font(.footnote)
                         .fontWeight(.semibold)
-                        .foregroundColor(.primary)
-                        .transition(.move(edge: .trailing).combined(with: .opacity))
+                        .opacity(0)
                 }
             }
             .padding(.horizontal, 6)
@@ -60,11 +69,14 @@ struct EventLikeButton: View {
         }
         .onAppear {
             heartOpacity = 1.0
+            updateMaxDigits(with: sanitizedLikeCount)
             showCount = sanitizedLikeCount > 0
         }
         .onChange(of: likeCount) { newValue in
             let sanitizedValue = max(newValue, 0)
             let shouldShow = sanitizedValue > 0
+
+            updateMaxDigits(with: sanitizedValue)
 
             let animation: Animation = shouldShow && !showCount
                 ? .spring(response: 0.35, dampingFraction: 0.7, blendDuration: 0.2)
@@ -86,6 +98,26 @@ struct EventLikeButton: View {
 
     private var sanitizedLikeCount: Int {
         max(likeCount, 0)
+    }
+
+    private var iconFrameSize: CGFloat {
+        iconSize + 8
+    }
+
+    private var progressScale: CGFloat {
+        max((iconSize / 18) * 0.6, 0.5)
+    }
+
+    private var countPlaceholder: String {
+        guard maxCountDigits > 0 else { return "" }
+        return String(repeating: "8", count: maxCountDigits)
+    }
+
+    private func updateMaxDigits(with value: Int) {
+        let digits = max(1, String(value).count)
+        if digits > maxCountDigits {
+            maxCountDigits = digits
+        }
     }
 
     private var accessibilityValueText: String {
