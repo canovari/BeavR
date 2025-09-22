@@ -34,7 +34,7 @@ struct EventLikeButton: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .onChange(of: isLiked) { _ in
+        .onChange(of: isLiked) { _, _ in
             fadeAnimationID += 1
             let currentID = fadeAnimationID
 
@@ -56,7 +56,7 @@ struct EventLikeButton: View {
             showCount = shouldShow
             countOpacity = shouldShow ? 1 : 0
         }
-        .onChange(of: likeCount) { newValue in
+        .onChange(of: likeCount) { _, newValue in
             let sanitizedValue = max(newValue, 0)
             let shouldShow = sanitizedValue > 0
 
@@ -100,6 +100,10 @@ struct EventLikeButton: View {
 
     private var iconFrameSize: CGFloat {
         iconSize + 8
+    }
+
+    private var progressScale: CGFloat {
+        max(iconSize / 16, 0.6)
     }
 
     private var countPlaceholder: String {
