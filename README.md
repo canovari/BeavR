@@ -20,7 +20,7 @@ Request a new verification code. Parameters:
 
 | Field | Description |
 | --- | --- |
-| `email` | LSE email address (`@lse.ac.uk`). |
+| `email` | Email address to send the login code to. |
 
 Successful response:
 
@@ -31,7 +31,7 @@ Successful response:
 Example error response (`400 Bad Request`):
 
 ```json
-{ "error": "Invalid email domain." }
+{ "error": "Invalid email address." }
 ```
 
 The endpoint generates a 6-digit code, stores it along with a 5-minute expiry window, and sends the email from `noreply@beavr.net`.
@@ -59,7 +59,7 @@ This endpoint manages event submissions and retrieval:
 
 * `POST api/events.php`
   * Requires an `Authorization: Bearer <token>` header with a valid login token.
-  * Accepts a JSON payload with the event details plus a `creator` field (the LSE email of the submitter). The server always persists the authenticated email in the `creator` column so the event can be tied back to the user.
+  * Accepts a JSON payload with the event details plus a `creator` field (the email of the submitter). The server always persists the authenticated email in the `creator` column so the event can be tied back to the user.
   * Stores the event as `pending` and returns the new event id.
 * `GET api/events.php`
   * Returns all live events for the public feed.
@@ -79,7 +79,7 @@ The schema creates a `users` table with the fields required for the flow plus a 
 
 The SwiftUI app now checks for a stored login token on launch. If a token exists, the user is taken directly to the main experience. Otherwise a two-step login flow is presented:
 
-1. Enter an `@lse.ac.uk` email address to trigger `request_code.php`.
+1. Enter an email address to trigger `request_code.php`.
 2. Enter the six-digit code from the email to call `verify_code.php`.
 
 After successful verification the login token is saved locally (via `UserDefaults`), so future launches bypass the login flow until the app is reinstalled.
