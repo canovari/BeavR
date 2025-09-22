@@ -8,11 +8,38 @@ struct PostDetailView: View {
 
     @ObservedObject private var viewModel: PostListViewModel
     @State private var currentPost: Post
+    @State private var likeState: LikeState
+    @State private var pendingLikeUpdate = false
     @State private var showLoginAlert = false
+
+    private struct LikeState {
+        var count: Int
+        var isLiked: Bool
+
+        init(count: Int, isLiked: Bool) {
+            self.count = max(0, count)
+            self.isLiked = isLiked
+        }
+
+        init(post: Post) {
+            self.init(count: post.likesCount, isLiked: post.likedByMe)
+        }
+    }
 
     init(post: Post, viewModel: PostListViewModel) {
         _viewModel = ObservedObject(wrappedValue: viewModel)
-        _currentPost = State(initialValue: post)
+        let sanitizedPost: Post
+        if post.likesCount >= 0 {
+            sanitizedPost = post
+        } else {
+            sanitizedPost = post.updatingLikeState(
+                likesCount: max(0, post.likesCount),
+                likedByMe: post.likedByMe
+            )
+        }
+
+        _currentPost = State(initialValue: sanitizedPost)
+        _likeState = State(initialValue: LikeState(post: sanitizedPost))
     }
 
     var body: some View {
@@ -78,18 +105,21 @@ struct PostDetailView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .eventLikeStatusDidChange)) { notification in
             guard let change = EventLikeChange.from(notification), change.eventID == currentPost.id else { return }
+            pendingLikeUpdate = false
+
             if let updated = change.post {
-                currentPost = updated
+                updateCurrentPost(updated)
             } else {
-                currentPost = currentPost.updatingLikeState(
-                    likesCount: change.likeCount,
-                    likedByMe: change.isLiked
-                )
+                updateLikeState(isLiked: change.isLiked, likeCount: change.likeCount, animated: false)
             }
         }
         .onReceive(viewModel.$posts) { _ in
-            if let updatedPost = viewModel.post(withID: currentPost.id) {
-                currentPost = updatedPost
+            guard let updatedPost = viewModel.post(withID: currentPost.id) else { return }
+
+            if pendingLikeUpdate {
+                updateCurrentPost(updatedPost, overridingLikeState: likeState)
+            } else {
+                updateCurrentPost(updatedPost)
             }
         }
     }
@@ -104,8 +134,8 @@ struct PostDetailView: View {
             Spacer(minLength: 12)
 
             EventLikeButton(
-                isLiked: currentPost.likedByMe,
-                likeCount: currentPost.likesCount,
+                isLiked: likeState.isLiked,
+                likeCount: likeState.count,
                 isLoading: isUpdatingLike,
                 action: toggleLike,
                 iconSize: 22
@@ -127,27 +157,81 @@ struct PostDetailView: View {
         }
 
         let originalPost = currentPost
-        let targetIsLiked = !originalPost.likedByMe
+        let targetIsLiked = !likeState.isLiked
         let delta = targetIsLiked ? 1 : -1
-        let updatedCount = max(0, originalPost.likesCount + delta)
+        let updatedCount = likeState.count + delta
 
-        withAnimation(.easeInOut(duration: 0.2)) {
-            currentPost = originalPost.updatingLikeState(
-                likesCount: updatedCount,
-                likedByMe: targetIsLiked
-            )
-        }
+        pendingLikeUpdate = true
+        updateLikeState(
+            isLiked: targetIsLiked,
+            likeCount: updatedCount,
+            basePost: originalPost,
+            animated: true
+        )
 
         Task {
             await viewModel.toggleLike(for: originalPost, token: token)
             await MainActor.run {
                 if let message = viewModel.likeErrorMessage, !message.isEmpty {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        currentPost = originalPost
-                    }
+                    pendingLikeUpdate = false
+                    updateCurrentPost(originalPost, animated: true)
                 }
             }
         }
+    }
+
+    private func updateCurrentPost(
+        _ post: Post,
+        animated: Bool = false,
+        overridingLikeState override: LikeState? = nil
+    ) {
+        let sanitizedOverride = override.map { LikeState(count: $0.count, isLiked: $0.isLiked) }
+
+        let sanitizedPost: Post
+        let resultingLikeState: LikeState
+
+        if let sanitizedOverride {
+            sanitizedPost = post.updatingLikeState(
+                likesCount: sanitizedOverride.count,
+                likedByMe: sanitizedOverride.isLiked
+            )
+            resultingLikeState = sanitizedOverride
+        } else {
+            let sanitizedCount = max(post.likesCount, 0)
+            if sanitizedCount == post.likesCount {
+                sanitizedPost = post
+            } else {
+                sanitizedPost = post.updatingLikeState(
+                    likesCount: sanitizedCount,
+                    likedByMe: post.likedByMe
+                )
+            }
+            resultingLikeState = LikeState(post: sanitizedPost)
+        }
+
+        let performUpdate = {
+            currentPost = sanitizedPost
+            likeState = resultingLikeState
+        }
+
+        if animated {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                performUpdate()
+            }
+        } else {
+            performUpdate()
+        }
+    }
+
+    private func updateLikeState(
+        isLiked: Bool,
+        likeCount: Int,
+        basePost: Post? = nil,
+        animated: Bool = true
+    ) {
+        let override = LikeState(count: likeCount, isLiked: isLiked)
+        let targetPost = basePost ?? currentPost
+        updateCurrentPost(targetPost, animated: animated, overridingLikeState: override)
     }
 
     @ViewBuilder
