@@ -146,7 +146,7 @@ struct FeedView: View {
                                     .padding(.top, 8)
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding()
+                                .padding(EdgeInsets(top: 16, leading: 16, bottom: 10, trailing: 16))
                                 .background(Color(.systemBackground))
                                 .cornerRadius(12)
                                 .shadow(radius: 1)
