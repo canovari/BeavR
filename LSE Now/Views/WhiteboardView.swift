@@ -12,6 +12,10 @@ struct WhiteboardView: View {
     @State private var showingInbox = false
     @State private var showingHowItWorks = false
     @State private var hasUnreadMessages = false
+    @State private var highlightedPinID: Int?
+    @State private var highlightPhase: Double = 0
+    @State private var livePinsAlertMessage: String?
+    @State private var highlightResetWorkItem: DispatchWorkItem?
 
     private let rows = WhiteboardGridConfiguration.rows
     private let columns = WhiteboardGridConfiguration.columns
@@ -24,9 +28,17 @@ struct WhiteboardView: View {
         return token
     }
 
+    private var rawLoggedInEmail: String? {
+        authViewModel.loggedInEmail ?? authViewModel.email
+    }
+
     private var normalizedLoggedInEmail: String {
-        let rawEmail = authViewModel.loggedInEmail ?? authViewModel.email
+        let rawEmail = rawLoggedInEmail ?? ""
         return rawEmail.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+    }
+
+    private var myActivePinCount: Int {
+        viewModel.activePinCount(forCreatorEmail: rawLoggedInEmail)
     }
 
     var body: some View {
@@ -39,6 +51,8 @@ struct WhiteboardView: View {
                     VStack(spacing: 24) {
                         pinboardGrid
                             .padding(.top, 24)
+
+                        livePinsButton
 
                         howItWorksButton
 
@@ -54,6 +68,23 @@ struct WhiteboardView: View {
                 .refreshable {
                     await refreshPins()
                 }
+            }
+            .alert(
+                "Live Pins",
+                isPresented: Binding(
+                    get: { livePinsAlertMessage != nil },
+                    set: { newValue in
+                        if !newValue {
+                            livePinsAlertMessage = nil
+                        }
+                    }
+                )
+            ) {
+                Button("OK", role: .cancel) {
+                    livePinsAlertMessage = nil
+                }
+            } message: {
+                Text(livePinsAlertMessage ?? "")
             }
             .navigationTitle("Pinboard")
             .toolbar {
@@ -158,6 +189,18 @@ struct WhiteboardView: View {
         }
         .onChange(of: viewModel.pins) { _, newPins in
             seenPinsStore.sync(with: newPins)
+
+            if let highlightedPinID = self.highlightedPinID,
+               !newPins.contains(where: { $0.id == highlightedPinID }) {
+                highlightResetWorkItem?.cancel()
+                highlightResetWorkItem = nil
+                self.highlightedPinID = nil
+                highlightPhase = 0
+            }
+        }
+        .onDisappear {
+            highlightResetWorkItem?.cancel()
+            highlightResetWorkItem = nil
         }
     }
 
@@ -169,6 +212,23 @@ struct WhiteboardView: View {
         TimelineView(.periodic(from: .now, by: 30)) { timeline in
             gridBody(referenceDate: timeline.date)
         }
+    }
+
+    private var livePinsButton: some View {
+        Button {
+            handleLivePinsButtonTap()
+        } label: {
+            Text("LIVE PINS: \(myActivePinCount)/1")
+                .font(.headline)
+                .monospacedDigit()
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.borderedProminent)
+        .controlSize(.large)
+        .padding(.horizontal, 16)
+        .accessibilityLabel("Show your live pin status")
+        .accessibilityValue("\(myActivePinCount) of 1 live pins active")
+        .accessibilityHint("Highlights your current pin if you have one")
     }
 
     private var howItWorksButton: some View {
@@ -198,7 +258,9 @@ struct WhiteboardView: View {
                         pin: pin,
                         isMine: !normalizedLoggedInEmail.isEmpty && pin.creatorEmail == normalizedLoggedInEmail,
                         isSeen: seenPinsStore.isPinSeen(pin.id),
-                        referenceDate: referenceDate
+                        referenceDate: referenceDate,
+                        isHighlighted: pin.id == highlightedPinID,
+                        highlightPhase: highlightPhase
                     )
                     .onTapGesture {
                         seenPinsStore.markPinAsSeen(pin)
@@ -207,8 +269,7 @@ struct WhiteboardView: View {
                 } else {
                     EmptySlotCell()
                         .onTapGesture {
-                            guard activeToken != nil else { return }
-                            addTarget = coordinate
+                            handleEmptySlotTap(at: coordinate)
                         }
                 }
             }
@@ -221,6 +282,53 @@ struct WhiteboardView: View {
         )
         .padding(.horizontal, 16)
         .animation(.easeInOut(duration: 0.2), value: viewModel.pins)
+    }
+
+    private func handleLivePinsButtonTap() {
+        guard let pin = viewModel.firstActivePin(forCreatorEmail: rawLoggedInEmail) else {
+            livePinsAlertMessage = "You have no live pins right now."
+            return
+        }
+        startHighlight(for: pin)
+    }
+
+    private func handleEmptySlotTap(at coordinate: WhiteboardCoordinate) {
+        guard activeToken != nil else { return }
+
+        if viewModel.hasActivePin(forCreatorEmail: rawLoggedInEmail) {
+            livePinsAlertMessage = WhiteboardViewModelError.pinLimitReached.errorDescription ??
+                "You already have a live pin. Delete it or wait for it to expire."
+            if let pin = viewModel.firstActivePin(forCreatorEmail: rawLoggedInEmail) {
+                startHighlight(for: pin)
+            }
+            return
+        }
+
+        addTarget = coordinate
+    }
+
+    private func startHighlight(for pin: WhiteboardPin) {
+        highlightResetWorkItem?.cancel()
+
+        highlightedPinID = pin.id
+        highlightPhase = 0
+
+        withAnimation(.linear(duration: 1.5)) {
+            highlightPhase = 1
+        }
+
+        let workItem = DispatchWorkItem { [pinID = pin.id] in
+            if highlightedPinID == pinID {
+                withAnimation(.easeOut(duration: 0.2)) {
+                    highlightPhase = 0
+                }
+                highlightedPinID = nil
+            }
+            highlightResetWorkItem = nil
+        }
+
+        highlightResetWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5, execute: workItem)
     }
 
     @MainActor
@@ -293,9 +401,16 @@ private struct WhiteboardPinCell: View {
     let isMine: Bool
     let isSeen: Bool
     let referenceDate: Date
+    let isHighlighted: Bool
+    let highlightPhase: Double
 
     var body: some View {
-        ZStack {
+        let wiggleValue = isHighlighted ? sin(highlightPhase * .pi * 6) : 0.0
+        let scaleAmount = isHighlighted ? 0.08 * abs(wiggleValue) : 0.0
+        let liftAmount = isHighlighted ? 8 * abs(wiggleValue) : 0.0
+        let rotationAngle = Angle(degrees: isHighlighted ? wiggleValue * 6 : 0)
+
+        return ZStack {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(Color.white)
 
@@ -307,7 +422,11 @@ private struct WhiteboardPinCell: View {
         .frame(maxWidth: .infinity)
         .aspectRatio(1, contentMode: .fit)
         .overlay(borderOverlay(referenceDate: referenceDate))
-        .opacity(isSeen ? 0.7 : 1.0)
+        .opacity((isSeen && !isHighlighted) ? 0.7 : 1.0)
+        .scaleEffect(CGFloat(1 + scaleAmount))
+        .rotationEffect(rotationAngle)
+        .offset(y: CGFloat(-liftAmount))
+        .zIndex(isHighlighted ? 1 : 0)
         .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel(referenceDate: referenceDate))
@@ -565,6 +684,16 @@ private struct AddPinSheet: View {
         viewModel.pin(at: coordinate) != nil
     }
 
+    private var normalizedCreatorEmail: String? {
+        let rawEmail = authViewModel.loggedInEmail ?? authViewModel.email
+        let trimmed = rawEmail.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    private var hasLivePinLimit: Bool {
+        viewModel.hasActivePin(forCreatorEmail: normalizedCreatorEmail)
+    }
+
     private var sanitizedEmojiText: String {
         sanitizeEmojiInput(from: emoji)
     }
@@ -572,7 +701,8 @@ private struct AddPinSheet: View {
     private var isSaveDisabled: Bool {
         sanitizedEmojiText.isEmpty ||
         text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-        slotOccupied
+        slotOccupied ||
+        hasLivePinLimit
     }
 
     var body: some View {
@@ -598,6 +728,12 @@ private struct AddPinSheet: View {
 
                 if slotOccupied {
                     Text("Someone already posted here. Please pick another slot.")
+                        .font(.footnote)
+                        .foregroundColor(.red)
+                }
+
+                if hasLivePinLimit {
+                    Text("You already have a live pin. Delete it or wait for it to expire before posting another.")
                         .font(.footnote)
                         .foregroundColor(.red)
                 }
@@ -628,15 +764,16 @@ private struct AddPinSheet: View {
 
         guard !trimmedEmoji.isEmpty, !trimmedText.isEmpty else { return }
 
-        let normalizedEmail = (authViewModel.loggedInEmail ?? authViewModel.email)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .lowercased()
-
         let resolvedAuthor: String?
         if !trimmedAuthor.isEmpty {
             resolvedAuthor = trimmedAuthor
         } else {
             resolvedAuthor = nil
+        }
+
+        guard !hasLivePinLimit else {
+            errorMessage = WhiteboardViewModelError.pinLimitReached.errorDescription
+            return
         }
 
         Task {
@@ -647,7 +784,7 @@ private struct AddPinSheet: View {
                     author: resolvedAuthor,
                     at: coordinate,
                     token: token,
-                    creatorEmail: normalizedEmail.isEmpty ? nil : normalizedEmail
+                    creatorEmail: normalizedCreatorEmail
                 )
                 dismiss()
             } catch {

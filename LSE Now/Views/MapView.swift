@@ -67,6 +67,7 @@ struct MapView: View {
                         let now = Date()
                         let hasStarted = now >= post.startTime
                         let isUnder1Hour = !hasStarted && now.distance(to: post.startTime) < 3600
+                        let isWithinEightHours = !hasStarted && now.distance(to: post.startTime) <= 8 * 3600
                         let timeText = timeLabel(for: post.startTime, endTime: post.endTime)
                         let zIndexValue = zIndexFor(post: post)
                         let isSameDay = Calendar.current.isDateInToday(post.startTime)
@@ -89,6 +90,7 @@ struct MapView: View {
                                             isUnder1Hour: isUnder1Hour,
                                             hasStarted: hasStarted,
                                             isSameDay: isSameDay,
+                                            isWithinEightHours: isWithinEightHours,
                                             shakeToggle: shakeToggle
                                         )
                                         .transition(.scale.combined(with: .opacity))
@@ -182,6 +184,8 @@ struct MapView: View {
                 PostDetailView(post: post, viewModel: vm)
             }
         }
+        .toolbarBackground(Color(.systemGroupedBackground), for: .tabBar)
+        .toolbarBackground(.visible, for: .tabBar)
     }
 
     private func updateLocationButtonVisibility() {
@@ -245,18 +249,24 @@ struct MapView: View {
         let now = Date()
         if let end = endTime, now > end { return "" }
 
-        let diff = start.timeIntervalSinceNow
+        let diff = start.timeIntervalSince(now)
         if diff < 0 {
             return "Started"
-        } else if diff < 3600 {
-            return "in \(Int(diff / 60))m"
-        } else if Calendar.current.isDateInToday(start) || diff < 6 * 3600 {
-            return start.formatted(date: .omitted, time: .shortened)
-        } else if Calendar.current.isDateInTomorrow(start) {
-            return "Tomorrow"
-        } else {
-            return start.formatted(.dateTime.weekday(.wide))
         }
+
+        if Calendar.current.isDateInToday(start) {
+            return start.formatted(date: .omitted, time: .shortened)
+        }
+
+        if diff <= 8 * 3600 {
+            return start.formatted(date: .omitted, time: .shortened)
+        }
+
+        if Calendar.current.isDateInTomorrow(start) {
+            return "Tomorrow"
+        }
+
+        return start.formatted(.dateTime.weekday(.wide))
     }
 }
 
@@ -266,6 +276,7 @@ private struct PostAnnotationView: View {
     let isUnder1Hour: Bool
     let hasStarted: Bool
     let isSameDay: Bool
+    let isWithinEightHours: Bool
     let shakeToggle: Bool
 
     var body: some View {
@@ -308,7 +319,7 @@ private struct PostAnnotationView: View {
 
     private var timeLabelColor: Color {
         if isSameDay { return .white }
-        return isUnder1Hour ? .red : .primary
+        return isWithinEightHours ? .red : .primary
     }
 }
 

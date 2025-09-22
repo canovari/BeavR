@@ -11,11 +11,14 @@ enum WhiteboardGridConfiguration {
 
 enum WhiteboardViewModelError: LocalizedError {
     case missingCreatorEmail
+    case pinLimitReached
 
     var errorDescription: String? {
         switch self {
         case .missingCreatorEmail:
             return "We couldn't verify who created this pin. Please log in again and try posting."
+        case .pinLimitReached:
+            return "You already have a live pin. Delete it or wait for it to expire before posting another."
         }
     }
 }
@@ -46,6 +49,25 @@ final class WhiteboardViewModel: ObservableObject {
             pin.gridCol == coordinate.column &&
             !pin.isExpired(referenceDate: now)
         }
+    }
+
+    func activePinCount(forCreatorEmail email: String?, referenceDate: Date = Date()) -> Int {
+        guard let normalized = normalizedCreatorEmail(from: email) else { return 0 }
+        return pins.reduce(into: 0) { count, pin in
+            if pin.creatorEmail == normalized && !pin.isExpired(referenceDate: referenceDate) {
+                count += 1
+            }
+        }
+    }
+
+    func firstActivePin(forCreatorEmail email: String?, referenceDate: Date = Date()) -> WhiteboardPin? {
+        guard let normalized = normalizedCreatorEmail(from: email) else { return nil }
+        return firstActivePin(forNormalizedCreatorEmail: normalized, referenceDate: referenceDate)
+    }
+
+    func hasActivePin(forCreatorEmail email: String?, referenceDate: Date = Date()) -> Bool {
+        guard let normalized = normalizedCreatorEmail(from: email) else { return false }
+        return hasActivePin(forNormalizedCreatorEmail: normalized, referenceDate: referenceDate)
     }
 
     func loadPins(forceReload: Bool = false) async {
@@ -114,13 +136,14 @@ final class WhiteboardViewModel: ObservableObject {
         isSubmittingPin = true
         defer { isSubmittingPin = false }
 
-        let normalizedCreator = creatorEmail?
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .lowercased()
-
-        guard let normalizedCreator, !normalizedCreator.isEmpty else {
+        guard let normalizedCreator = normalizedCreatorEmail(from: creatorEmail) else {
             print("❌ createPin aborted — missing creator email")
             throw WhiteboardViewModelError.missingCreatorEmail
+        }
+
+        guard !hasActivePin(forNormalizedCreatorEmail: normalizedCreator) else {
+            print("❌ createPin aborted — live pin limit reached for \(normalizedCreator)")
+            throw WhiteboardViewModelError.pinLimitReached
         }
 
         let request = CreatePinRequest(
@@ -153,6 +176,20 @@ final class WhiteboardViewModel: ObservableObject {
         pins.append(pinWithCreatorAuthor(finalPin))
         maintainExpirationTimer()
         print("➕ Added new pin at (\(newPin.gridRow),\(newPin.gridCol)). Total now=\(pins.count)")
+    }
+
+    private func firstActivePin(forNormalizedCreatorEmail normalized: String, referenceDate: Date = Date()) -> WhiteboardPin? {
+        pins.first { $0.creatorEmail == normalized && !$0.isExpired(referenceDate: referenceDate) }
+    }
+
+    private func hasActivePin(forNormalizedCreatorEmail normalized: String, referenceDate: Date = Date()) -> Bool {
+        firstActivePin(forNormalizedCreatorEmail: normalized, referenceDate: referenceDate) != nil
+    }
+
+    private func normalizedCreatorEmail(from rawEmail: String?) -> String? {
+        guard let rawEmail else { return nil }
+        let trimmed = rawEmail.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return trimmed.isEmpty ? nil : trimmed
     }
 
     func deletePin(_ pin: WhiteboardPin, token: String) async throws {
