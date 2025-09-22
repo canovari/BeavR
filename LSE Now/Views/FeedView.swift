@@ -143,7 +143,7 @@ struct FeedView: View {
                                             action: { handleLike(for: post) }
                                         )
                                         .alignmentGuide(.firstTextBaseline) { context in
-                                            context[VerticalAlignment.center]
+                                            context[VerticalAlignment.center] - 1
                                         }
                                     }
                                     .padding(.top, 8)
