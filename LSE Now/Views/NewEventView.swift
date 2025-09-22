@@ -31,9 +31,15 @@ struct NewEventView: View {
                         }
 
                         NavigationLink {
-                            MyEventsView()
+                            MyEventsView(mode: .likedOnly)
                         } label: {
-                            HubRectButton(icon: "calendar", title: "My Events")
+                            HubRectButton(icon: "heart.fill", title: "Liked Events")
+                        }
+
+                        NavigationLink {
+                            MyEventsView(mode: .submittedOnly)
+                        } label: {
+                            HubRectButton(icon: "calendar.badge.clock", title: "Submitted Events")
                         }
 
                         NavigationLink {
@@ -105,11 +111,83 @@ struct HubRectButton: View {
 
 // MARK: - Placeholder Views
 struct MyEventsView: View {
+    private struct ModeIntroduction {
+        let icon: String
+        let accent: Color
+        let message: String
+    }
+
+    enum Mode {
+        case all
+        case likedOnly
+        case submittedOnly
+
+        fileprivate var initialTab: MyEventsViewModel.Tab {
+            switch self {
+            case .all, .likedOnly:
+                return .liked
+            case .submittedOnly:
+                return .submitted
+            }
+        }
+
+        fileprivate var availableTabs: [MyEventsViewModel.Tab] {
+            switch self {
+            case .all:
+                return MyEventsViewModel.Tab.allCases
+            case .likedOnly:
+                return [.liked]
+            case .submittedOnly:
+                return [.submitted]
+            }
+        }
+
+        fileprivate var navigationTitle: String {
+            switch self {
+            case .all:
+                return "My Events"
+            case .likedOnly:
+                return "Liked Events"
+            case .submittedOnly:
+                return "Submitted Events"
+            }
+        }
+
+        fileprivate var introduction: ModeIntroduction? {
+            switch self {
+            case .all:
+                return nil
+            case .likedOnly:
+                return ModeIntroduction(
+                    icon: "heart.fill",
+                    accent: Color("LSERed"),
+                    message: "Tap the heart on any event to keep it handy here — we'll sync your saved list everywhere you sign in."
+                )
+            case .submittedOnly:
+                return ModeIntroduction(
+                    icon: "calendar.badge.clock",
+                    accent: .orange,
+                    message: "Follow the approval journey of the events you've shared and make updates whenever plans change."
+                )
+            }
+        }
+    }
+
     @EnvironmentObject private var authViewModel: AuthViewModel
     @EnvironmentObject private var eventsViewModel: PostListViewModel
     @StateObject private var viewModel = MyEventsViewModel()
-    @State private var selectedTab: MyEventsViewModel.Tab = .liked
+    @State private var selectedTab: MyEventsViewModel.Tab
     @State private var activeAlert: AlertType?
+    private let availableTabs: [MyEventsViewModel.Tab]
+    private let navigationTitleText: String
+    private let introduction: ModeIntroduction?
+
+    init(mode: Mode = .all) {
+        self.availableTabs = mode.availableTabs
+        self.navigationTitleText = mode.navigationTitle
+        self.introduction = mode.introduction
+        _selectedTab = State(initialValue: mode.initialTab)
+    }
 
     var body: some View {
         Group {
@@ -119,7 +197,7 @@ struct MyEventsView: View {
                 loggedOutState
             }
         }
-        .navigationTitle("My Events")
+        .navigationTitle(navigationTitleText)
         .navigationBarTitleDisplayMode(.inline)
         .task(id: authViewModel.token) {
             if let token = authViewModel.token {
@@ -150,24 +228,39 @@ struct MyEventsView: View {
         }
     }
 
+    private var showsTabPicker: Bool {
+        availableTabs.count > 1
+    }
+
     private func eventsList(token: String) -> some View {
-        let events = viewModel.events(for: selectedTab)
+        let currentTab = availableTabs.contains(selectedTab) ? selectedTab : (availableTabs.first ?? .liked)
+        let events = viewModel.events(for: currentTab)
 
         return List {
-            Section {
-                Picker("Event Type", selection: $selectedTab) {
-                    ForEach(MyEventsViewModel.Tab.allCases) { tab in
-                        Text(tab.title).tag(tab)
+            if showsTabPicker {
+                Section {
+                    Picker("Event Type", selection: $selectedTab) {
+                        ForEach(availableTabs) { tab in
+                            Text(tab.title).tag(tab)
+                        }
                     }
+                    .pickerStyle(.segmented)
                 }
-                .pickerStyle(.segmented)
+                .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 8, trailing: 16))
+                .listRowBackground(Color.clear)
             }
-            .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 8, trailing: 16))
-            .listRowBackground(Color.clear)
+
+            if let introduction {
+                Section {
+                    IntroHighlight(introduction: introduction)
+                }
+                .listRowInsets(EdgeInsets(top: showsTabPicker ? 0 : 12, leading: 16, bottom: 6, trailing: 16))
+                .listRowBackground(Color.clear)
+            }
 
             Section {
                 ForEach(events) { event in
-                    switch selectedTab {
+                    switch currentTab {
                     case .liked:
                         NavigationLink {
                             PostDetailView(post: event, viewModel: eventsViewModel)
@@ -218,7 +311,7 @@ struct MyEventsView: View {
                 ProgressView("Loading events...")
                     .allowsHitTesting(false)
             } else if events.isEmpty {
-                emptyState(for: selectedTab)
+                emptyState(for: currentTab)
                     .allowsHitTesting(false)
             }
         }
@@ -288,6 +381,26 @@ struct MyEventsView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemGroupedBackground))
+    }
+
+    private struct IntroHighlight: View {
+        let introduction: ModeIntroduction
+
+        var body: some View {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: introduction.icon)
+                    .font(.title3)
+                    .foregroundColor(introduction.accent)
+                    .padding(10)
+                    .background(introduction.accent.opacity(0.14), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+
+                Text(introduction.message)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.vertical, 4)
+        }
     }
 
     private func statusDisplay(for post: Post) -> StatusDisplay {

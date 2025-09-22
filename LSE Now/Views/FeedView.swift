@@ -216,7 +216,6 @@ struct FeedView: View {
 
     private func refreshFeed() async {
         print("🔄 [Refresh] Starting refreshFeed()")
-        print("🔄 [Refresh] Current thread: \(Thread.isMainThread ? "Main" : "Background")")
         print("🔄 [Refresh] Current post count before refresh: \(vm.posts.count)")
         print("🔄 [Refresh] isLoading before refresh: \(vm.isLoading)")
 

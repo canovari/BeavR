@@ -53,7 +53,7 @@ struct LoginFlowView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItemGroup(placement: .keyboard) { Spacer(); Button("Done") { focusedField = nil } } }
             .onAppear { focusField(for: viewModel.step) }
-            .onChange(of: viewModel.step) { step in
+            .onChange(of: viewModel.step, initial: false) { _, step in
                 focusField(for: step)
             }
         }
@@ -112,7 +112,7 @@ struct LoginFlowView: View {
                 .padding()
                 .background(Color(.secondarySystemBackground))
                 .cornerRadius(12)
-                .onChange(of: viewModel.code) { newValue in
+                .onChange(of: viewModel.code, initial: false) { _, newValue in
                     let filtered = newValue.filter { $0.isNumber }
                     let capped = String(filtered.prefix(6))
                     if capped != viewModel.code {
