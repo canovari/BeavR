@@ -2,6 +2,7 @@ import SwiftUI
 
 struct GuidedIntroductionOverlay: View {
     @Binding var isPresented: Bool
+    @Binding var selectedTab: Int
     var onFinish: () -> Void
 
     @State private var currentStep = 0
@@ -9,55 +10,100 @@ struct GuidedIntroductionOverlay: View {
     private let steps = IntroStep.steps
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .topLeading) {
             Color.black.opacity(0.45)
                 .ignoresSafeArea()
                 .transition(.opacity)
 
-            VStack(spacing: 28) {
+            VStack(spacing: 0) {
+                HStack {
+                    Button(action: finish) {
+                        Text("Skip Intro")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundColor(.white.opacity(0.9))
+                    }
+                    .buttonStyle(.plain)
+
+                    Spacer()
+                }
+                .padding(.top, 20)
+                .padding(.horizontal, 24)
+
                 Spacer(minLength: 0)
 
                 Text("Welcome to BeavR")
                     .font(.largeTitle.weight(.semibold))
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
-                    .padding(.top, 4)
+                    .padding(.horizontal, 32)
+                    .padding(.bottom, 20)
 
-                TabView(selection: $currentStep) {
-                    ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
-                        IntroCard(step: step)
-                            .tag(index)
-                            .padding(.horizontal, 12)
-                    }
-                }
-                .tabViewStyle(.page(indexDisplayMode: .always))
-                .frame(height: 340)
-
-                Button(action: advance) {
-                    Text(currentStep == steps.count - 1 ? "Get Started" : "Next")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(Color("LSERed"), in: Capsule())
-                        .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 6)
-                }
-                .buttonStyle(.plain)
-
-                Button(action: finish) {
-                    Text("Skip Intro")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundColor(.white.opacity(0.88))
-                        .padding(.top, 4)
-                }
-
-                Spacer(minLength: 16)
+                introPanel
             }
-            .padding(.horizontal, 24)
-            .padding(.top, 40)
-            .padding(.bottom, 32)
         }
-        .transition(.opacity.combined(with: .scale))
+        .onAppear {
+            currentStep = 0
+            selectedTab = steps[currentStep].tabSelection
+        }
+        .onChange(of: currentStep, initial: false) { _, newStep in
+            withAnimation(.easeInOut(duration: 0.25)) {
+                selectedTab = steps[newStep].tabSelection
+            }
+        }
+        .transition(.opacity)
+    }
+
+    private var introPanel: some View {
+        VStack(spacing: 20) {
+            TabView(selection: $currentStep) {
+                ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
+                    IntroCard(step: step)
+                        .tag(index)
+                        .padding(.horizontal, 4)
+                }
+            }
+            .tabViewStyle(.page(indexDisplayMode: .never))
+            .frame(height: 280)
+
+            HStack(spacing: 8) {
+                ForEach(Array(steps.indices), id: \.self) { index in
+                    Capsule(style: .continuous)
+                        .fill(index == currentStep ? steps[currentStep].accent : Color.white.opacity(0.35))
+                        .frame(width: index == currentStep ? 24 : 8, height: 8)
+                        .animation(.easeInOut(duration: 0.25), value: currentStep)
+                }
+            }
+            .frame(maxWidth: .infinity)
+
+            Button(action: advance) {
+                Text(currentStep == steps.count - 1 ? "Get Started" : "Next")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .fill(Color("LSERed"))
+                    )
+                    .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 6)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.top, 28)
+        .padding(.horizontal, 24)
+        .padding(.bottom, 24)
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 32, style: .continuous)
+                .fill(.ultraThinMaterial)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 32, style: .continuous)
+                .strokeBorder(Color.white.opacity(0.14))
+        )
+        .shadow(color: Color.black.opacity(0.12), radius: 16, x: 0, y: 12)
+        .padding(.horizontal, 24)
+        .padding(.bottom, 32)
     }
 
     private func advance() {
@@ -71,9 +117,14 @@ struct GuidedIntroductionOverlay: View {
     }
 
     private func finish() {
+        withAnimation(.easeInOut(duration: 0.25)) {
+            selectedTab = steps[0].tabSelection
+        }
+
         withAnimation(.easeInOut(duration: 0.32)) {
             isPresented = false
         }
+
         onFinish()
     }
 }
@@ -86,6 +137,7 @@ private struct IntroStep: Identifiable {
     let tabIcon: String
     let accent: Color
     let tabLabel: String
+    let tabSelection: Int
 
     static let steps: [IntroStep] = [
         IntroStep(
@@ -94,7 +146,8 @@ private struct IntroStep: Identifiable {
             icon: "map.fill",
             tabIcon: "map",
             accent: .blue,
-            tabLabel: "Map tab"
+            tabLabel: "Map",
+            tabSelection: 0
         ),
         IntroStep(
             title: "Catch every update",
@@ -102,7 +155,8 @@ private struct IntroStep: Identifiable {
             icon: "list.bullet.rectangle",
             tabIcon: "list.bullet.rectangle",
             accent: .indigo,
-            tabLabel: "Feed tab"
+            tabLabel: "Feed",
+            tabSelection: 1
         ),
         IntroStep(
             title: "Drop quick pins",
@@ -110,7 +164,8 @@ private struct IntroStep: Identifiable {
             icon: "square.grid.3x3.fill",
             tabIcon: "square.grid.3x3.fill",
             accent: .purple,
-            tabLabel: "Pinboard tab"
+            tabLabel: "Pinboard",
+            tabSelection: 2
         ),
         IntroStep(
             title: "Find exclusive deals",
@@ -118,15 +173,17 @@ private struct IntroStep: Identifiable {
             icon: "tag.fill",
             tabIcon: "tag",
             accent: .orange,
-            tabLabel: "Deals tab"
+            tabLabel: "Deals",
+            tabSelection: 3
         ),
         IntroStep(
             title: "Share & save events",
-            message: "Head to New Event to post your own happenings, track approvals, and revisit favourites in Liked Events.",
+            message: "Head to Share & Save to post your own happenings, track approvals, and revisit favourites in Liked Events.",
             icon: "plus.circle.fill",
             tabIcon: "plus.circle",
             accent: Color("LSERed"),
-            tabLabel: "New Event tab"
+            tabLabel: "Share & Save",
+            tabSelection: 4
         )
     ]
 }
@@ -135,25 +192,26 @@ private struct IntroCard: View {
     let step: IntroStep
 
     var body: some View {
-        VStack(spacing: 22) {
+        VStack(alignment: .leading, spacing: 18) {
             ZStack {
-                RoundedRectangle(cornerRadius: 26, style: .continuous)
-                    .fill(step.accent.opacity(0.12))
-                    .frame(width: 86, height: 86)
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .fill(step.accent.opacity(0.16))
+                    .frame(width: 72, height: 72)
 
                 Image(systemName: step.icon)
-                    .font(.system(size: 40, weight: .semibold))
+                    .font(.system(size: 34, weight: .semibold))
                     .foregroundColor(step.accent)
             }
 
             Text(step.title)
                 .font(.title3.weight(.semibold))
-                .multilineTextAlignment(.center)
+                .foregroundColor(.primary)
+                .multilineTextAlignment(.leading)
 
             Text(step.message)
                 .font(.body)
                 .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
+                .multilineTextAlignment(.leading)
 
             Spacer(minLength: 0)
 
@@ -165,18 +223,10 @@ private struct IntroCard: View {
             }
             .font(.subheadline)
             .foregroundColor(step.accent)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 9)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
             .background(step.accent.opacity(0.16), in: Capsule())
         }
-        .padding(.vertical, 28)
-        .padding(.horizontal, 24)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 32, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 32, style: .continuous)
-                .strokeBorder(Color.white.opacity(0.14))
-        )
-        .shadow(color: Color.black.opacity(0.12), radius: 16, x: 0, y: 12)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }

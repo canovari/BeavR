@@ -47,10 +47,10 @@ struct MainTabView: View {
         .accentColor(Color("LSERed"))
         .overlay {
             if showIntroduction {
-                GuidedIntroductionOverlay(isPresented: $showIntroduction) {
+                GuidedIntroductionOverlay(isPresented: $showIntroduction, selectedTab: $selection) {
                     hasSeenMainGuide = true
                 }
-                .transition(.opacity.combined(with: .scale))
+                .transition(.opacity)
                 .zIndex(2)
             }
         }
