@@ -77,6 +77,51 @@ function loadEnvFile(string $path): void
     }
 }
 
+$phpConfigPaths = [
+    __DIR__ . '/config.local.php',
+];
+
+function loadPhpConfig(string $path): void
+{
+    if (!is_file($path) || !is_readable($path)) {
+        return;
+    }
+
+    $data = include $path;
+
+    if (!is_array($data)) {
+        return;
+    }
+
+    foreach ($data as $name => $value) {
+        if (!is_string($name)) {
+            continue;
+        }
+
+        $name = trim($name);
+        if ($name === '') {
+            continue;
+        }
+
+        if ($value === null || is_array($value) || is_object($value)) {
+            continue;
+        }
+
+        $value = trim((string) $value);
+
+        if (!isset($_ENV)) {
+            $_ENV = [];
+        }
+        if (!isset($_SERVER)) {
+            $_SERVER = [];
+        }
+
+        putenv(sprintf('%s=%s', $name, $value));
+        $_ENV[$name] = $value;
+        $_SERVER[$name] = $value;
+    }
+}
+
 $dotenvPaths = [
     __DIR__ . '/.env',
     dirname(__DIR__) . '/.env',
@@ -84,6 +129,10 @@ $dotenvPaths = [
 
 foreach ($dotenvPaths as $dotenvPath) {
     loadEnvFile($dotenvPath);
+}
+
+foreach ($phpConfigPaths as $phpConfigPath) {
+    loadPhpConfig($phpConfigPath);
 }
 
 function readEnv(string $key): ?string {
