@@ -23,12 +23,10 @@ struct EventLikeButton: View {
             HStack(spacing: 6) {
                 if showCount {
                     iconContainer
-                        .matchedGeometryEffect(id: "heart", in: likeNamespace)
                     countContainer
                 } else {
                     countContainer
                     iconContainer
-                        .matchedGeometryEffect(id: "heart", in: likeNamespace)
                 }
             }
             .padding(.horizontal, 6)
@@ -124,10 +122,18 @@ struct EventLikeButton: View {
     }
 
     private var iconContainer: some View {
-        Image(systemName: isLiked ? "heart.fill" : "heart")
-            .font(.system(size: iconSize, weight: .semibold))
-            .foregroundColor(isLiked ? Color("LSERed") : .secondary)
-            .opacity(heartOpacity)
+        ZStack {
+            if isLoading {
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .scaleEffect(progressScale)
+            } else {
+                Image(systemName: isLiked ? "heart.fill" : "heart")
+                    .font(.system(size: iconSize, weight: .semibold))
+                    .foregroundColor(isLiked ? Color("LSERed") : .secondary)
+                    .opacity(heartOpacity)
+            }
+        }
         .frame(width: iconFrameSize, height: iconFrameSize)
     }
 
@@ -138,7 +144,7 @@ struct EventLikeButton: View {
                     .font(.footnote)
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
-                    .opacity(countOpacity)
+                    .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .trailing)))
             }
 
             Text(countPlaceholder)

@@ -11,6 +11,7 @@ struct WhiteboardView: View {
     @State private var selectedPin: WhiteboardPin?
     @State private var showingInbox = false
     @State private var showingHowItWorks = false
+    @State private var hasUnreadMessages = false
 
     private let rows = WhiteboardGridConfiguration.rows
     private let columns = WhiteboardGridConfiguration.columns
@@ -59,15 +60,35 @@ struct WhiteboardView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         showingInbox = true
+                        hasUnreadMessages = false
                     } label: {
                         Image(systemName: "envelope")
                             .padding(.top, 2)
+                            .overlay(alignment: .topTrailing) {
+                                if hasUnreadMessages {
+                                    Circle()
+                                        .fill(Color.red)
+                                        .frame(width: 10, height: 10)
+                                        .offset(x: 6, y: -6)
+                                }
+                            }
                     }
-                    .accessibilityLabel("Open messages inbox")
+                    .accessibilityLabel(
+                        hasUnreadMessages
+                            ? "Open messages inbox, new messages available"
+                            : "Open messages inbox"
+                    )
                 }
             }
             .task {
                 await viewModel.loadPins()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: PushNotificationManager.messageReplyReceivedNotification)) { _ in
+                if showingInbox {
+                    hasUnreadMessages = false
+                } else {
+                    hasUnreadMessages = true
+                }
             }
             .alert(
                 "Unable to Load Pins",
@@ -201,6 +222,23 @@ struct WhiteboardView: View {
         print("🔄 [Refresh] Current thread: \(Thread.isMainThread ? "Main" : "Background")")
         print("🔄 [Refresh] Current pin count before refresh: \(viewModel.pins.count)")
         print("🔄 [Refresh] isLoading before refresh: \(viewModel.isLoading)")
+
+        do {
+            let spinnerDelay: UInt64 = 800_000_000  // 0.8 seconds
+            try await Task.sleep(nanoseconds: spinnerDelay)
+        } catch {
+            if Task.isCancelled {
+                print("⛔️ [Refresh] refreshPins() cancelled during spinner delay")
+                return
+            }
+
+            print("⚠️ [Refresh] Unexpected error during spinner delay: \(error.localizedDescription)")
+        }
+
+        if Task.isCancelled {
+            print("⛔️ [Refresh] refreshPins() cancelled before reloading")
+            return
+        }
 
         await viewModel.loadPins(forceReload: true)
 

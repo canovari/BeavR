@@ -215,18 +215,31 @@ struct FeedView: View {
     }
 
     private func refreshFeed() async {
-        let minimumDuration: TimeInterval = 1
-        let start = Date()
+        print("🔄 [Refresh] Starting refreshFeed()")
+        print("🔄 [Refresh] Current thread: \(Thread.isMainThread ? "Main" : "Background")")
+        print("🔄 [Refresh] Current post count before refresh: \(vm.posts.count)")
+        print("🔄 [Refresh] isLoading before refresh: \(vm.isLoading)")
+
+        do {
+            let spinnerDelay: UInt64 = 800_000_000  // 0.8 seconds
+            try await Task.sleep(nanoseconds: spinnerDelay)
+        } catch {
+            if Task.isCancelled {
+                print("⛔️ [Refresh] refreshFeed() cancelled during spinner delay")
+                return
+            }
+
+            print("⚠️ [Refresh] Unexpected error during spinner delay: \(error.localizedDescription)")
+        }
+
+        if Task.isCancelled {
+            print("⛔️ [Refresh] refreshFeed() cancelled before reloading")
+            return
+        }
+
         await vm.refreshPosts()
 
-        guard !Task.isCancelled else { return }
-
-        let elapsed = Date().timeIntervalSince(start)
-        let remaining = minimumDuration - elapsed
-        guard remaining > 0 else { return }
-
-        let delay = UInt64((remaining * 1_000_000_000).rounded())
-        try? await Task.sleep(nanoseconds: delay)
+        print("✅ [Refresh] Completed refreshFeed() — new post count: \(vm.posts.count)")
     }
 
     // MARK: - Helpers
