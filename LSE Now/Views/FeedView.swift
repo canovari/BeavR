@@ -130,19 +130,23 @@ struct FeedView: View {
                                             .foregroundColor(.secondary)
                                     }
 
-                                    dateOrLiveView(for: post)
-                                        .font(.subheadline)
+                                    HStack(alignment: .firstTextBaseline) {
+                                        dateOrLiveView(for: post)
+                                            .font(.subheadline)
 
-                                    HStack {
-                                        Spacer()
+                                        Spacer(minLength: 12)
+
                                         EventLikeButton(
                                             isLiked: post.likedByMe,
                                             likeCount: post.likesCount,
                                             isLoading: vm.isUpdatingLike(for: post.id),
                                             action: { handleLike(for: post) }
                                         )
-                                        .padding(.top, 8)
+                                        .alignmentGuide(.firstTextBaseline) { context in
+                                            context[VerticalAlignment.center]
+                                        }
                                     }
+                                    .padding(.top, 8)
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding()
