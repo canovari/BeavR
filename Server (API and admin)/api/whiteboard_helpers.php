@@ -66,11 +66,9 @@ function extractBearerToken(): ?string
 function findUserByToken(PDO $pdo, string $token): ?array
 {
     helperLog("findUserByToken searching for token='{$token}'");
-    $stmt = $pdo->prepare('SELECT id, email, status FROM users WHERE login_token = :token LIMIT 1');
-    $stmt->execute([':token' => $token]);
-    $user = $stmt->fetch();
+    $user = fetchUserByToken($pdo, $token);
 
-    if (!$user) {
+    if ($user === null) {
         helperLog("findUserByToken failed → no user for token");
         return null;
     }

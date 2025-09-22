@@ -100,7 +100,7 @@ function requireAuth(PDO $pdo): array
         respondWithError(401, 'Missing bearer token.');
     }
 
-    $user = findUserByToken($pdo, $token);
+    $user = fetchUserByToken($pdo, $token);
     if ($user === null) {
         respondWithError(401, 'Invalid or expired token.');
     }
@@ -110,23 +110,6 @@ function requireAuth(PDO $pdo): array
     }
 
     return $user;
-}
-
-function findUserByToken(PDO $pdo, string $token): ?array
-{
-    $stmt = $pdo->prepare('SELECT id, email, status FROM users WHERE login_token = :token LIMIT 1');
-    $stmt->execute([':token' => $token]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$user) {
-        return null;
-    }
-
-    return [
-        'id' => (int)$user['id'],
-        'email' => strtolower((string)$user['email']),
-        'status' => normalizeUserStatus($user['status'] ?? null),
-    ];
 }
 
 function extractBearerToken(): ?string
