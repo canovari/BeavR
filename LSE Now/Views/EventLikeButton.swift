@@ -18,33 +18,12 @@ struct EventLikeButton: View {
             action()
         } label: {
             HStack(spacing: 6) {
-                ZStack {
-                    if isLoading {
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                            .scaleEffect(progressScale)
-                    } else {
-                        Image(systemName: isLiked ? "heart.fill" : "heart")
-                            .font(.system(size: iconSize, weight: .semibold))
-                            .foregroundColor(isLiked ? Color("LSERed") : .secondary)
-                            .opacity(heartOpacity)
-                    }
-                }
-                .frame(width: iconFrameSize, height: iconFrameSize)
-
-                ZStack(alignment: .trailing) {
-                    if showCount {
-                        Text("\(sanitizedLikeCount)")
-                            .font(.footnote)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.primary)
-                            .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .trailing)))
-                    }
-
-                    Text(countPlaceholder)
-                        .font(.footnote)
-                        .fontWeight(.semibold)
-                        .opacity(0)
+                if showCount {
+                    iconContainer
+                    countContainer
+                } else {
+                    countContainer
+                    iconContainer
                 }
             }
             .padding(.horizontal, 6)
@@ -125,5 +104,38 @@ struct EventLikeButton: View {
             return "No likes yet"
         }
         return "\(sanitizedLikeCount) likes"
+    }
+
+    private var iconContainer: some View {
+        ZStack {
+            if isLoading {
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .scaleEffect(progressScale)
+            } else {
+                Image(systemName: isLiked ? "heart.fill" : "heart")
+                    .font(.system(size: iconSize, weight: .semibold))
+                    .foregroundColor(isLiked ? Color("LSERed") : .secondary)
+                    .opacity(heartOpacity)
+            }
+        }
+        .frame(width: iconFrameSize, height: iconFrameSize)
+    }
+
+    private var countContainer: some View {
+        ZStack(alignment: .trailing) {
+            if showCount {
+                Text("\(sanitizedLikeCount)")
+                    .font(.footnote)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                    .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .trailing)))
+            }
+
+            Text(countPlaceholder)
+                .font(.footnote)
+                .fontWeight(.semibold)
+                .opacity(0)
+        }
     }
 }
