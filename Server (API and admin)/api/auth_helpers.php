@@ -24,7 +24,8 @@ function normalizeUserStatus($status): string
  */
 function fetchUserByToken(PDO $pdo, string $token): ?array
 {
-    $stmt = $pdo->prepare('SELECT id, email, status FROM users WHERE login_token = :token LIMIT 1');
+    $columns = getUserSelectColumns($pdo);
+    $stmt = $pdo->prepare(sprintf('SELECT %s FROM users WHERE login_token = :token LIMIT 1', $columns));
     $stmt->execute([':token' => $token]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -37,6 +38,37 @@ function fetchUserByToken(PDO $pdo, string $token): ?array
         'email' => strtolower((string) $row['email']),
         'status' => normalizeUserStatus($row['status'] ?? null),
     ];
+}
+
+function getUserSelectColumns(PDO $pdo): string
+{
+    return usersTableHasStatusColumn($pdo) ? 'id, email, status' : 'id, email';
+}
+
+function usersTableHasStatusColumn(PDO $pdo): bool
+{
+    static $hasStatusColumn;
+
+    if ($hasStatusColumn !== null) {
+        return $hasStatusColumn;
+    }
+
+    try {
+        $stmt = $pdo->prepare(
+            "SELECT 1
+             FROM information_schema.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE()
+               AND TABLE_NAME = 'users'
+               AND COLUMN_NAME = :column
+             LIMIT 1"
+        );
+        $stmt->execute([':column' => 'status']);
+        $hasStatusColumn = (bool) $stmt->fetchColumn();
+    } catch (Throwable $e) {
+        $hasStatusColumn = false;
+    }
+
+    return $hasStatusColumn;
 }
 
 function userIsBanned(array $user): bool
