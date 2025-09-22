@@ -22,8 +22,14 @@ final class PushNotificationManager: NSObject {
         self.tokenStorage = .shared
         super.init()
 
-        cachedAuthToken = tokenStorage.loadToken()?.trimmingCharacters(in: .whitespacesAndNewlines)
-        cachedEmail = tokenStorage.loadEmail()?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        do {
+            cachedAuthToken = try tokenStorage.loadToken()?.trimmingCharacters(in: .whitespacesAndNewlines)
+            cachedEmail = try tokenStorage.loadEmail()?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        } catch {
+            cachedAuthToken = nil
+            cachedEmail = nil
+            print("⚠️ [Push] Failed to load stored credentials: \(error.localizedDescription)")
+        }
     }
 
     func applicationDidFinishLaunching() {
