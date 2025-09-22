@@ -1,5 +1,55 @@
 <?php
 // Central DB config — supports both global $pdo and getPDO()
+// ✅ Only loads from config.local.php
+
+function loadPhpConfig(string $path): void
+{
+    if (!is_file($path) || !is_readable($path)) {
+        return;
+    }
+
+    $data = include $path;
+
+    if (!is_array($data)) {
+        return;
+    }
+
+    foreach ($data as $name => $value) {
+        if (!is_string($name)) {
+            continue;
+        }
+
+        $name = trim($name);
+        if ($name === '') {
+            continue;
+        }
+
+        if ($value === null || is_array($value) || is_object($value)) {
+            continue;
+        }
+
+        $value = trim((string) $value);
+
+        if (!isset($_ENV)) {
+            $_ENV = [];
+        }
+        if (!isset($_SERVER)) {
+            $_SERVER = [];
+        }
+
+        putenv(sprintf('%s=%s', $name, $value));
+        $_ENV[$name] = $value;
+        $_SERVER[$name] = $value;
+    }
+}
+
+$phpConfigPaths = [
+    __DIR__ . '/config.local.php',
+];
+
+foreach ($phpConfigPaths as $phpConfigPath) {
+    loadPhpConfig($phpConfigPath);
+}
 
 function readEnv(string $key): ?string {
     $candidates = [
@@ -34,7 +84,7 @@ function requireEnv(string $key): string {
 
 try {
     $host = requireEnv('DB_HOST');
-    $db = requireEnv('DB_NAME');
+    $db   = requireEnv('DB_NAME');
     $user = requireEnv('DB_USER');
     $pass = requireEnv('DB_PASS');
 } catch (RuntimeException $exception) {
