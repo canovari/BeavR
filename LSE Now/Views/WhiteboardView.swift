@@ -202,6 +202,23 @@ struct WhiteboardView: View {
         print("🔄 [Refresh] Current pin count before refresh: \(viewModel.pins.count)")
         print("🔄 [Refresh] isLoading before refresh: \(viewModel.isLoading)")
 
+        do {
+            let spinnerDelay: UInt64 = 800_000_000  // 0.8 seconds
+            try await Task.sleep(nanoseconds: spinnerDelay)
+        } catch {
+            if Task.isCancelled {
+                print("⛔️ [Refresh] refreshPins() cancelled during spinner delay")
+                return
+            }
+
+            print("⚠️ [Refresh] Unexpected error during spinner delay: \(error.localizedDescription)")
+        }
+
+        if Task.isCancelled {
+            print("⛔️ [Refresh] refreshPins() cancelled before reloading")
+            return
+        }
+
         await viewModel.loadPins(forceReload: true)
 
         print("✅ [Refresh] Completed refreshPins() — new pin count: \(viewModel.pins.count)")
