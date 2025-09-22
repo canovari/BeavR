@@ -163,18 +163,14 @@ final class AuthViewModel: ObservableObject {
         resendSecondsRemaining = 60
 
         resendTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] timer in
-            guard let self = self else {
+            guard self != nil else {
                 timer.invalidate()
                 return
             }
 
-            if self.resendSecondsRemaining > 0 {
-                self.resendSecondsRemaining -= 1
-            }
-
-            if self.resendSecondsRemaining == 0 {
-                timer.invalidate()
-                self.resendTimer = nil
+            Task { @MainActor [weak self] in
+                guard let self = self else { return }
+                self.handleResendTimerTick()
             }
         }
     }
@@ -183,5 +179,16 @@ final class AuthViewModel: ObservableObject {
         resendTimer?.invalidate()
         resendTimer = nil
         resendSecondsRemaining = 0
+    }
+
+    private func handleResendTimerTick() {
+        if resendSecondsRemaining > 0 {
+            resendSecondsRemaining -= 1
+        }
+
+        if resendSecondsRemaining == 0 {
+            resendTimer?.invalidate()
+            resendTimer = nil
+        }
     }
 }
