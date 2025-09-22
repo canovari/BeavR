@@ -7,10 +7,13 @@ struct EventLikeButton: View {
     let action: () -> Void
     var iconSize: CGFloat = 18
 
+    @Namespace private var likeNamespace
+
     @State private var heartOpacity = 1.0
     @State private var fadeAnimationID = 0
     @State private var showCount = false
     @State private var maxCountDigits = 1
+    @State private var countOpacity = 0.0
 
     var body: some View {
         Button {
@@ -18,33 +21,14 @@ struct EventLikeButton: View {
             action()
         } label: {
             HStack(spacing: 6) {
-                ZStack {
-                    if isLoading {
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                            .scaleEffect(progressScale)
-                    } else {
-                        Image(systemName: isLiked ? "heart.fill" : "heart")
-                            .font(.system(size: iconSize, weight: .semibold))
-                            .foregroundColor(isLiked ? Color("LSERed") : .secondary)
-                            .opacity(heartOpacity)
-                    }
-                }
-                .frame(width: iconFrameSize, height: iconFrameSize)
-
-                ZStack(alignment: .trailing) {
-                    if showCount {
-                        Text("\(sanitizedLikeCount)")
-                            .font(.footnote)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.primary)
-                            .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .trailing)))
-                    }
-
-                    Text(countPlaceholder)
-                        .font(.footnote)
-                        .fontWeight(.semibold)
-                        .opacity(0)
+                if showCount {
+                    iconContainer
+                        .matchedGeometryEffect(id: "heart", in: likeNamespace)
+                    countContainer
+                } else {
+                    countContainer
+                    iconContainer
+                        .matchedGeometryEffect(id: "heart", in: likeNamespace)
                 }
             }
             .padding(.horizontal, 6)
@@ -70,7 +54,9 @@ struct EventLikeButton: View {
         .onAppear {
             heartOpacity = 1.0
             updateMaxDigits(with: sanitizedLikeCount)
-            showCount = sanitizedLikeCount > 0
+            let shouldShow = sanitizedLikeCount > 0
+            showCount = shouldShow
+            countOpacity = shouldShow ? 1 : 0
         }
         .onChange(of: likeCount) { newValue in
             let sanitizedValue = max(newValue, 0)
@@ -78,12 +64,26 @@ struct EventLikeButton: View {
 
             updateMaxDigits(with: sanitizedValue)
 
-            let animation: Animation = shouldShow && !showCount
-                ? .spring(response: 0.35, dampingFraction: 0.7, blendDuration: 0.2)
-                : .easeInOut(duration: 0.2)
+            if shouldShow && !showCount {
+                countOpacity = 0
+                withAnimation(.interactiveSpring(response: 0.32, dampingFraction: 0.85, blendDuration: 0.2)) {
+                    showCount = true
+                }
+                withAnimation(.easeOut(duration: 0.12).delay(0.04)) {
+                    countOpacity = 1
+                }
+            } else {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    showCount = shouldShow
+                }
 
-            withAnimation(animation) {
-                showCount = shouldShow
+                if shouldShow {
+                    withAnimation(.easeOut(duration: 0.12)) {
+                        countOpacity = 1
+                    }
+                } else {
+                    countOpacity = 0
+                }
             }
         }
         .animation(.easeInOut(duration: 0.2), value: isLoading)
@@ -104,10 +104,6 @@ struct EventLikeButton: View {
         iconSize + 8
     }
 
-    private var progressScale: CGFloat {
-        max((iconSize / 18) * 0.6, 0.5)
-    }
-
     private var countPlaceholder: String {
         guard maxCountDigits > 0 else { return "" }
         return String(repeating: "8", count: maxCountDigits)
@@ -125,5 +121,30 @@ struct EventLikeButton: View {
             return "No likes yet"
         }
         return "\(sanitizedLikeCount) likes"
+    }
+
+    private var iconContainer: some View {
+        Image(systemName: isLiked ? "heart.fill" : "heart")
+            .font(.system(size: iconSize, weight: .semibold))
+            .foregroundColor(isLiked ? Color("LSERed") : .secondary)
+            .opacity(heartOpacity)
+        .frame(width: iconFrameSize, height: iconFrameSize)
+    }
+
+    private var countContainer: some View {
+        ZStack(alignment: .trailing) {
+            if showCount {
+                Text("\(sanitizedLikeCount)")
+                    .font(.footnote)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                    .opacity(countOpacity)
+            }
+
+            Text(countPlaceholder)
+                .font(.footnote)
+                .fontWeight(.semibold)
+                .opacity(0)
+        }
     }
 }
