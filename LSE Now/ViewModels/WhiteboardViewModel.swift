@@ -155,6 +155,24 @@ final class WhiteboardViewModel: ObservableObject {
         print("➕ Added new pin at (\(newPin.gridRow),\(newPin.gridCol)). Total now=\(pins.count)")
     }
 
+    func deletePin(_ pin: WhiteboardPin, token: String) async throws {
+        print("🗑️ Deleting pin id=\(pin.id)")
+        do {
+            try await apiService.deletePin(id: pin.id, token: token)
+            pins.removeAll { $0.id == pin.id }
+
+            if pins.isEmpty {
+                expirationTimer?.invalidate()
+                expirationTimer = nil
+            }
+
+            print("✅ Deleted pin id=\(pin.id). Remaining pins=\(pins.count)")
+        } catch {
+            print("❌ Failed to delete pin id=\(pin.id): \(error.localizedDescription)")
+            throw error
+        }
+    }
+
     func sendReply(to pin: WhiteboardPin, message: String, author: String?, token: String) async throws {
         guard !isSendingReply else { return }
 

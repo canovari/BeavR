@@ -120,13 +120,23 @@ struct WhiteboardView: View {
                 }
             }
             .sheet(item: $selectedPin) { pin in
+                let token = activeToken
+                let canReply = token != nil
+                let canDelete = canReply && pin.creatorEmail == normalizedLoggedInEmail
+
                 PinDetailSheet(
                     pin: pin,
-                    canReply: activeToken != nil,
+                    canReply: canReply,
                     onReply: {
                         selectedPin = nil
                         replyTarget = pin
-                    }
+                    },
+                    canDelete: canDelete,
+                    onDelete: canDelete ? {
+                        if let token {
+                            try await viewModel.deletePin(pin, token: token)
+                        }
+                    } : nil
                 )
             }
             .sheet(item: $replyTarget) { pin in
@@ -300,14 +310,39 @@ private struct WhiteboardPinCell: View {
         }
         .frame(maxWidth: .infinity)
         .aspectRatio(1, contentMode: .fit)
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(isMine ? Color("LSERed") : Color(.separator), lineWidth: isMine ? 2 : 1)
-        )
+        .overlay(borderOverlay(referenceDate: referenceDate))
         .opacity(isSeen ? 0.7 : 1.0)
         .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel(referenceDate: referenceDate))
+    }
+
+    @ViewBuilder
+    private func borderOverlay(referenceDate: Date) -> some View {
+        let baseShape = RoundedRectangle(cornerRadius: 16, style: .continuous)
+
+        if isMine {
+            let progress = CGFloat(pin.remainingLifetimeFraction(referenceDate: referenceDate))
+
+            ZStack {
+                baseShape
+                    .stroke(Color(.separator), lineWidth: 1)
+
+                if progress > 0 {
+                    baseShape
+                        .trim(from: 0, to: progress)
+                        .stroke(
+                            Color("LSERed"),
+                            style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round)
+                        )
+                        .rotation(Angle(degrees: -90))
+                        .animation(.easeInOut(duration: 0.35), value: progress)
+                }
+            }
+        } else {
+            baseShape
+                .stroke(Color(.separator), lineWidth: 1)
+        }
     }
 
     private func accessibilityLabel(referenceDate: Date) -> String {
@@ -359,6 +394,12 @@ private struct PinDetailSheet: View {
     let pin: WhiteboardPin
     let canReply: Bool
     let onReply: () -> Void
+    let canDelete: Bool
+    let onDelete: (() async throws -> Void)?
+
+    @State private var isDeleting = false
+    @State private var deleteError: String?
+    @State private var showingDeleteConfirmation = false
 
     var body: some View {
         NavigationStack {
@@ -437,18 +478,76 @@ private struct PinDetailSheet: View {
                         .background(Color("LSERed"))
                         .cornerRadius(16)
                 }
-                .disabled(!canReply || isExpired)
-                .opacity((canReply && !isExpired) ? 1 : 0.5)
+                .disabled(!canReply || isExpired || isDeleting)
+                .opacity((canReply && !isExpired && !isDeleting) ? 1 : 0.5)
 
                 if !canReply {
                     Text("Log in to reply to pins.")
                         .font(.footnote)
                         .foregroundColor(.secondary)
                 }
+
+                if canDelete, let onDelete {
+                    Button(role: .destructive) {
+                        showingDeleteConfirmation = true
+                    } label: {
+                        if isDeleting {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                                .tint(Color("LSERed"))
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                        } else {
+                            Text("Delete Pin")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                        }
+                    }
+                    .disabled(isDeleting)
+                    .confirmationDialog(
+                        "Delete this pin?",
+                        isPresented: $showingDeleteConfirmation,
+                        titleVisibility: .visible
+                    ) {
+                        Button("Delete Pin", role: .destructive) {
+                            Task { await handleDelete(onDelete: onDelete) }
+                        }
+                        Button("Cancel", role: .cancel) { }
+                    }
+                }
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 24)
         }
+        .alert("Couldn't Delete Pin", isPresented: Binding(
+            get: { deleteError != nil },
+            set: { newValue in
+                if !newValue {
+                    deleteError = nil
+                }
+            }
+        )) {
+            Button("OK", role: .cancel) { deleteError = nil }
+        } message: {
+            Text(deleteError ?? "")
+        }
+    }
+
+    @MainActor
+    private func handleDelete(onDelete: @escaping () async throws -> Void) async {
+        guard !isDeleting else { return }
+        showingDeleteConfirmation = false
+        isDeleting = true
+
+        do {
+            try await onDelete()
+            dismiss()
+        } catch {
+            deleteError = error.localizedDescription
+        }
+
+        isDeleting = false
     }
 }
 
