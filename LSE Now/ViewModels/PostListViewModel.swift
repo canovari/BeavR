@@ -16,7 +16,6 @@ class PostListViewModel: ObservableObject {
     private let apiService: APIService
     private var authToken: String?
     private var likeChangeObserver: NSObjectProtocol?
-    private var shouldReloadAfterCurrentFetch: Bool = false
     private lazy var urlSession: URLSession = {
         let configuration = URLSessionConfiguration.default
         configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
@@ -85,20 +84,13 @@ class PostListViewModel: ObservableObject {
 
     func refreshPosts(allowRetryAfterCancellation: Bool = true) async {
         if isLoading {
-            shouldReloadAfterCurrentFetch = true
+            print("⏳ Refresh already in progress — waiting for completion before retrying")
+            await waitForCurrentRefreshToFinish()
             return
         }
 
         isLoading = true
-        defer {
-            isLoading = false
-            if shouldReloadAfterCurrentFetch {
-                shouldReloadAfterCurrentFetch = false
-                Task { [weak self] in
-                    await self?.refreshPosts(allowRetryAfterCancellation: false)
-                }
-            }
-        }
+        defer { isLoading = false }
 
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
@@ -128,6 +120,24 @@ class PostListViewModel: ObservableObject {
             }
         } catch {
             print("❌ Unexpected error:", error.localizedDescription)
+        }
+    }
+
+    private func waitForCurrentRefreshToFinish(pollInterval: UInt64 = 50_000_000) async {
+        while isLoading {
+            if Task.isCancelled {
+                print("⛔️ Refresh wait cancelled before completion")
+                return
+            }
+
+            do {
+                try await Task.sleep(nanoseconds: pollInterval)
+            } catch {
+                if Task.isCancelled {
+                    print("⛔️ Refresh wait cancelled during sleep")
+                    return
+                }
+            }
         }
     }
 
