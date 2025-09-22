@@ -160,7 +160,7 @@ struct WhiteboardView: View {
                 }
             }
         }
-        .onChange(of: viewModel.pins) { newPins in
+        .onChange(of: viewModel.pins) { _, newPins in
             seenPinsStore.sync(with: newPins)
         }
     }
@@ -227,6 +227,7 @@ struct WhiteboardView: View {
         .animation(.easeInOut(duration: 0.2), value: viewModel.pins)
     }
 
+    @MainActor
     private func refreshPins() async {
         print("🔄 [Refresh] Starting refreshPins()")
         print("🔄 [Refresh] Current thread: \(Thread.isMainThread ? "Main" : "Background")")
@@ -335,8 +336,8 @@ private struct WhiteboardPinCell: View {
                             Color("LSERed"),
                             style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round)
                         )
-                        .rotation(Angle(degrees: -90))
-                        .animation(.easeInOut(duration: 0.35), value: progress)
+                        .rotationEffect(.degrees(-90))
+                        .animation(Animation.easeInOut(duration: 0.35), value: progress)
                 }
             }
         } else {
