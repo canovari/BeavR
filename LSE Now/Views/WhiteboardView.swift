@@ -60,7 +60,6 @@ struct WhiteboardView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         showingInbox = true
-                        hasUnreadMessages = false
                     } label: {
                         Image(systemName: "envelope")
                             .padding(.top, 2)
@@ -84,11 +83,7 @@ struct WhiteboardView: View {
                 await viewModel.loadPins()
             }
             .onReceive(NotificationCenter.default.publisher(for: PushNotificationManager.messageReplyReceivedNotification)) { _ in
-                if showingInbox {
-                    hasUnreadMessages = false
-                } else {
-                    hasUnreadMessages = true
-                }
+                hasUnreadMessages = true
             }
             .alert(
                 "Unable to Load Pins",
@@ -153,7 +148,8 @@ struct WhiteboardView: View {
                 if let token = activeToken {
                     MessagesInboxView(
                         viewModel: inboxViewModel,
-                        token: token
+                        token: token,
+                        hasUnreadMessages: $hasUnreadMessages
                     )
                 } else {
                     MissingSessionView()
@@ -337,6 +333,7 @@ private struct WhiteboardPinCell: View {
                             style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round)
                         )
                         .rotationEffect(.degrees(-90))
+                        .scaleEffect(x: -1, y: 1, anchor: .center)
                         .animation(Animation.easeInOut(duration: 0.35), value: progress)
                 }
             }
