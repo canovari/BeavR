@@ -7,10 +7,13 @@ struct EventLikeButton: View {
     let action: () -> Void
     var iconSize: CGFloat = 18
 
+    @Namespace private var likeNamespace
+
     @State private var heartOpacity = 1.0
     @State private var fadeAnimationID = 0
     @State private var showCount = false
     @State private var maxCountDigits = 1
+    @State private var countOpacity = 0.0
 
     var body: some View {
         Button {
@@ -49,7 +52,9 @@ struct EventLikeButton: View {
         .onAppear {
             heartOpacity = 1.0
             updateMaxDigits(with: sanitizedLikeCount)
-            showCount = sanitizedLikeCount > 0
+            let shouldShow = sanitizedLikeCount > 0
+            showCount = shouldShow
+            countOpacity = shouldShow ? 1 : 0
         }
         .onChange(of: likeCount) { newValue in
             let sanitizedValue = max(newValue, 0)
@@ -57,12 +62,26 @@ struct EventLikeButton: View {
 
             updateMaxDigits(with: sanitizedValue)
 
-            let animation: Animation = shouldShow && !showCount
-                ? .spring(response: 0.35, dampingFraction: 0.7, blendDuration: 0.2)
-                : .easeInOut(duration: 0.2)
+            if shouldShow && !showCount {
+                countOpacity = 0
+                withAnimation(.interactiveSpring(response: 0.32, dampingFraction: 0.85, blendDuration: 0.2)) {
+                    showCount = true
+                }
+                withAnimation(.easeOut(duration: 0.12).delay(0.04)) {
+                    countOpacity = 1
+                }
+            } else {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    showCount = shouldShow
+                }
 
-            withAnimation(animation) {
-                showCount = shouldShow
+                if shouldShow {
+                    withAnimation(.easeOut(duration: 0.12)) {
+                        countOpacity = 1
+                    }
+                } else {
+                    countOpacity = 0
+                }
             }
         }
         .animation(.easeInOut(duration: 0.2), value: isLoading)
@@ -81,10 +100,6 @@ struct EventLikeButton: View {
 
     private var iconFrameSize: CGFloat {
         iconSize + 8
-    }
-
-    private var progressScale: CGFloat {
-        max((iconSize / 18) * 0.6, 0.5)
     }
 
     private var countPlaceholder: String {
