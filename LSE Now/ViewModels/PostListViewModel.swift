@@ -33,10 +33,12 @@ class PostListViewModel: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] notification in
-            guard let self else { return }
-            if let sender = notification.object as AnyObject?, sender === self { return }
-            guard let change = EventLikeChange.from(notification) else { return }
-            self.applyExternalLikeChange(change)
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                if let sender = notification.object as AnyObject?, sender === self { return }
+                guard let change = EventLikeChange.from(notification) else { return }
+                self.applyExternalLikeChange(change)
+            }
         }
     }
 

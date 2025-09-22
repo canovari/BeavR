@@ -22,15 +22,26 @@ struct EventLikeButton: View {
         } label: {
             HStack(spacing: 6) {
                 if showCount {
-                    iconContainer
-                    countContainer
-                } else {
-                    countContainer
-                    iconContainer
+                    heartContainer
+                        .matchedGeometryEffect(id: "heart", in: likeNamespace)
+                }
+
+                countContainer
+                    .frame(width: showCount ? nil : 0, alignment: .trailing)
+                    .clipped()
+                    .opacity(showCount ? 1 : 0)
+                    .animation(.easeInOut(duration: 0.2), value: showCount)
+                    .animation(.easeInOut(duration: 0.2), value: countOpacity)
+                    .accessibilityHidden(!showCount)
+
+                if !showCount {
+                    heartContainer
+                        .matchedGeometryEffect(id: "heart", in: likeNamespace)
                 }
             }
             .padding(.horizontal, 6)
             .padding(.vertical, 4)
+            .frame(minHeight: iconFrameSize)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -103,7 +114,7 @@ struct EventLikeButton: View {
     }
 
     private var progressScale: CGFloat {
-        max(iconSize / 16, 0.6)
+        max(iconSize / 16, 0.65)
     }
 
     private var countPlaceholder: String {
@@ -125,18 +136,22 @@ struct EventLikeButton: View {
         return "\(sanitizedLikeCount) likes"
     }
 
-    private var iconContainer: some View {
+    private var heartContainer: some View {
         ZStack {
             if isLoading {
                 ProgressView()
                     .progressViewStyle(.circular)
-                    .scaleEffect(progressScale)
-            } else {
-                Image(systemName: isLiked ? "heart.fill" : "heart")
-                    .font(.system(size: iconSize, weight: .semibold))
-                    .foregroundColor(isLiked ? Color("LSERed") : .secondary)
-                    .opacity(heartOpacity)
+                    .scaleEffect(progressScale * 1.1)
+                    .tint(Color("LSERed"))
+                    .opacity(0.85)
+                    .transition(.opacity)
             }
+
+            Image(systemName: isLiked ? "heart.fill" : "heart")
+                .font(.system(size: iconSize, weight: .semibold))
+                .foregroundColor(isLiked ? Color("LSERed") : .secondary)
+                .opacity(heartOpacity)
+                .animation(.easeInOut(duration: 0.18), value: isLoading)
         }
         .frame(width: iconFrameSize, height: iconFrameSize)
     }
@@ -148,13 +163,23 @@ struct EventLikeButton: View {
                     .font(.footnote)
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
-                    .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .trailing)))
+                    .opacity(countOpacity)
+                    .transition(
+                        .asymmetric(
+                            insertion: .move(edge: .trailing)
+                                .combined(with: .opacity)
+                                .combined(with: .scale(scale: 0.92, anchor: .trailing)),
+                            removal: .opacity
+                        )
+                    )
             }
 
-            Text(countPlaceholder)
-                .font(.footnote)
-                .fontWeight(.semibold)
-                .opacity(0)
+            if showCount {
+                Text(countPlaceholder)
+                    .font(.footnote)
+                    .fontWeight(.semibold)
+                    .opacity(0)
+            }
         }
     }
 }

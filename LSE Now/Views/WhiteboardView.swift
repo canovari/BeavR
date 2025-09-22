@@ -226,7 +226,6 @@ struct WhiteboardView: View {
     @MainActor
     private func refreshPins() async {
         print("🔄 [Refresh] Starting refreshPins()")
-        print("🔄 [Refresh] Current thread: \(Thread.isMainThread ? "Main" : "Background")")
         print("🔄 [Refresh] Current pin count before refresh: \(viewModel.pins.count)")
         print("🔄 [Refresh] isLoading before refresh: \(viewModel.isLoading)")
 
@@ -583,7 +582,7 @@ private struct AddPinSheet: View {
                     TextField("Emoji", text: $emoji)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled(true)
-                        .onChange(of: emoji) { newValue in
+                        .onChange(of: emoji, initial: false) { _, newValue in
                             let sanitized = sanitizeEmojiInput(from: newValue)
                             if sanitized != newValue {
                                 emoji = sanitized

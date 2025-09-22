@@ -52,7 +52,6 @@ final class TokenStorage {
         }
 
         var didPersistToken = false
-        var didPersistEmail = false
 
         do {
             if let legacyToken {
@@ -62,14 +61,13 @@ final class TokenStorage {
 
             if let legacyEmail {
                 try keychain.save(legacyEmail, for: .email)
-                didPersistEmail = true
             }
         } catch {
             if didPersistToken {
                 try? keychain.deleteValue(for: .token)
             }
 
-            if didPersistEmail {
+            if legacyEmail != nil {
                 try? keychain.deleteValue(for: .email)
             }
 
