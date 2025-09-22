@@ -21,20 +21,21 @@ struct LocationSuggestion: Identifiable, Equatable {
 
 class LocationSearchCompleter: NSObject, ObservableObject, MKLocalSearchCompleterDelegate {
     private let searchCompleter = MKLocalSearchCompleter()
+    private let minimumSpanDelta: CLLocationDegrees = 0.02
 
     @Published var suggestions: [LocationSuggestion] = []
 
     override init() {
         super.init()
         searchCompleter.delegate = self
-        searchCompleter.resultTypes = [.address, .pointOfInterest]
+        searchCompleter.resultTypes = [.address, .pointOfInterest, .query]
 
         // Restrict search around LSE campus
         let lseRegion = MKCoordinateRegion(
             center: CLLocationCoordinate2D(latitude: 51.5145, longitude: -0.1160),
             span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
         )
-        searchCompleter.region = lseRegion
+        searchCompleter.region = normalizedRegion(lseRegion)
     }
 
     func update(query: String) {
@@ -49,11 +50,22 @@ class LocationSearchCompleter: NSObject, ObservableObject, MKLocalSearchComplete
     }
 
     func updateRegion(_ region: MKCoordinateRegion) {
-        searchCompleter.region = region
+        searchCompleter.region = normalizedRegion(region)
     }
 
     func clear() {
         suggestions = []
+    }
+
+    private func normalizedRegion(_ region: MKCoordinateRegion) -> MKCoordinateRegion {
+        let span = region.span
+        let latitudeDelta = max(span.latitudeDelta, minimumSpanDelta)
+        let longitudeDelta = max(span.longitudeDelta, minimumSpanDelta)
+
+        return MKCoordinateRegion(
+            center: region.center,
+            span: MKCoordinateSpan(latitudeDelta: latitudeDelta, longitudeDelta: longitudeDelta)
+        )
     }
 
     func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
