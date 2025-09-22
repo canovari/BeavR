@@ -3,29 +3,86 @@ import Foundation
 final class TokenStorage {
     static let shared = TokenStorage()
 
-    private let tokenKey = "lse.now.authToken"
-    private let emailKey = "lse.now.authEmail"
-    private let userDefaults: UserDefaults
+    private let keychain: any SecureTokenStoring
+    private let legacyUserDefaults: UserDefaults
 
-    init(userDefaults: UserDefaults = .standard) {
-        self.userDefaults = userDefaults
+    private let legacyTokenKey = SecureTokenStorage.ItemKey.token.rawValue
+    private let legacyEmailKey = SecureTokenStorage.ItemKey.email.rawValue
+
+    init(
+        keychain: any SecureTokenStoring = SecureTokenStorage(),
+        legacyUserDefaults: UserDefaults = .standard
+    ) {
+        self.keychain = keychain
+        self.legacyUserDefaults = legacyUserDefaults
+
+        migrateLegacyCredentialsIfNeeded()
     }
 
-    func loadToken() -> String? {
-        userDefaults.string(forKey: tokenKey)
+    func loadToken() throws -> String? {
+        try keychain.loadValue(for: .token)
     }
 
-    func loadEmail() -> String? {
-        userDefaults.string(forKey: emailKey)
+    func loadEmail() throws -> String? {
+        try keychain.loadValue(for: .email)
     }
 
-    func save(token: String, email: String) {
-        userDefaults.set(token, forKey: tokenKey)
-        userDefaults.set(email, forKey: emailKey)
+    func save(token: String, email: String) throws {
+        do {
+            try keychain.save(token, for: .token)
+            try keychain.save(email, for: .email)
+        } catch {
+            try? keychain.deleteValue(for: .token)
+            try? keychain.deleteValue(for: .email)
+            throw error
+        }
     }
 
-    func clear() {
-        userDefaults.removeObject(forKey: tokenKey)
-        userDefaults.removeObject(forKey: emailKey)
+    func clear() throws {
+        try keychain.deleteValue(for: .token)
+        try keychain.deleteValue(for: .email)
+    }
+
+    private func migrateLegacyCredentialsIfNeeded() {
+        let legacyToken = legacyUserDefaults.string(forKey: legacyTokenKey)
+        let legacyEmail = legacyUserDefaults.string(forKey: legacyEmailKey)
+
+        guard legacyToken != nil || legacyEmail != nil else {
+            return
+        }
+
+        var didPersistToken = false
+        var didPersistEmail = false
+
+        do {
+            if let legacyToken {
+                try keychain.save(legacyToken, for: .token)
+                didPersistToken = true
+            }
+
+            if let legacyEmail {
+                try keychain.save(legacyEmail, for: .email)
+                didPersistEmail = true
+            }
+        } catch {
+            if didPersistToken {
+                try? keychain.deleteValue(for: .token)
+            }
+
+            if didPersistEmail {
+                try? keychain.deleteValue(for: .email)
+            }
+
+            print("⚠️ [TokenStorage] Failed to migrate credentials from UserDefaults: \(error.localizedDescription)")
+            return
+        }
+
+        if legacyToken != nil {
+            legacyUserDefaults.removeObject(forKey: legacyTokenKey)
+        }
+
+        if legacyEmail != nil {
+            legacyUserDefaults.removeObject(forKey: legacyEmailKey)
+        }
     }
 }

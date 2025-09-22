@@ -5,11 +5,12 @@ This repository now includes a lightweight PHP backend that powers the email + o
 ## Backend setup
 
 1. Create the tables using the schema in [`database/schema.sql`](database/schema.sql). This now provisions both the `users` table for authentication and an `events` table that stores every submitted event together with its creator email and publication status.
-2. Provide the database connection credentials through the following environment variables before serving the PHP scripts:
+2. Provide the database connection credentials through the following environment variables before serving the PHP scripts (the shared `config.php` will refuse to bootstrap without them and will return HTTP 500 instead of leaking stack traces):
    - `DB_HOST`
    - `DB_NAME`
    - `DB_USER`
    - `DB_PASS`
+   You can export them directly in your shell prior to calling `php -S`, place them in your web server's environment configuration (for example Apache's `SetEnv` or nginx's `fastcgi_param`), or load them via a deployment-specific secrets manager.
 3. Deploy the contents of the [`api/`](api) directory to your PHP-capable web server. Both scripts expect `config.php` one level above them so they can share the PDO connection.
 
 ### Available endpoints
@@ -82,4 +83,4 @@ The SwiftUI app now checks for a stored login token on launch. If a token exists
 1. Enter an `@lse.ac.uk` email address to trigger `request_code.php`.
 2. Enter the six-digit code from the email to call `verify_code.php`.
 
-After successful verification the login token is saved locally (via `UserDefaults`), so future launches bypass the login flow until the app is reinstalled.
+After successful verification the login token is saved locally in the iOS Keychain (with an automatic migration for users that still had credentials in `UserDefaults`), so future launches bypass the login flow until the app is reinstalled or the token is cleared.

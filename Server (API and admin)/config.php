@@ -1,12 +1,53 @@
 <?php
 // Central DB config — supports both global $pdo and getPDO()
 
-$host = "sql.beavr.net";
-$db   = "canovari46540";
-$user = "canovari46540";
-$pass = "cano99880";
+function readEnv(string $key): ?string {
+    $candidates = [
+        getenv($key),
+        $_ENV[$key] ?? null,
+        $_SERVER[$key] ?? null,
+    ];
 
-$dsn = "mysql:host=$host;dbname=$db;charset=utf8mb4";
+    foreach ($candidates as $candidate) {
+        if ($candidate === false || $candidate === null) {
+            continue;
+        }
+
+        $value = trim((string) $candidate);
+        if ($value !== '') {
+            return $value;
+        }
+    }
+
+    return null;
+}
+
+function requireEnv(string $key): string {
+    $value = readEnv($key);
+
+    if ($value === null) {
+        throw new RuntimeException("Missing required environment variable: {$key}");
+    }
+
+    return $value;
+}
+
+try {
+    $host = requireEnv('DB_HOST');
+    $db = requireEnv('DB_NAME');
+    $user = requireEnv('DB_USER');
+    $pass = requireEnv('DB_PASS');
+} catch (RuntimeException $exception) {
+    error_log('[config] ' . $exception->getMessage());
+
+    if (PHP_SAPI !== 'cli' && function_exists('http_response_code')) {
+        http_response_code(500);
+    }
+
+    exit('Server configuration error.');
+}
+
+$dsn = "mysql:host={$host};dbname={$db};charset=utf8mb4";
 
 function getPDO(): PDO {
     global $dsn, $user, $pass;

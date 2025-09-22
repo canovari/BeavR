@@ -41,8 +41,14 @@ final class AuthViewModel: ObservableObject {
     }
 
     func loadExistingSession() {
-        token = tokenStorage.loadToken()
-        loggedInEmail = tokenStorage.loadEmail()
+        do {
+            token = try tokenStorage.loadToken()
+            loggedInEmail = try tokenStorage.loadEmail()
+        } catch {
+            token = nil
+            loggedInEmail = nil
+            print("⚠️ [AuthViewModel] Failed to load stored credentials: \(error.localizedDescription)")
+        }
 
         if let savedEmail = loggedInEmail {
             email = savedEmail
@@ -109,10 +115,17 @@ final class AuthViewModel: ObservableObject {
         errorMessage = nil
         infoMessage = nil
         isLoading = true
+        defer { isLoading = false }
 
         do {
             let token = try await apiService.verifyLoginCode(email: email, code: trimmedCode)
-            tokenStorage.save(token: token, email: email)
+            do {
+                try tokenStorage.save(token: token, email: email)
+            } catch {
+                errorMessage = "We couldn't securely store your login. Please try again."
+                print("⚠️ [AuthViewModel] Failed to store credentials: \(error.localizedDescription)")
+                return
+            }
             self.token = token
             loggedInEmail = email
             code = ""
@@ -121,8 +134,6 @@ final class AuthViewModel: ObservableObject {
         } catch {
             errorMessage = error.localizedDescription
         }
-
-        isLoading = false
     }
 
     func logout() {
@@ -133,7 +144,11 @@ final class AuthViewModel: ObservableObject {
             pushManager.handleLogout(email: currentEmail, authToken: currentToken)
         }
 
-        tokenStorage.clear()
+        do {
+            try tokenStorage.clear()
+        } catch {
+            print("⚠️ [AuthViewModel] Failed to clear stored credentials: \(error.localizedDescription)")
+        }
         token = nil
         loggedInEmail = nil
         startOver()
