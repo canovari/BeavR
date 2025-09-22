@@ -5,12 +5,12 @@ This repository now includes a lightweight PHP backend that powers the email + o
 ## Backend setup
 
 1. Create the tables using the schema in [`database/schema.sql`](database/schema.sql). This now provisions both the `users` table for authentication and an `events` table that stores every submitted event together with its creator email and publication status.
-2. Provide the database connection credentials through the following environment variables before serving the PHP scripts (the shared `config.php` will refuse to bootstrap without them and will return HTTP 500 instead of leaking stack traces):
+2. Provide the database connection credentials through the following environment variables before serving the PHP scripts (the shared `config.php` will refuse to bootstrap without them and will return HTTP 500 instead of leaking stack traces). You can set them in your shell, configure them in your web server, or create a `.env` file (either at the repository root or inside `Server (API and admin)/`) with the same key/value pairs:
    - `DB_HOST`
    - `DB_NAME`
    - `DB_USER`
    - `DB_PASS`
-   You can export them directly in your shell prior to calling `php -S`, place them in your web server's environment configuration (for example Apache's `SetEnv` or nginx's `fastcgi_param`), or load them via a deployment-specific secrets manager.
+   For local development you can copy [`Server (API and admin)/.env.example`](Server%20(API%20and%20admin)/.env.example) to `.env` and customise the values.
 3. Deploy the contents of the [`api/`](api) directory to your PHP-capable web server. Both scripts expect `config.php` one level above them so they can share the PDO connection.
 
 ### Available endpoints
