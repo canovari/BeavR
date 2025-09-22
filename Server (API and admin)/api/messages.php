@@ -7,6 +7,7 @@ file_put_contents(__DIR__ . '/messages_log.txt', "[DEBUG] File write test\n", FI
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../services/NotificationService.php';
 require_once __DIR__ . '/whiteboard_helpers.php';
+require_once __DIR__ . '/auth_helpers.php';
 
 header('Content-Type: application/json');
 
@@ -73,6 +74,13 @@ function listMessages(PDO $pdo): void
         return;
     }
 
+    if (userIsBanned($user)) {
+        http_response_code(403);
+        echo json_encode(['error' => ACCOUNT_SUSPENDED_MESSAGE]);
+        logMessage('❌ GET failed → banned account.');
+        return;
+    }
+
     $box = strtolower((string) ($_GET['box'] ?? 'received'));
     if ($box !== 'sent') {
         $box = 'received';
@@ -118,6 +126,20 @@ function createMessage(PDO $pdo): void
         return;
     }
     logMessage("✅ Authenticated user: {$user['email']}");
+
+    if (userIsBanned($user)) {
+        http_response_code(403);
+        echo json_encode(['error' => ACCOUNT_SUSPENDED_MESSAGE]);
+        logMessage('❌ POST failed → banned account.');
+        return;
+    }
+
+    if (userIsMuted($user)) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Your account is muted and cannot reply to messages.']);
+        logMessage('❌ POST failed → muted account.');
+        return;
+    }
 
     $payload = decodeJsonPayload();
     logMessage("🔹 Raw POST payload: " . json_encode($payload));

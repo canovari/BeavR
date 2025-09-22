@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 $logFile = __DIR__ . '/../messages_log.txt';
 
+require_once __DIR__ . '/auth_helpers.php';
+
 /**
  * Debug log helper (safe to call everywhere)
  */
@@ -64,7 +66,7 @@ function extractBearerToken(): ?string
 function findUserByToken(PDO $pdo, string $token): ?array
 {
     helperLog("findUserByToken searching for token='{$token}'");
-    $stmt = $pdo->prepare('SELECT id, email FROM users WHERE login_token = :token LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id, email, status FROM users WHERE login_token = :token LIMIT 1');
     $stmt->execute([':token' => $token]);
     $user = $stmt->fetch();
 
@@ -74,11 +76,13 @@ function findUserByToken(PDO $pdo, string $token): ?array
     }
 
     $normalizedEmail = normalizeEmail($user['email'] ?? null);
-    helperLog("findUserByToken success → id={$user['id']} email={$normalizedEmail}");
+    $status = normalizeUserStatus($user['status'] ?? null);
+    helperLog("findUserByToken success → id={$user['id']} email={$normalizedEmail} status={$status}");
 
     return [
         'id' => (int) $user['id'],
         'email' => $normalizedEmail,
+        'status' => $status,
     ];
 }
 

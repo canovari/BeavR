@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/auth_helpers.php';
 
 header('Content-Type: application/json');
 
@@ -22,6 +23,26 @@ if (!preg_match('/^[A-Za-z0-9._%+-]+@lse\.ac\.uk$/', $email)) {
 }
 
 $isDemoAccount = strcasecmp($email, DEMO_EMAIL) === 0;
+
+$existingStatus = null;
+try {
+    $lookup = $pdo->prepare('SELECT status FROM users WHERE email = :email LIMIT 1');
+    $lookup->execute([':email' => $email]);
+    $existing = $lookup->fetch();
+    if ($existing) {
+        $existingStatus = normalizeUserStatus($existing['status'] ?? null);
+    }
+} catch (PDOException $exception) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Unable to process request.']);
+    exit;
+}
+
+if ($existingStatus === USER_STATUS_BANNED) {
+    http_response_code(403);
+    echo json_encode(['error' => ACCOUNT_SUSPENDED_MESSAGE]);
+    exit;
+}
 
 if ($isDemoAccount) {
     $code = '000000';
