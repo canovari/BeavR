@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/auth_helpers.php';
 
 header('Content-Type: application/json');
 
@@ -13,6 +14,26 @@ if ($method !== 'POST') {
 }
 
 try {
+    $token = extractBearerToken();
+    if ($token === null) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Missing bearer token.']);
+        exit;
+    }
+
+    $user = fetchUserByToken($pdo, $token);
+    if ($user === null) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Invalid or expired token.']);
+        exit;
+    }
+
+    if (userIsBanned($user)) {
+        http_response_code(403);
+        echo json_encode(['error' => ACCOUNT_SUSPENDED_MESSAGE]);
+        exit;
+    }
+
     // Parse JSON body
     $payload = json_decode(file_get_contents('php://input'), true);
     if (!is_array($payload)) {
@@ -28,10 +49,16 @@ try {
 
     // Validate
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Valid email is required.']);
+        $email = $user['email'];
+    }
+
+    if (strcasecmp((string) $email, $user['email']) !== 0) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Authenticated email does not match payload.']);
         exit;
     }
+
+    $email = $user['email'];
     if (!is_numeric($latitude) || !is_numeric($longitude)) {
         http_response_code(400);
         echo json_encode(['error' => 'Latitude and longitude are required.']);
@@ -75,5 +102,16 @@ try {
 } catch (Throwable $exception) {
     http_response_code(500);
     echo json_encode(['error' => 'Unexpected server error.']);
+}
+
+function extractBearerToken(): ?string
+{
+    $headers = function_exists('getallheaders') ? getallheaders() : [];
+    $authorization = $headers['Authorization'] ?? $headers['authorization'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? null;
+    if (!$authorization || stripos($authorization, 'Bearer ') !== 0) {
+        return null;
+    }
+    $token = trim(substr($authorization, 7));
+    return $token === '' ? null : $token;
 }
 

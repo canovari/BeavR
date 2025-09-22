@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/auth_helpers.php';
 
 header('Content-Type: application/json');
 
@@ -23,6 +24,26 @@ if (!preg_match('/^[0-9]{6}$/', $code)) {
 }
 
 $isDemoAccount = strcasecmp($email, DEMO_EMAIL) === 0;
+
+$existingStatus = null;
+try {
+    $lookup = $pdo->prepare('SELECT status FROM users WHERE email = :email LIMIT 1');
+    $lookup->execute([':email' => $email]);
+    $existing = $lookup->fetch();
+    if ($existing) {
+        $existingStatus = normalizeUserStatus($existing['status'] ?? null);
+    }
+} catch (PDOException $exception) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Unable to verify code.']);
+    exit;
+}
+
+if ($existingStatus === USER_STATUS_BANNED) {
+    http_response_code(403);
+    echo json_encode(['error' => ACCOUNT_SUSPENDED_MESSAGE]);
+    exit;
+}
 
 if ($isDemoAccount) {
     if ($code !== '000000') {
@@ -64,7 +85,7 @@ if ($isDemoAccount) {
 }
 
 try {
-    $stmt = $pdo->prepare('SELECT id, code_expires_at FROM users WHERE email = :email AND code = :code LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id, code_expires_at, status FROM users WHERE email = :email AND code = :code LIMIT 1');
     $stmt->execute([
         ':email' => $email,
         ':code' => $code,
@@ -79,6 +100,13 @@ try {
 if (!$user) {
     http_response_code(400);
     echo json_encode(['error' => 'Invalid or expired code.']);
+    exit;
+}
+
+$status = normalizeUserStatus($user['status'] ?? $existingStatus);
+if ($status === USER_STATUS_BANNED) {
+    http_response_code(403);
+    echo json_encode(['error' => ACCOUNT_SUSPENDED_MESSAGE]);
     exit;
 }
 

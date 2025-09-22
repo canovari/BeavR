@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../services/NotificationService.php';
 require_once __DIR__ . '/whiteboard_helpers.php';
+require_once __DIR__ . '/auth_helpers.php';
 
 header('Content-Type: application/json');
 
@@ -56,6 +57,13 @@ function registerNotificationToken(PDO $pdo): void
         return;
     }
 
+    if (userIsBanned($user)) {
+        http_response_code(403);
+        echo json_encode(['error' => ACCOUNT_SUSPENDED_MESSAGE]);
+        logNotificationApi('POST rejected: banned account.');
+        return;
+    }
+
     $payload = decodeJsonPayload();
     if (!is_array($payload)) {
         http_response_code(400);
@@ -102,6 +110,13 @@ function deleteNotificationToken(PDO $pdo): void
         http_response_code(401);
         echo json_encode(['error' => 'Invalid login token.']);
         logNotificationApi('DELETE rejected: invalid token.');
+        return;
+    }
+
+    if (userIsBanned($user)) {
+        http_response_code(403);
+        echo json_encode(['error' => ACCOUNT_SUSPENDED_MESSAGE]);
+        logNotificationApi('DELETE rejected: banned account.');
         return;
     }
 

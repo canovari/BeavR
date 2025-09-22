@@ -189,6 +189,7 @@ CREATE TABLE `users` (
   `code_expires_at` datetime DEFAULT NULL,
   `verified` tinyint(1) NOT NULL DEFAULT '0',
   `login_token` char(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` enum('regular','muted','banned') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'regular',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -197,8 +198,8 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `email`, `code`, `code_expires_at`, `verified`, `login_token`, `created_at`, `updated_at`) VALUES
-(1, 'p.canovari@lse.ac.uk', NULL, NULL, 1, 'd84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7', '2025-09-19 20:47:46', '2025-09-19 20:52:27');
+INSERT INTO `users` (`id`, `email`, `code`, `code_expires_at`, `verified`, `login_token`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'p.canovari@lse.ac.uk', NULL, NULL, 1, 'd84743e13fd17eaa6e81f7bbf6ebfbb01fe68cd5ece780919528db991c3747f7', 'regular', '2025-09-19 20:47:46', '2025-09-19 20:52:27');
 
 -- --------------------------------------------------------
 

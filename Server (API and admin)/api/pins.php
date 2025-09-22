@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . "/../config.php"; // adjust path if needed
+require_once __DIR__ . '/auth_helpers.php';
 
 const PIN_LIFETIME_SECONDS = 8 * 60 * 60;
 
@@ -63,9 +64,34 @@ if ($method === "POST") {
         exit;
     }
 
-    // TODO: validate auth token from headers
+    $token = extractBearerToken();
+    if ($token === null) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Missing bearer token.']);
+        exit;
+    }
+
+    $user = fetchUserByToken($pdo, $token);
+    if ($user === null) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Invalid or expired token.']);
+        exit;
+    }
+
+    if (userIsBanned($user)) {
+        http_response_code(403);
+        echo json_encode(['error' => ACCOUNT_SUSPENDED_MESSAGE]);
+        exit;
+    }
+
+    if (userIsMuted($user)) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Your account is muted and cannot add pins.']);
+        exit;
+    }
+
     $author = $data["author"] ?? null;
-    $creatorEmail = strtolower(trim($data["creatorEmail"]));
+    $creatorEmail = $user['email'];
 
     $stmt = $pdo->prepare("
         INSERT INTO pins (emoji, text, author, creator_email, grid_row, grid_col)
@@ -100,3 +126,14 @@ if ($method === "POST") {
 
 http_response_code(405);
 echo json_encode(["error" => "Method not allowed"]);
+
+function extractBearerToken(): ?string
+{
+    $headers = function_exists('getallheaders') ? getallheaders() : [];
+    $authorization = $headers['Authorization'] ?? $headers['authorization'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? null;
+    if (!$authorization || stripos($authorization, 'Bearer ') !== 0) {
+        return null;
+    }
+    $token = trim(substr($authorization, 7));
+    return $token === '' ? null : $token;
+}

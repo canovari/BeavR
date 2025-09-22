@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/auth_helpers.php';
 
 header('Content-Type: application/json');
 
@@ -104,12 +105,16 @@ function requireAuth(PDO $pdo): array
         respondWithError(401, 'Invalid or expired token.');
     }
 
+    if (userIsBanned($user)) {
+        respondWithError(403, ACCOUNT_SUSPENDED_MESSAGE);
+    }
+
     return $user;
 }
 
 function findUserByToken(PDO $pdo, string $token): ?array
 {
-    $stmt = $pdo->prepare('SELECT id, email FROM users WHERE login_token = :token LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id, email, status FROM users WHERE login_token = :token LIMIT 1');
     $stmt->execute([':token' => $token]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -120,6 +125,7 @@ function findUserByToken(PDO $pdo, string $token): ?array
     return [
         'id' => (int)$user['id'],
         'email' => strtolower((string)$user['email']),
+        'status' => normalizeUserStatus($user['status'] ?? null),
     ];
 }
 
