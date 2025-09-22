@@ -18,22 +18,12 @@ struct DealsView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if viewModel.deals.isEmpty && viewModel.isLoading {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                } else if filteredDeals.isEmpty {
-                    emptyState
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 12) {
-                            ForEach(filteredDeals) { deal in
-                                DealCardView(deal: deal)
-                            }
-                        }
-                        .padding()
-                    }
-                }
+            ZStack {
+                Color(.systemGroupedBackground)
+                    .ignoresSafeArea()
+
+                content
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
             .navigationTitle("Deals")
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search deals")
@@ -44,6 +34,26 @@ struct DealsView: View {
                 if viewModel.deals.isEmpty {
                     viewModel.fetchDeals()
                 }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if viewModel.deals.isEmpty && viewModel.isLoading {
+            ProgressView()
+                .progressViewStyle(.circular)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if filteredDeals.isEmpty {
+            emptyState
+        } else {
+            ScrollView {
+                LazyVStack(spacing: 12) {
+                    ForEach(filteredDeals) { deal in
+                        DealCardView(deal: deal)
+                    }
+                }
+                .padding()
             }
         }
     }
