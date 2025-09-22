@@ -111,7 +111,7 @@ struct HubRectButton: View {
 
 // MARK: - Placeholder Views
 struct MyEventsView: View {
-    private struct ModeIntroduction {
+    fileprivate struct ModeIntroduction {
         let icon: String
         let accent: Color
         let message: String
