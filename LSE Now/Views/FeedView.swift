@@ -24,7 +24,6 @@ struct FeedView: View {
 
     @State private var showFilterSheet = false
     @State private var selectedCategories: Set<String> = Set(FilterSheet.categories)
-    @State private var selectedDate: Date? = nil
     @State private var searchText: String = ""
     @State private var sortOption: FeedSortOption = .time
     @State private var radiusMiles: Double = 5
@@ -56,10 +55,6 @@ struct FeedView: View {
                     guard selectedCategories.contains(category) else { return false }
                 }
             } else if selectedCategories.isEmpty {
-                return false
-            }
-
-            if let date = selectedDate, !Calendar.current.isDate(post.startTime, inSameDayAs: date) {
                 return false
             }
 
@@ -179,7 +174,6 @@ struct FeedView: View {
             .sheet(isPresented: $showFilterSheet) {
                 FilterSheet(
                     selectedCategories: $selectedCategories,
-                    selectedDate: $selectedDate,
                     sortOption: $sortOption,
                     radiusMiles: $radiusMiles
                 )
@@ -376,7 +370,6 @@ private struct LocationSortUnavailableView: View {
 // MARK: - Filter Sheet
 struct FilterSheet: View {
     @Binding var selectedCategories: Set<String>
-    @Binding var selectedDate: Date?
     @Binding var sortOption: FeedSortOption
     @Binding var radiusMiles: Double
 
@@ -393,12 +386,7 @@ struct FilterSheet: View {
         }
     }
 
-    static let categories = [
-        "Art Events 🎨", "Career 💼", "Club Events 🎉", "Cooking 👨‍🍳",
-        "Cultural 🌍", "Festivals 🎊", "Freebie 😎", "Holiday ✨",
-        "Ice Skating ⛸️", "Lectures 🎤", "Library 📚", "Movie 🎬", "Night Life 🎶",
-        "Pride 🏳️‍🌈", "Shows 🎵", "Sports 🏀", "Trivia 🎲", "Wellness 🧘"
-    ]
+    static let categories = EventCategoryCatalog.all
 
     private let radiusRange: ClosedRange<Double> = 1...20
 
@@ -455,19 +443,6 @@ struct FilterSheet: View {
                     }
                 }
 
-                Section("Date") {
-                    DatePicker("Select Date", selection: Binding(
-                        get: { selectedDate ?? Date() },
-                        set: { selectedDate = $0 }
-                    ), displayedComponents: .date)
-                    
-                    if selectedDate != nil {
-                        Button("Clear Date Filter") {
-                            selectedDate = nil
-                        }
-                        .foregroundColor(.red)
-                    }
-                }
             }
             .navigationTitle("Filters")
             .toolbar {

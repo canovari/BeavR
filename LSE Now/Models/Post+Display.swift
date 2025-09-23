@@ -20,6 +20,17 @@ extension Post {
     }
 
     var primaryLocationLine: String? {
+        let baseLocation = sanitizedPrimaryLocation
+        let roomComponent = sanitizedRoom
+
+        if let baseLocation, let roomComponent {
+            return "\(baseLocation) – \(roomComponent)"
+        }
+
+        return baseLocation ?? roomComponent
+    }
+
+    private var sanitizedPrimaryLocation: String? {
         guard let rawLocation = location?.trimmingCharacters(in: .whitespacesAndNewlines), !rawLocation.isEmpty else {
             return nil
         }
@@ -53,6 +64,13 @@ extension Post {
         }
 
         return normalized
+    }
+
+    private var sanitizedRoom: String? {
+        guard let rawRoom = room?.trimmingCharacters(in: .whitespacesAndNewlines), !rawRoom.isEmpty else {
+            return nil
+        }
+        return rawRoom
     }
 }
 
