@@ -4,6 +4,7 @@ import CoreLocation
 final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published private(set) var authorizationStatus: CLAuthorizationStatus
     @Published private(set) var latestLocation: CLLocation?
+    @Published private(set) var accuracyAuthorization: CLAccuracyAuthorization
 
     private let locationManager: CLLocationManager
     private let apiService: APIService
@@ -32,6 +33,11 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         self.apiService = apiService
         self.userDefaults = userDefaults
         self.authorizationStatus = manager.authorizationStatus
+        if #available(iOS 14.0, *) {
+            self.accuracyAuthorization = manager.accuracyAuthorization
+        } else {
+            self.accuracyAuthorization = .fullAccuracy
+        }
 
         super.init()
         manager.delegate = self
@@ -164,11 +170,13 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
     @available(iOS 14.0, *)
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         log("locationManagerDidChangeAuthorization → \(describeAuthorizationStatus(manager.authorizationStatus))")
+        updateAccuracyAuthorization(from: manager)
         handleAuthorizationChange(to: manager.authorizationStatus)
     }
 
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         log("didChangeAuthorization (legacy) → \(describeAuthorizationStatus(status))")
+        updateAccuracyAuthorization(from: manager)
         handleAuthorizationChange(to: status)
     }
 
@@ -177,6 +185,13 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
             self.authorizationStatus = status
+            if #available(iOS 14.0, *) {
+                let newAccuracy = self.locationManager.accuracyAuthorization
+                if newAccuracy != self.accuracyAuthorization {
+                    self.accuracyAuthorization = newAccuracy
+                    self.log("Accuracy authorization updated → \(self.describeAccuracyAuthorization(newAccuracy))")
+                }
+            }
 
             switch status {
             case .authorizedWhenInUse, .authorizedAlways:
@@ -294,6 +309,24 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
     // MARK: - Helpers
     private func log(_ message: String) {
         print("[LocationManager] \(message)")
+    }
+
+    private func updateAccuracyAuthorization(from manager: CLLocationManager) {
+        guard #available(iOS 14.0, *) else { return }
+        let newAccuracy = manager.accuracyAuthorization
+        if newAccuracy != accuracyAuthorization {
+            accuracyAuthorization = newAccuracy
+            log("Accuracy authorization updated → \(describeAccuracyAuthorization(newAccuracy))")
+        }
+    }
+
+    @available(iOS 14.0, *)
+    private func describeAccuracyAuthorization(_ accuracy: CLAccuracyAuthorization) -> String {
+        switch accuracy {
+        case .fullAccuracy: return "full accuracy"
+        case .reducedAccuracy: return "reduced accuracy"
+        @unknown default: return "unknown (\(accuracy.rawValue))"
+        }
     }
 
     private func describeAuthorizationStatus(_ status: CLAuthorizationStatus) -> String {
