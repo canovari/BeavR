@@ -11,10 +11,12 @@ struct MainTabView: View {
     @State private var permissionsCompleted = false
     @EnvironmentObject private var locationManager: LocationManager
     @Environment(\.scenePhase) private var scenePhase
+    private let launchAnimationFinished: Bool
 
-    init(eventsViewModel: PostListViewModel, dealsViewModel: DealListViewModel) {
+    init(eventsViewModel: PostListViewModel, dealsViewModel: DealListViewModel, launchAnimationFinished: Bool) {
         _eventsViewModel = StateObject(wrappedValue: eventsViewModel)
         _dealsViewModel = StateObject(wrappedValue: dealsViewModel)
+        self.launchAnimationFinished = launchAnimationFinished
 
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
@@ -37,9 +39,11 @@ struct MainTabView: View {
             }
 
             if !permissionsCompleted {
-                PermissionsGateView(isComplete: $permissionsCompleted)
-                    .transition(.opacity)
-                    .zIndex(3)
+                if launchAnimationFinished {
+                    PermissionsGateView(isComplete: $permissionsCompleted)
+                        .transition(.opacity)
+                        .zIndex(3)
+                }
             }
         }
         .onAppear {

@@ -81,6 +81,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
             locationManager.requestWhenInUseAuthorization()
         default:
             log("Skipping refresh, not authorized")
+            synchronizeAuthorizationState()
         }
     }
 
@@ -165,6 +166,17 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         log("didFailWithError → \(error.localizedDescription)")
+
+        if let clError = error as? CLError, clError.code == .denied {
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                self.log("Location access denied while requesting update → synchronizing state")
+                self.latestLocation = nil
+                self.shouldUploadWhenLocationAvailable = false
+                self.locationManager.stopUpdatingLocation()
+                self.synchronizeAuthorizationState()
+            }
+        }
     }
 
     @available(iOS 14.0, *)
@@ -185,13 +197,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
             self.authorizationStatus = status
-            if #available(iOS 14.0, *) {
-                let newAccuracy = self.locationManager.accuracyAuthorization
-                if newAccuracy != self.accuracyAuthorization {
-                    self.accuracyAuthorization = newAccuracy
-                    self.log("Accuracy authorization updated → \(self.describeAccuracyAuthorization(newAccuracy))")
-                }
-            }
+            self.updateAccuracyAuthorization(from: self.locationManager)
 
             switch status {
             case .authorizedWhenInUse, .authorizedAlways:
@@ -227,6 +233,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
             locationManager.requestWhenInUseAuthorization()
         default:
             log("Not authorized, not starting updates")
+            synchronizeAuthorizationState()
         }
     }
 
@@ -251,6 +258,11 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
             return
         }
 
+        guard ensureLocationPermissionAvailable(context: "upload timer") else {
+            log("Skipping upload timer execution → location permission missing")
+            return
+        }
+
         if let location = latestLocation {
             sendLocationUpdate(using: location)
             locationManager.requestLocation()
@@ -268,6 +280,11 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
 
     // MARK: - Upload
     private func sendLocationUpdate(using location: CLLocation) {
+        guard ensureLocationPermissionAvailable(context: "sending location") else {
+            log("Aborting location upload → permission not granted")
+            return
+        }
+
         guard let emailClosure = emailProvider else {
             log("No emailProvider wired → skipping upload")
             return
@@ -340,6 +357,52 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
             accuracyAuthorization = newAccuracy
             log("Accuracy authorization updated → \(describeAccuracyAuthorization(newAccuracy))")
         }
+    }
+
+    private func synchronizeAuthorizationState() {
+        let currentStatus = locationManager.authorizationStatus
+        if authorizationStatus != currentStatus {
+            authorizationStatus = currentStatus
+            log("Synchronized authorization status → \(describeAuthorizationStatus(currentStatus))")
+        }
+
+        updateAccuracyAuthorization(from: locationManager)
+
+        if !CLLocationManager.locationServicesEnabled() ||
+            !(currentStatus == .authorizedAlways || currentStatus == .authorizedWhenInUse) {
+            locationManager.stopUpdatingLocation()
+            latestLocation = nil
+        }
+    }
+
+    private func ensureLocationPermissionAvailable(context: String) -> Bool {
+        let status = locationManager.authorizationStatus
+
+        if !CLLocationManager.locationServicesEnabled() {
+            log("Location services disabled during \(context) → clearing cached location")
+            latestLocation = nil
+            shouldUploadWhenLocationAvailable = false
+            synchronizeAuthorizationState()
+            return false
+        }
+
+        guard status == .authorizedWhenInUse || status == .authorizedAlways else {
+            log("Authorization missing during \(context) → status = \(describeAuthorizationStatus(status))")
+            latestLocation = nil
+            shouldUploadWhenLocationAvailable = false
+            synchronizeAuthorizationState()
+            return false
+        }
+
+        if !isPreciseAccuracyEnabled {
+            log("Precise accuracy disabled during \(context) → awaiting user action")
+            shouldUploadWhenLocationAvailable = false
+            synchronizeAuthorizationState()
+            return false
+        }
+
+        updateAccuracyAuthorization(from: locationManager)
+        return true
     }
 
     @available(iOS 14.0, *)
