@@ -307,6 +307,28 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
     }
 
     // MARK: - Helpers
+    var hasValidLocationPermission: Bool {
+        guard CLLocationManager.locationServicesEnabled() else {
+            return false
+        }
+
+        switch authorizationStatus {
+        case .authorizedAlways, .authorizedWhenInUse:
+            return isPreciseAccuracyEnabled
+        case .authorized:
+            return true
+        default:
+            return false
+        }
+    }
+
+    private var isPreciseAccuracyEnabled: Bool {
+        if #available(iOS 14.0, *) {
+            return accuracyAuthorization == .fullAccuracy
+        }
+        return true
+    }
+
     private func log(_ message: String) {
         print("[LocationManager] \(message)")
     }
@@ -336,6 +358,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         case .denied: return "denied"
         case .authorizedAlways: return "authorized always"
         case .authorizedWhenInUse: return "authorized when in use"
+        case .authorized: return "authorized"
         @unknown default: return "unknown (\(status.rawValue))"
         }
     }
