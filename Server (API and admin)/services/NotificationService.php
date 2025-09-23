@@ -171,7 +171,9 @@ final class NotificationService
             'threadId' => 'whiteboard-replies',
             'category' => 'MESSAGE_REPLY',
             'contentAvailable' => true,
-            'collapseId' => 'message_reply_' . $pinId,
+            // Use the individual message id so multiple replies to the same pin
+            // don't collapse into a single notification.
+            'collapseId' => 'message_reply_' . $messageId,
             'extra' => $extra,
         ];
 
