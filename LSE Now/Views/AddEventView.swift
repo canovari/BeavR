@@ -7,6 +7,7 @@ struct PostDraft {
     var startTime: Date
     var endTime: Date
     var location: String
+    var room: String?
     var description: String
     var organization: String
     var category: String
@@ -23,10 +24,10 @@ struct AddEventView: View {
 
     // Event fields
     @State private var title = ""
-    @State private var startDate = Date()
-    @State private var startTime = Date()
-    @State private var endTime = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date()
+    @State private var startDateTime = Date()
+    @State private var endDateTime = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date()
     @State private var locationQuery = ""
+    @State private var room = ""
     @State private var description = ""
     @State private var organization = ""
     @State private var category = ""
@@ -50,15 +51,22 @@ struct AddEventView: View {
                     .focused($focusedField, equals: "title")
 
                 // Date + Time
-                DatePicker("Date", selection: $startDate, displayedComponents: .date)
-                    .modifier(ValidationHighlight(isInvalid: invalidFields.contains("date")))
+                DatePicker(
+                    "Start Time",
+                    selection: $startDateTime,
+                    displayedComponents: [.date, .hourAndMinute]
+                )
+                .datePickerStyle(.wheel)
+                .modifier(ValidationHighlight(isInvalid: invalidFields.contains("startTime")))
 
-                DatePicker("Start Time", selection: $startTime, displayedComponents: .hourAndMinute)
-                    .modifier(ValidationHighlight(isInvalid: invalidFields.contains("startTime")))
-                    .focused($focusedField, equals: "time")
-
-                DatePicker("End Time", selection: $endTime, displayedComponents: .hourAndMinute)
-                    .modifier(ValidationHighlight(isInvalid: invalidFields.contains("endTime")))
+                DatePicker(
+                    "End Time",
+                    selection: $endDateTime,
+                    in: startDateTime...,
+                    displayedComponents: [.date, .hourAndMinute]
+                )
+                .datePickerStyle(.wheel)
+                .modifier(ValidationHighlight(isInvalid: invalidFields.contains("endTime")))
 
                 Text(eventTimingSummary)
                     .font(.footnote)
@@ -93,6 +101,13 @@ struct AddEventView: View {
                 .modifier(ValidationHighlight(
                     isInvalid: invalidFields.contains("mapPin") || invalidFields.contains("location")
                 ))
+
+                if pickedCoordinate != nil {
+                    TextField("Room (optional)", text: $room)
+                        .textInputAutocapitalization(.words)
+                        .autocorrectionDisabled(true)
+                        .focused($focusedField, equals: "room")
+                }
 
                 // Category
                 NavigationLink {
@@ -150,6 +165,13 @@ struct AddEventView: View {
                         }
                     }
                     .disabled(isSubmitting)
+                }
+            }
+            .safeAreaInset(edge: .bottom) {
+                if focusedField == "description" {
+                    Color.clear
+                        .frame(height: 320)
+                        .allowsHitTesting(false)
                 }
             }
             .navigationTitle("New Event")
@@ -221,13 +243,16 @@ struct AddEventView: View {
 
         let normalizedEmail = email.lowercased()
 
-        let startDateTime = combinedStartDateTime
-        let computedEndTime = resolvedEndDateTime
+        let eventStart = startDateTime
+        let eventEnd = normalizedEndDateTime
+        let trimmedLocation = locationQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedRoom = room.trimmingCharacters(in: .whitespacesAndNewlines)
         let draft = PostDraft(
             title: title,
-            startTime: startDateTime,
-            endTime: computedEndTime,
-            location: locationQuery,
+            startTime: eventStart,
+            endTime: eventEnd,
+            location: trimmedLocation.isEmpty ? locationQuery : trimmedLocation,
+            room: trimmedRoom.isEmpty ? nil : trimmedRoom,
             description: description,
             organization: organization,
             category: category,
@@ -257,40 +282,30 @@ struct AddEventView: View {
         }
     }
 
-    private func merge(date: Date, time: Date) -> Date {
-        let cal = Calendar.current
-        let d = cal.dateComponents([.year, .month, .day], from: date)
-        let t = cal.dateComponents([.hour, .minute], from: time)
-        return cal.date(from: DateComponents(
-            year: d.year, month: d.month, day: d.day,
-            hour: t.hour, minute: t.minute)) ?? date
-    }
-
-    private var combinedStartDateTime: Date {
-        merge(date: startDate, time: startTime)
-    }
-
-    private var resolvedEndDateTime: Date {
-        let sameDayEnd = merge(date: startDate, time: endTime)
-        if sameDayEnd <= combinedStartDateTime {
-            let calendar = Calendar.current
-            return calendar.date(byAdding: .day, value: 1, to: sameDayEnd) ?? sameDayEnd.addingTimeInterval(86_400)
-        }
-        return sameDayEnd
-    }
-
     private var eventDuration: TimeInterval {
-        max(0, resolvedEndDateTime.timeIntervalSince(combinedStartDateTime))
+        max(0, normalizedEndDateTime.timeIntervalSince(startDateTime))
+    }
+
+    private var normalizedEndDateTime: Date {
+        if endDateTime < startDateTime {
+            return startDateTime
+        }
+        return endDateTime
     }
 
     private var eventTimingSummary: String {
-        let startString = AddEventView.startFormatter.string(from: combinedStartDateTime)
+        let startString = AddEventView.startFormatter.string(from: startDateTime)
+
+        guard eventDuration > 0 else {
+            return "Event starts on \(startString)."
+        }
+
         let durationText = formattedDuration(eventDuration)
 
-        if Calendar.current.isDate(resolvedEndDateTime, inSameDayAs: combinedStartDateTime) {
+        if Calendar.current.isDate(normalizedEndDateTime, inSameDayAs: startDateTime) {
             return "Event starts on \(startString) and lasts \(durationText)."
         } else {
-            let endString = AddEventView.endFormatter.string(from: resolvedEndDateTime)
+            let endString = AddEventView.endFormatter.string(from: normalizedEndDateTime)
             return "Event starts on \(startString), lasts \(durationText), and ends on \(endString)."
         }
     }
