@@ -52,7 +52,7 @@ struct WhiteboardView: View {
                         pinboardGrid
                             .padding(.top, 24)
 
-                        livePinsButton
+                        livePinsStatusText
 
                         howItWorksButton
 
@@ -214,21 +214,13 @@ struct WhiteboardView: View {
         }
     }
 
-    private var livePinsButton: some View {
-        Button {
-            handleLivePinsButtonTap()
-        } label: {
-            Text("LIVE PINS: \(myActivePinCount)/1")
-                .font(.headline)
-                .monospacedDigit()
-                .frame(maxWidth: .infinity)
-        }
-        .buttonStyle(.borderedProminent)
-        .controlSize(.large)
-        .padding(.horizontal, 16)
-        .accessibilityLabel("Show your live pin status")
-        .accessibilityValue("\(myActivePinCount) of 1 live pins active")
-        .accessibilityHint("Highlights your current pin if you have one")
+    private var livePinsStatusText: some View {
+        Text("LIVE PINS: \(myActivePinCount)/1")
+            .font(.subheadline)
+            .monospacedDigit()
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 16)
     }
 
     private var howItWorksButton: some View {
@@ -282,14 +274,6 @@ struct WhiteboardView: View {
         )
         .padding(.horizontal, 16)
         .animation(.easeInOut(duration: 0.2), value: viewModel.pins)
-    }
-
-    private func handleLivePinsButtonTap() {
-        guard let pin = viewModel.firstActivePin(forCreatorEmail: rawLoggedInEmail) else {
-            livePinsAlertMessage = "You have no live pins right now."
-            return
-        }
-        startHighlight(for: pin)
     }
 
     private func handleEmptySlotTap(at coordinate: WhiteboardCoordinate) {
