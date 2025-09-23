@@ -5,6 +5,7 @@ struct LaunchView: View {
     @State private var zooming = false
     @State private var fadeBackground = false
     @State private var hideLaunchContent = false
+    @State private var pendingLocationActivation = false
     @StateObject private var viewModel = PostListViewModel() // preload in background
     @StateObject private var dealsViewModel = DealListViewModel()
     @StateObject private var authViewModel = AuthViewModel()
@@ -14,7 +15,11 @@ struct LaunchView: View {
     var body: some View {
         ZStack {
             if authViewModel.isLoggedIn {
-                MainTabView(eventsViewModel: viewModel, dealsViewModel: dealsViewModel)
+                MainTabView(
+                    eventsViewModel: viewModel,
+                    dealsViewModel: dealsViewModel,
+                    launchAnimationFinished: finished
+                )
                     .environmentObject(authViewModel)
                     .environmentObject(locationManager)
             } else {
@@ -34,12 +39,8 @@ struct LaunchView: View {
             authViewModel.loadExistingSession()
             viewModel.updateAuthToken(authViewModel.token)
 
-            if authViewModel.isLoggedIn {
-                locationManager.handleLoginStateChange(
-                    isLoggedIn: true,
-                    emailProvider: { authViewModel.email }
-                )
-            }
+            pendingLocationActivation = authViewModel.isLoggedIn
+            activateLocationTrackingIfReady()
 
             locationManager.updateAppActivity(isActive: scenePhase == .active)
 
@@ -69,20 +70,36 @@ struct LaunchView: View {
         }
         .onChange(of: authViewModel.isLoggedIn) { _, isLoggedIn in
             if isLoggedIn {
-                locationManager.handleLoginStateChange(
-                    isLoggedIn: true,
-                    emailProvider: { authViewModel.email }
-                )
+                pendingLocationActivation = true
+                activateLocationTrackingIfReady()
             } else {
+                pendingLocationActivation = false
                 locationManager.handleLoginStateChange(isLoggedIn: false, emailProvider: nil)
             }
         }
         .onChange(of: authViewModel.token) { _, token in
             viewModel.updateAuthToken(token)
         }
+        .onChange(of: finished) { _, isFinished in
+            if isFinished {
+                activateLocationTrackingIfReady()
+            }
+        }
         .onChange(of: scenePhase) { _, newPhase in
             locationManager.updateAppActivity(isActive: newPhase == .active)
         }
+    }
+
+    private func activateLocationTrackingIfReady() {
+        guard finished else { return }
+        guard pendingLocationActivation, authViewModel.isLoggedIn else { return }
+
+        locationManager.handleLoginStateChange(
+            isLoggedIn: true,
+            emailProvider: { authViewModel.email }
+        )
+
+        pendingLocationActivation = false
     }
 
     private var launchOverlay: some View {
