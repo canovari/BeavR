@@ -9,6 +9,8 @@ struct MainTabView: View {
     @State private var showIntroduction = false
     @State private var didTriggerIntroduction = false
     @State private var permissionsCompleted = false
+    @EnvironmentObject private var locationManager: LocationManager
+    @Environment(\.scenePhase) private var scenePhase
 
     init(eventsViewModel: PostListViewModel, dealsViewModel: DealListViewModel) {
         _eventsViewModel = StateObject(wrappedValue: eventsViewModel)
@@ -41,6 +43,7 @@ struct MainTabView: View {
             }
         }
         .onAppear {
+            enforceLocationPermissionsIfNeeded()
             if permissionsCompleted {
                 triggerIntroductionIfNeeded()
             }
@@ -51,6 +54,17 @@ struct MainTabView: View {
             } else {
                 showIntroduction = false
                 didTriggerIntroduction = false
+            }
+        }
+        .onChange(of: locationManager.authorizationStatus) { _, _ in
+            enforceLocationPermissionsIfNeeded()
+        }
+        .onChange(of: locationManager.accuracyAuthorization) { _, _ in
+            enforceLocationPermissionsIfNeeded()
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                enforceLocationPermissionsIfNeeded()
             }
         }
         .onChange(of: showIntroduction, initial: false) { wasShowing, isShowing in
@@ -94,6 +108,16 @@ struct MainTabView: View {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.88, blendDuration: 0.3)) {
                 showIntroduction = true
             }
+        }
+    }
+
+    private func enforceLocationPermissionsIfNeeded() {
+        guard permissionsCompleted else { return }
+        guard locationManager.hasValidLocationPermission else {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                permissionsCompleted = false
+            }
+            return
         }
     }
 }

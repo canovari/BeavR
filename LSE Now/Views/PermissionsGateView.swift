@@ -1,6 +1,7 @@
 import SwiftUI
 import UserNotifications
 import UIKit
+import CoreLocation
 
 struct PermissionsGateView: View {
     @Binding var isComplete: Bool
@@ -184,15 +185,19 @@ struct PermissionsGateView: View {
             }
         case .restricted, .denied:
             stage = .locationDenied
-        case .authorizedWhenInUse, .authorizedAlways:
-            if #available(iOS 14.0, *) {
-                if locationManager.accuracyAuthorization == .reducedAccuracy {
-                    stage = .locationPreciseRequired
-                    return
-                }
+        case .authorizedWhenInUse, .authorizedAlways, .authorized:
+            guard CLLocationManager.locationServicesEnabled() else {
+                stage = .locationDenied
+                return
             }
+
+            if !locationManager.hasValidLocationPermission {
+                stage = .locationPreciseRequired
+                return
+            }
+
             handleNotificationStage()
-        default:
+        @unknown default:
             stage = .locationDenied
         }
     }
@@ -253,15 +258,7 @@ struct PermissionsGateView: View {
     }
 
     private var hasFullLocationAccess: Bool {
-        switch locationManager.authorizationStatus {
-        case .authorizedAlways, .authorizedWhenInUse:
-            if #available(iOS 14.0, *) {
-                return locationManager.accuracyAuthorization == .fullAccuracy
-            }
-            return true
-        default:
-            return false
-        }
+        locationManager.hasValidLocationPermission
     }
 
     private func openSettings() {
