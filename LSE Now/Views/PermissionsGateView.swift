@@ -13,7 +13,7 @@ struct PermissionsGateView: View {
     @State private var notificationStatus: UNAuthorizationStatus?
     @State private var isRequestingNotifications = false
     @State private var isFetchingNotificationStatus = false
-    @State private var hasRequestedNotifications = false
+    @AppStorage("hasCompletedNotificationPrompt") private var hasCompletedNotificationPrompt = false
 
     private let pushManager = PushNotificationManager.shared
 
@@ -91,25 +91,36 @@ struct PermissionsGateView: View {
                 openSettings()
             }
             retryButton
-        case .notificationRequest:
+        case .notificationPrompt:
+            let status = notificationStatus
             permissionHeader(
-                systemImage: "bell.fill",
+                systemImage: status == .denied ? "bell.slash.fill" : "bell.fill",
                 title: "Stay in the Loop",
-                message: "Allow notifications so we can alert you about important happenings and updates."
+                message: status == .denied
+                    ? "Notifications keep you up to date with campus events. You can enable them from Settings or skip for now."
+                    : "Turn on notifications to hear about important happenings. You can always enable them later."
             )
-            permissionButton(title: "Allow Notifications") {
-                requestNotifications()
+
+            if status == .denied {
+                permissionButton(title: "Open Settings") {
+                    openSettings()
+                }
+            } else {
+                permissionButton(title: "Allow Notifications") {
+                    requestNotifications()
+                }
             }
-        case .notificationDenied:
-            permissionHeader(
-                systemImage: "bell.slash.fill",
-                title: "Enable Notifications",
-                message: "Notifications keep you up to date with campus events. Turn them on in Settings > Notifications > BeavR."
-            )
-            permissionButton(title: "Open Settings") {
-                openSettings()
+
+            Button {
+                hasCompletedNotificationPrompt = true
+                completePermissions()
+            } label: {
+                Text("Maybe Later")
+                    .font(.subheadline.weight(.semibold))
             }
-            retryButton
+            .buttonStyle(.plain)
+            .foregroundColor(Color("LSERed"))
+            .padding(.top, 4)
         case .completed:
             EmptyView()
         }
@@ -127,7 +138,7 @@ struct PermissionsGateView: View {
 
     private func permissionButton(title: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            if stage == .notificationRequest && isRequestingNotifications {
+            if stage == .notificationPrompt && isRequestingNotifications {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle())
                     .tint(.white)
@@ -165,6 +176,11 @@ struct PermissionsGateView: View {
 
         if !hasFullLocationAccess {
             handleLocationStage()
+            return
+        }
+
+        if hasCompletedNotificationPrompt {
+            completePermissions()
             return
         }
 
@@ -206,24 +222,17 @@ struct PermissionsGateView: View {
         if let status = notificationStatus {
             switch status {
             case .authorized, .provisional, .ephemeral:
+                hasCompletedNotificationPrompt = true
                 completePermissions()
             case .denied:
-                stage = .notificationDenied
+                stage = .notificationPrompt
             case .notDetermined:
-                stage = .notificationRequest
-                if !hasRequestedNotifications {
-                    hasRequestedNotifications = true
-                    requestNotifications()
-                }
+                stage = .notificationPrompt
             default:
-                stage = .notificationRequest
-                if !hasRequestedNotifications {
-                    hasRequestedNotifications = true
-                    requestNotifications()
-                }
+                stage = .notificationPrompt
             }
         } else {
-            stage = .checking
+            stage = .notificationPrompt
             fetchNotificationStatus()
         }
     }
@@ -252,7 +261,6 @@ struct PermissionsGateView: View {
 
     private func refreshStatuses() {
         notificationStatus = nil
-        hasRequestedNotifications = false
         fetchNotificationStatus(force: true)
         evaluateState()
     }
@@ -279,8 +287,7 @@ struct PermissionsGateView: View {
         case locationRequest
         case locationDenied
         case locationPreciseRequired
-        case notificationRequest
-        case notificationDenied
+        case notificationPrompt
         case completed
     }
 
