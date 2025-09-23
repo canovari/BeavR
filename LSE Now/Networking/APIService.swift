@@ -87,6 +87,7 @@ final class APIService {
             startTime: draft.startTime,
             endTime: draft.endTime,
             location: draft.location,
+            room: draft.room,
             description: draft.description,
             organization: draft.organization,
             category: draft.category,
@@ -479,6 +480,7 @@ private struct EventSubmissionPayload: Encodable {
     let startTime: Date
     let endTime: Date?
     let location: String
+    let room: String?
     let description: String
     let organization: String
     let category: String

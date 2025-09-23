@@ -12,6 +12,8 @@ struct ConfirmEventSpotView: View {
     @State private var shouldSkipNextReverseGeocode = false
     @State private var isGeocoding = false
     @State private var hasPendingSearch = false
+    @State private var pendingSelectedPlaceName: String?
+    @State private var selectedPlaceNameOverride: String?
     @StateObject private var locationSearchCompleter = LocationSearchCompleter()
     @FocusState private var isAddressFieldFocused: Bool
 
@@ -180,9 +182,17 @@ struct ConfirmEventSpotView: View {
         hasPendingSearch = false
         isAddressFieldFocused = false
 
-        let suggestionText = suggestion.displayText
-        locationText = suggestionText
-        searchForAddress(query: suggestionText)
+        let suggestionTitle = suggestion.title.trimmingCharacters(in: .whitespacesAndNewlines)
+        let suggestionQuery = suggestion.displayText
+        if !suggestionTitle.isEmpty {
+            locationText = suggestionTitle
+            selectedPlaceNameOverride = suggestionTitle
+            searchForAddress(query: suggestionQuery, selectedName: suggestionTitle)
+        } else {
+            locationText = suggestionQuery
+            selectedPlaceNameOverride = nil
+            searchForAddress(query: suggestionQuery)
+        }
     }
 
     @ViewBuilder
@@ -302,13 +312,31 @@ struct ConfirmEventSpotView: View {
         }
     }
 
-    private func searchForAddress(query providedQuery: String? = nil) {
+    private func searchForAddress(query providedQuery: String? = nil, selectedName: String? = nil) {
         hasPendingSearch = false
         let rawQuery = providedQuery ?? locationText
         let query = rawQuery.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !query.isEmpty else { return }
+        let trimmedName = selectedName?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let effectiveName = (trimmedName?.isEmpty == false) ? trimmedName : nil
 
-        locationText = query
+        guard !query.isEmpty else {
+            pendingSelectedPlaceName = effectiveName
+            if let effectiveName {
+                selectedPlaceNameOverride = effectiveName
+            }
+            return
+        }
+
+        if let effectiveName {
+            locationText = effectiveName
+            pendingSelectedPlaceName = effectiveName
+            selectedPlaceNameOverride = effectiveName
+        } else {
+            locationText = query
+            pendingSelectedPlaceName = nil
+            selectedPlaceNameOverride = nil
+        }
+
         geocodeWorkItem?.cancel()
         geocoder.cancelGeocode()
         currentSearch?.cancel()
@@ -411,13 +439,19 @@ struct ConfirmEventSpotView: View {
         locationSearchCompleter.updateRegion(newRegion)
 
         if !isAddressFieldFocused {
-            if let placemark {
+            if let pendingSelectedPlaceName, !pendingSelectedPlaceName.isEmpty {
+                locationText = pendingSelectedPlaceName
+            } else if let selectedPlaceNameOverride, !selectedPlaceNameOverride.isEmpty {
+                locationText = selectedPlaceNameOverride
+            } else if let placemark {
                 locationText = formattedAddress(from: placemark)
             } else {
                 locationText = fallbackAddress(for: targetCoordinate)
             }
             hasPendingSearch = false
         }
+
+        pendingSelectedPlaceName = nil
 
         searchError = nil
     }
@@ -428,6 +462,7 @@ struct ConfirmEventSpotView: View {
             return
         }
 
+        selectedPlaceNameOverride = nil
         geocodeWorkItem?.cancel()
 
         let workItem = DispatchWorkItem {
@@ -459,7 +494,11 @@ struct ConfirmEventSpotView: View {
                 self.isGeocoding = false
 
                 if let placemark = placemarks?.first, error == nil {
-                    self.locationText = self.formattedAddress(from: placemark)
+                    if let override = self.selectedPlaceNameOverride, !override.isEmpty {
+                        self.locationText = override
+                    } else {
+                        self.locationText = self.formattedAddress(from: placemark)
+                    }
                     self.searchError = nil
                     self.hasPendingSearch = false
                 } else {
@@ -488,11 +527,15 @@ struct ConfirmEventSpotView: View {
 
         if isAddressFieldFocused {
             hasPendingSearch = !trimmed.isEmpty
+            if let override = selectedPlaceNameOverride, override != trimmed {
+                selectedPlaceNameOverride = nil
+            }
         } else {
             hasPendingSearch = false
         }
 
         if trimmed.isEmpty {
+            selectedPlaceNameOverride = nil
             locationSearchCompleter.clear()
             return
         }

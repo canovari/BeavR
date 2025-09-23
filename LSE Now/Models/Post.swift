@@ -6,6 +6,7 @@ struct Post: Identifiable, Codable, Hashable {
     let startTime: Date
     let endTime: Date?
     let location: String?
+    let room: String?
     let description: String?
     let organization: String?
     let category: String?
@@ -48,6 +49,7 @@ struct Post: Identifiable, Codable, Hashable {
             startTime: startTime,
             endTime: endTime,
             location: location,
+            room: room,
             description: description,
             organization: organization,
             category: category,
@@ -71,6 +73,7 @@ extension Post {
             startTime: startTime,
             endTime: endTime,
             location: location,
+            room: room,
             description: description,
             organization: organization,
             category: category,
