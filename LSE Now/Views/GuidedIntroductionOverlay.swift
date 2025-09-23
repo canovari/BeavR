@@ -1,4 +1,5 @@
 import SwiftUI
+import CoreGraphics
 
 struct GuidedIntroductionOverlay: View {
     @Binding var isPresented: Bool
@@ -58,23 +59,47 @@ struct GuidedIntroductionOverlay: View {
     }
 
     private var backgroundView: some View {
-        Group {
-            if hasStartedTour {
-                LinearGradient(
-                    colors: [
-                        Color.black.opacity(0.55),
-                        Color.black.opacity(0.5),
-                        Color.black.opacity(0.3),
-                        Color.black.opacity(0.12)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            } else {
-                Color.white
+        GeometryReader { geometry in
+            let highlight = highlightCircle(in: geometry)
+
+            ZStack {
+                if hasStartedTour {
+                    LinearGradient(
+                        colors: [
+                            Color.black.opacity(0.55),
+                            Color.black.opacity(0.5),
+                            Color.black.opacity(0.3),
+                            Color.black.opacity(0.12)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .ignoresSafeArea()
+                } else {
+                    Color.white
+                        .ignoresSafeArea()
+                }
             }
+            .overlay {
+                if let highlight, hasStartedTour {
+                    Circle()
+                        .strokeBorder(Color.white.opacity(0.9), lineWidth: 3)
+                        .frame(width: highlight.diameter, height: highlight.diameter)
+                        .position(highlight.center)
+                        .transition(.opacity)
+                }
+            }
+            .overlay {
+                if let highlight, hasStartedTour {
+                    Circle()
+                        .fill(Color.black)
+                        .frame(width: highlight.diameter, height: highlight.diameter)
+                        .position(highlight.center)
+                        .blendMode(.destinationOut)
+                }
+            }
+            .compositingGroup()
         }
-        .ignoresSafeArea()
     }
 
     private var startScreen: some View {
@@ -122,20 +147,24 @@ struct GuidedIntroductionOverlay: View {
     }
 
     private var startedTourContent: some View {
-        VStack(spacing: 0) {
-            skipButton
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                skipButton
 
-            Spacer(minLength: 0)
+                Spacer(minLength: 0)
 
-            Text("Welcome to BeavR")
-                .matchedGeometryEffect(id: "welcomeText", in: welcomeNamespace)
-                .font(.largeTitle.weight(.semibold))
-                .foregroundColor(.white)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-                .padding(.bottom, 20)
+                Text("Welcome to BeavR")
+                    .matchedGeometryEffect(id: "welcomeText", in: welcomeNamespace)
+                    .font(.largeTitle.weight(.semibold))
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+                    .padding(.bottom, 20)
 
-            introPanel
+                introPanel
+                    .padding(.bottom, geometry.safeAreaInsets.bottom + 72)
+            }
+            .frame(width: geometry.size.width, height: geometry.size.height)
         }
     }
 
@@ -208,7 +237,6 @@ struct GuidedIntroductionOverlay: View {
         )
         .shadow(color: Color.black.opacity(0.12), radius: 16, x: 0, y: 12)
         .padding(.horizontal, 24)
-        .padding(.bottom, 32)
     }
 
     private func advance() {
@@ -226,7 +254,7 @@ struct GuidedIntroductionOverlay: View {
             showStartButton = false
         }
 
-        withAnimation(.spring(response: 0.7, dampingFraction: 0.88, blendDuration: 0.3)) {
+        withAnimation(.easeInOut(duration: 0.6)) {
             hasStartedTour = true
         }
 
@@ -246,6 +274,29 @@ struct GuidedIntroductionOverlay: View {
 
         onFinish()
     }
+
+    private func highlightCircle(in geometry: GeometryProxy) -> HighlightCircleInfo? {
+        guard hasStartedTour else { return nil }
+
+        let totalTabs = max(steps.count, 1)
+        let currentIndex = steps[currentStep].tabSelection
+        let clampedIndex = min(max(currentIndex, 0), totalTabs - 1)
+        let width = geometry.size.width
+        let segmentWidth = width / CGFloat(totalTabs)
+        let centerX = segmentWidth * (CGFloat(clampedIndex) + 0.5)
+        let bottomInset = geometry.safeAreaInsets.bottom
+        let tabBarHeight: CGFloat = 49
+        let verticalOffset: CGFloat = 4
+        let centerY = geometry.size.height - bottomInset - (tabBarHeight / 2) - verticalOffset
+        let diameter: CGFloat = 118
+
+        return HighlightCircleInfo(center: CGPoint(x: centerX, y: centerY), diameter: diameter)
+    }
+}
+
+private struct HighlightCircleInfo {
+    let center: CGPoint
+    let diameter: CGFloat
 }
 
 private struct IntroStep: Identifiable {

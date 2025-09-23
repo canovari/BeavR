@@ -16,6 +16,7 @@ struct LaunchView: View {
             if authViewModel.isLoggedIn {
                 MainTabView(eventsViewModel: viewModel, dealsViewModel: dealsViewModel)
                     .environmentObject(authViewModel)
+                    .environmentObject(locationManager)
             } else {
                 LoginFlowView(viewModel: authViewModel)
             }

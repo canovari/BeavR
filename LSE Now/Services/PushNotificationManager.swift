@@ -115,7 +115,7 @@ final class PushNotificationManager: NSObject {
 
     // MARK: - Private helpers
 
-    private func requestAuthorizationIfNeeded() {
+    func requestAuthorizationIfNeeded(onStatusDetermined: ((UNAuthorizationStatus) -> Void)? = nil) {
         let center = UNUserNotificationCenter.current()
         center.getNotificationSettings { [weak self] settings in
             guard let self else { return }
@@ -125,6 +125,7 @@ final class PushNotificationManager: NSObject {
                 DispatchQueue.main.async {
                     UIApplication.shared.registerForRemoteNotifications()
                     self.registerDeviceTokenIfPossible(force: false)
+                    onStatusDetermined?(settings.authorizationStatus)
                 }
             case .notDetermined:
                 center.requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
@@ -132,16 +133,28 @@ final class PushNotificationManager: NSObject {
                         print("⚠️ [Push] Authorization request failed: \(error.localizedDescription)")
                     }
 
-                    guard granted else { return }
+                    guard granted else {
+                        DispatchQueue.main.async {
+                            onStatusDetermined?(.denied)
+                        }
+                        return
+                    }
+
                     DispatchQueue.main.async { [weak self] in
                         UIApplication.shared.registerForRemoteNotifications()
                         self?.registerDeviceTokenIfPossible(force: true)
+                        onStatusDetermined?(.authorized)
                     }
                 }
             case .denied:
                 print("⚠️ [Push] Notifications are disabled in Settings.")
+                DispatchQueue.main.async {
+                    onStatusDetermined?(.denied)
+                }
             default:
-                break
+                DispatchQueue.main.async {
+                    onStatusDetermined?(settings.authorizationStatus)
+                }
             }
         }
     }
