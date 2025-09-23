@@ -164,7 +164,7 @@ struct LoginFlowView: View {
     private func focusField(for step: AuthViewModel.Step) {
         switch step {
         case .emailEntry:
-            focusedField = .email
+            focusedField = nil
         case .codeEntry:
             focusedField = .code
         }
