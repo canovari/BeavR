@@ -6,51 +6,156 @@ struct GuidedIntroductionOverlay: View {
     var onFinish: () -> Void
 
     @State private var currentStep = 0
+    @State private var hasStartedTour = false
+    @State private var welcomeTextAppeared = false
+    @State private var showStartButton = false
+
+    @Namespace private var welcomeNamespace
 
     private let steps = IntroStep.steps
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            Color.black.opacity(0.45)
-                .ignoresSafeArea()
-                .transition(.opacity)
+            backgroundView
 
-            VStack(spacing: 0) {
-                HStack {
-                    Button(action: finish) {
-                        Text("Skip Intro")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundColor(.white.opacity(0.9))
-                    }
-                    .buttonStyle(.plain)
-
-                    Spacer()
-                }
-                .padding(.top, 20)
-                .padding(.horizontal, 24)
-
-                Spacer(minLength: 0)
-
-                Text("Welcome to BeavR")
-                    .font(.largeTitle.weight(.semibold))
-                    .foregroundColor(.white)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-                    .padding(.bottom, 20)
-
-                introPanel
+            if hasStartedTour {
+                startedTourContent
+                    .transition(.opacity)
+            } else {
+                startScreen
+                    .transition(.opacity)
             }
         }
         .onAppear {
             currentStep = 0
-            selectedTab = steps[currentStep].tabSelection
+            hasStartedTour = false
+            welcomeTextAppeared = false
+            showStartButton = false
+
+            withAnimation(.spring(response: 0.7, dampingFraction: 0.82).delay(0.05)) {
+                welcomeTextAppeared = true
+            }
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+                withAnimation(.easeOut(duration: 0.45)) {
+                    showStartButton = true
+                }
+            }
         }
         .onChange(of: currentStep, initial: false) { _, newStep in
+            guard hasStartedTour else { return }
             withAnimation(.easeInOut(duration: 0.25)) {
                 selectedTab = steps[newStep].tabSelection
             }
         }
+        .onChange(of: hasStartedTour, initial: false) { _, started in
+            guard started else { return }
+            withAnimation(.easeInOut(duration: 0.25)) {
+                selectedTab = steps[currentStep].tabSelection
+            }
+        }
         .transition(.opacity)
+    }
+
+    private var backgroundView: some View {
+        Group {
+            if hasStartedTour {
+                LinearGradient(
+                    colors: [
+                        Color.black.opacity(0.55),
+                        Color.black.opacity(0.5),
+                        Color.black.opacity(0.3),
+                        Color.black.opacity(0.12)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            } else {
+                Color.white
+            }
+        }
+        .ignoresSafeArea()
+    }
+
+    private var startScreen: some View {
+        VStack(spacing: 0) {
+            skipButton
+
+            Spacer()
+
+            VStack(spacing: 28) {
+                Text("Welcome to BeavR")
+                    .matchedGeometryEffect(id: "welcomeText", in: welcomeNamespace)
+                    .font(.largeTitle.weight(.bold))
+                    .foregroundColor(.black)
+                    .multilineTextAlignment(.center)
+                    .scaleEffect(welcomeTextAppeared ? 1 : 0.82)
+                    .opacity(welcomeTextAppeared ? 1 : 0)
+                    .animation(.spring(response: 0.65, dampingFraction: 0.85), value: welcomeTextAppeared)
+
+                startCallToAction
+            }
+            .padding(.horizontal, 36)
+
+            Spacer()
+        }
+        .padding(.bottom, 48)
+    }
+
+    private var startCallToAction: some View {
+        Button(action: startTour) {
+            Text("Start")
+                .font(.headline)
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(Color("LSERed"))
+                )
+                .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 8)
+        }
+        .buttonStyle(.plain)
+        .opacity(showStartButton ? 1 : 0)
+        .animation(.easeOut(duration: 0.45), value: showStartButton)
+        .allowsHitTesting(showStartButton)
+    }
+
+    private var startedTourContent: some View {
+        VStack(spacing: 0) {
+            skipButton
+
+            Spacer(minLength: 0)
+
+            Text("Welcome to BeavR")
+                .matchedGeometryEffect(id: "welcomeText", in: welcomeNamespace)
+                .font(.largeTitle.weight(.semibold))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+                .padding(.bottom, 20)
+
+            introPanel
+        }
+    }
+
+    private var skipButton: some View {
+        HStack {
+            Button(action: finish) {
+                Text("Skip Intro")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(skipButtonColor)
+            }
+            .buttonStyle(.plain)
+
+            Spacer()
+        }
+        .padding(.top, 20)
+        .padding(.horizontal, 24)
+    }
+
+    private var skipButtonColor: Color {
+        hasStartedTour ? .white.opacity(0.9) : Color("LSERed")
     }
 
     private var introPanel: some View {
@@ -95,11 +200,11 @@ struct GuidedIntroductionOverlay: View {
         .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 32, style: .continuous)
-                .fill(.ultraThinMaterial)
+                .fill(Color.white)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 32, style: .continuous)
-                .strokeBorder(Color.white.opacity(0.14))
+                .strokeBorder(Color("LSERed").opacity(0.18))
         )
         .shadow(color: Color.black.opacity(0.12), radius: 16, x: 0, y: 12)
         .padding(.horizontal, 24)
@@ -113,6 +218,20 @@ struct GuidedIntroductionOverlay: View {
             }
         } else {
             finish()
+        }
+    }
+
+    private func startTour() {
+        withAnimation(.easeOut(duration: 0.2)) {
+            showStartButton = false
+        }
+
+        withAnimation(.spring(response: 0.7, dampingFraction: 0.88, blendDuration: 0.3)) {
+            hasStartedTour = true
+        }
+
+        withAnimation(.easeInOut(duration: 0.3)) {
+            selectedTab = steps[currentStep].tabSelection
         }
     }
 
@@ -145,7 +264,7 @@ private struct IntroStep: Identifiable {
             message: "The Map tab shows live pins for everything happening nearby. Tap one to see the essentials instantly.",
             icon: "map.fill",
             tabIcon: "map",
-            accent: .blue,
+            accent: Color("LSERed"),
             tabLabel: "Map",
             tabSelection: 0
         ),
@@ -154,7 +273,7 @@ private struct IntroStep: Identifiable {
             message: "Scroll the Feed for a clean timeline of upcoming events. Open any card for full details and directions.",
             icon: "list.bullet.rectangle",
             tabIcon: "list.bullet.rectangle",
-            accent: .indigo,
+            accent: Color("LSERed"),
             tabLabel: "Feed",
             tabSelection: 1
         ),
@@ -163,7 +282,7 @@ private struct IntroStep: Identifiable {
             message: "The Pinboard is perfect for fast shout-outs and micro-updates from around campus.",
             icon: "square.grid.3x3.fill",
             tabIcon: "square.grid.3x3.fill",
-            accent: .purple,
+            accent: Color("LSERed"),
             tabLabel: "Pinboard",
             tabSelection: 2
         ),
@@ -172,7 +291,7 @@ private struct IntroStep: Identifiable {
             message: "Never miss a student offer. Check the Deals tab for fresh perks from local favourites.",
             icon: "tag.fill",
             tabIcon: "tag",
-            accent: .orange,
+            accent: Color("LSERed"),
             tabLabel: "Deals",
             tabSelection: 3
         ),
