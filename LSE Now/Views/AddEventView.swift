@@ -1,5 +1,6 @@
 import SwiftUI
 import MapKit
+import UIKit
 
 // MARK: - Draft model
 struct PostDraft {
@@ -43,6 +44,7 @@ struct AddEventView: View {
     @FocusState private var focusedField: String?
     @State private var isSubmitting = false
     @State private var submissionErrorMessage: String?
+    @State private var activeDatePicker: DatePickerField?
 
     var body: some View {
         NavigationStack {
@@ -53,21 +55,28 @@ struct AddEventView: View {
                     .focused($focusedField, equals: "title")
 
                 // Date + Time
-                DatePicker(
-                    "Start Time",
+                DatePickerRow(
+                    title: "Start Time",
                     selection: $startDateTime,
-                    displayedComponents: [.date, .hourAndMinute]
-                )
-                .datePickerStyle(.wheel)
+                    displayFormatter: { AddEventView.startFormatter.string(from: $0) },
+                    isPresented: activeDatePicker == .start,
+                    displayedComponents: [.date, .hourAndMinute],
+                    range: nil
+                ) {
+                    toggleDatePicker(.start)
+                }
                 .modifier(ValidationHighlight(isInvalid: invalidFields.contains("startTime")))
 
-                DatePicker(
-                    "End Time",
+                DatePickerRow(
+                    title: "End Time",
                     selection: $endDateTime,
-                    in: startDateTime...,
-                    displayedComponents: [.date, .hourAndMinute]
-                )
-                .datePickerStyle(.wheel)
+                    displayFormatter: { AddEventView.endFormatter.string(from: $0) },
+                    isPresented: activeDatePicker == .end,
+                    displayedComponents: [.date, .hourAndMinute],
+                    range: endDateRange
+                ) {
+                    toggleDatePicker(.end)
+                }
                 .modifier(ValidationHighlight(isInvalid: invalidFields.contains("endTime")))
 
                 Text(eventTimingSummary)
@@ -183,9 +192,15 @@ struct AddEventView: View {
                         .allowsHitTesting(false)
                 }
             }
+            .background(BackgroundTapView(onTap: handleBackgroundTap))
             .navigationTitle("New Event")
             .navigationBarTitleDisplayMode(.large)
-            .scrollDismissesKeyboard(.immediately)
+            .scrollDismissesKeyboard(.interactively)
+            .onChange(of: focusedField) { _, newValue in
+                if newValue != nil {
+                    closeActiveDatePicker()
+                }
+            }
             .alert("Send Event?", isPresented: $showFinalConfirmation) {
                 Button("Cancel", role: .cancel) {}
                 Button("Send", role: .destructive) {
@@ -293,8 +308,43 @@ struct AddEventView: View {
         }
     }
 
+    private func toggleDatePicker(_ field: DatePickerField) {
+        if activeDatePicker == field {
+            closeActiveDatePicker()
+        } else {
+            focusedField = nil
+            withAnimation(.easeInOut(duration: 0.25)) {
+                activeDatePicker = field
+            }
+        }
+    }
+
+    private func closeActiveDatePicker(animated: Bool = true) {
+        guard activeDatePicker != nil else { return }
+        if animated {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                activeDatePicker = nil
+            }
+        } else {
+            activeDatePicker = nil
+        }
+    }
+
+    private func handleBackgroundTap() {
+        let hadActivePicker = activeDatePicker != nil
+        focusedField = nil
+        if hadActivePicker {
+            closeActiveDatePicker()
+        }
+    }
+
     private var eventDuration: TimeInterval {
         max(0, normalizedEndDateTime.timeIntervalSince(startDateTime))
+    }
+
+    private var endDateRange: ClosedRange<Date> {
+        let upperBound = Date.distantFuture
+        return startDateTime...upperBound
     }
 
     private var normalizedEndDateTime: Date {
@@ -356,6 +406,119 @@ struct AddEventView: View {
         formatter.dateFormat = "MMM d 'at' h:mm a"
         return formatter
     }()
+}
+
+private enum DatePickerField {
+    case start
+    case end
+}
+
+private struct DatePickerRow: View {
+    let title: String
+    @Binding var selection: Date
+    let displayFormatter: (Date) -> String
+    let isPresented: Bool
+    let displayedComponents: DatePickerComponents
+    let range: ClosedRange<Date>?
+    let onToggle: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Button(action: onToggle) {
+                HStack(spacing: 12) {
+                    Text(title)
+                        .foregroundColor(.primary)
+
+                    Spacer()
+
+                    Text(displayFormatter(selection))
+                        .foregroundColor(.secondary)
+                        .font(.callout)
+
+                    Image(systemName: isPresented ? "chevron.up" : "chevron.down")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundColor(.secondary.opacity(0.8))
+                        .accessibilityHidden(true)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            if isPresented {
+                Group {
+                    if let range {
+                        DatePicker(
+                            "",
+                            selection: $selection,
+                            in: range,
+                            displayedComponents: displayedComponents
+                        )
+                    } else {
+                        DatePicker(
+                            "",
+                            selection: $selection,
+                            displayedComponents: displayedComponents
+                        )
+                    }
+                }
+                .datePickerStyle(.wheel)
+                .labelsHidden()
+                .frame(maxWidth: .infinity)
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+        .padding(.vertical, 4)
+        .animation(.easeInOut(duration: 0.2), value: isPresented)
+    }
+}
+
+private struct BackgroundTapView: UIViewRepresentable {
+    var onTap: () -> Void
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onTap: onTap)
+    }
+
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView(frame: .zero)
+        view.isUserInteractionEnabled = true
+
+        let tap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))
+        tap.cancelsTouchesInView = false
+        tap.delegate = context.coordinator
+        view.addGestureRecognizer(tap)
+
+        return view
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {}
+
+    final class Coordinator: NSObject, UIGestureRecognizerDelegate {
+        let onTap: () -> Void
+
+        init(onTap: @escaping () -> Void) {
+            self.onTap = onTap
+        }
+
+        @objc func handleTap(_ recognizer: UITapGestureRecognizer) {
+            guard recognizer.state == .ended else { return }
+            onTap()
+        }
+
+        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+            guard let touchedView = touch.view else { return false }
+
+            var view: UIView? = touchedView
+            while let current = view {
+                if current is UIControl || current is UITextView || current is UITextField || current is UIPickerView {
+                    return false
+                }
+                view = current.superview
+            }
+
+            return true
+        }
+    }
 }
 
 // MARK: - Validation highlight
