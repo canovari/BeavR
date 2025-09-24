@@ -12,6 +12,7 @@ struct PostDraft {
     var organization: String
     var category: String
     var contact: ContactInfo?
+    var link: String?
     var latitude: Double
     var longitude: Double
     var creator: String
@@ -32,6 +33,7 @@ struct AddEventView: View {
     @State private var organization = ""
     @State private var category = ""
     @State private var contact: ContactInfo?
+    @State private var linkURL = ""
 
     // Confirmation & validation
     @State private var showFinalConfirmation = false
@@ -145,6 +147,13 @@ struct AddEventView: View {
                     }
                 }
 
+                Section("Link (optional)") {
+                    TextField("https://example.com", text: $linkURL)
+                        .keyboardType(.URL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled(true)
+                }
+
                 // Description
                 TextField("Description", text: $description, axis: .vertical)
                     .lineLimit(nil)
@@ -247,6 +256,7 @@ struct AddEventView: View {
         let eventEnd = normalizedEndDateTime
         let trimmedLocation = locationQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedRoom = room.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedLink = linkURL.trimmingCharacters(in: .whitespacesAndNewlines)
         let draft = PostDraft(
             title: title,
             startTime: eventStart,
@@ -257,6 +267,7 @@ struct AddEventView: View {
             organization: organization,
             category: category,
             contact: contact,
+            link: trimmedLink.isEmpty ? nil : trimmedLink,
             latitude: coord.latitude,
             longitude: coord.longitude,
             creator: normalizedEmail

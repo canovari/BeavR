@@ -9,6 +9,7 @@ struct AddDealView: View {
     @State private var discount: String = ""
     @State private var description: String = ""
     @State private var location: String = ""
+    @State private var link: String = ""
     @State private var startDate: Date = Date()
     @State private var endDate: Date = Calendar.current.date(byAdding: .day, value: 30, to: Date()) ?? Date()
     @State private var hasEndDate: Bool = true
@@ -59,6 +60,13 @@ struct AddDealView: View {
                     TextField("Describe the deal", text: $description, axis: .vertical)
                         .lineLimit(3...6)
                         .modifier(ValidationHighlight(isInvalid: invalidFields.contains("description")))
+                }
+
+                Section("Link (optional)") {
+                    TextField("https://example.com", text: $link)
+                        .keyboardType(.URL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled(true)
                 }
 
                 Section {
@@ -184,12 +192,15 @@ struct AddDealView: View {
             return
         }
 
+        let trimmedLocation = location.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedLink = link.trimmingCharacters(in: .whitespacesAndNewlines)
         let payload = DealSubmissionPayload(
             name: dealName.trimmingCharacters(in: .whitespacesAndNewlines),
             type: dealKind.rawValue,
             discount: discount.trimmingCharacters(in: .whitespacesAndNewlines),
             description: description.trimmingCharacters(in: .whitespacesAndNewlines),
-            location: location.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : location.trimmingCharacters(in: .whitespacesAndNewlines),
+            location: trimmedLocation.isEmpty ? nil : trimmedLocation,
+            link: trimmedLink.isEmpty ? nil : trimmedLink,
             startDate: normalizedStartDate,
             endDate: normalizedEndDate
         )

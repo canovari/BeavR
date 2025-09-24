@@ -32,6 +32,7 @@ struct Deal: Identifiable, Codable, Hashable {
     let discount: String
     let description: String?
     let location: String?
+    let link: String?
     let startDate: Date
     let endDate: Date?
     let status: String?
@@ -46,6 +47,7 @@ struct Deal: Identifiable, Codable, Hashable {
         case discount
         case description
         case location
+        case link
         case startDate
         case endDate
         case status
