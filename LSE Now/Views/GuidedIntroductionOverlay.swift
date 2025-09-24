@@ -4,6 +4,7 @@ import CoreGraphics
 struct GuidedIntroductionOverlay: View {
     @Binding var isPresented: Bool
     @Binding var selectedTab: Int
+    var tabIconFrames: [Int: CGRect] = [:]
     var onFinish: () -> Void
 
     @State private var currentStep = 0
@@ -281,14 +282,25 @@ struct GuidedIntroductionOverlay: View {
         let totalTabs = max(steps.count, 1)
         let currentIndex = steps[currentStep].tabSelection
         let clampedIndex = min(max(currentIndex, 0), totalTabs - 1)
+
+        if let iconFrame = tabIconFrames[clampedIndex] {
+            let overlayFrame = geometry.frame(in: .global)
+            let center = CGPoint(
+                x: iconFrame.midX - overlayFrame.minX,
+                y: iconFrame.midY - overlayFrame.minY
+            )
+            let diameter = max(iconFrame.width, iconFrame.height) + 36
+            return HighlightCircleInfo(center: center, diameter: diameter)
+        }
+
         let width = geometry.size.width
         let segmentWidth = width / CGFloat(totalTabs)
         let centerX = segmentWidth * (CGFloat(clampedIndex) + 0.5)
         let bottomInset = geometry.safeAreaInsets.bottom
-        let tabBarHeight: CGFloat = 49
-        let verticalOffset: CGFloat = 4
+        let tabBarHeight: CGFloat = 56
+        let verticalOffset: CGFloat = -6
         let centerY = geometry.size.height - bottomInset - (tabBarHeight / 2) - verticalOffset
-        let diameter: CGFloat = 118
+        let diameter: CGFloat = 88
 
         return HighlightCircleInfo(center: CGPoint(x: centerX, y: centerY), diameter: diameter)
     }
