@@ -16,6 +16,7 @@ struct Post: Identifiable, Codable, Hashable {
     let longitude: Double?
     let creator: String?
     let contact: ContactInfo?   // ✅ Reference only, don’t redeclare
+    let link: String?
     let likesCount: Int
     let likedByMe: Bool
 
@@ -59,6 +60,7 @@ struct Post: Identifiable, Codable, Hashable {
             longitude: longitude,
             creator: creator,
             contact: contact,
+            link: link,
             likesCount: likesCount,
             likedByMe: likedByMe
         )
@@ -83,6 +85,7 @@ extension Post {
             longitude: longitude,
             creator: creator,
             contact: contact,
+            link: link,
             likesCount: likesCount,
             likedByMe: likedByMe
         )

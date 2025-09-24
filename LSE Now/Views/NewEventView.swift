@@ -7,72 +7,73 @@ struct NewEventView: View {
                 Color(.systemGroupedBackground)
                     .ignoresSafeArea()
 
-                VStack(spacing: 20) {
-                    // Title (same style as Explore / Feed)
-                    Text("New Event")
-                        .font(.largeTitle)
-                        .bold()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal)
-                        .padding(.top, 44)
+                ScrollView {
+                    VStack(spacing: 24) {
+                        // Title (same style as Explore / Feed)
+                        Text("New Event")
+                            .font(.largeTitle)
+                            .bold()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.top, 44)
 
-                    // Main buttons
-                    VStack(spacing: 16) {
-                        NavigationLink {
-                            AddEventView()
-                        } label: {
-                            HubRectButton(icon: "plus.circle.fill", title: "Add Event")
+                        // Main buttons
+                        VStack(spacing: 16) {
+                            NavigationLink {
+                                AddEventView()
+                            } label: {
+                                HubRectButton(icon: "plus.circle.fill", title: "Add Event")
+                            }
+
+                            NavigationLink {
+                                AddDealView()
+                            } label: {
+                                HubRectButton(icon: "tag.fill", title: "Add Deal")
+                            }
+
+                            NavigationLink {
+                                MyEventsView(mode: .likedOnly)
+                            } label: {
+                                HubRectButton(icon: "heart.fill", title: "Liked Events")
+                            }
+
+                            NavigationLink {
+                                MyEventsView(mode: .submittedOnly)
+                            } label: {
+                                HubRectButton(icon: "calendar.badge.clock", title: "Submitted Events")
+                            }
+
+                            NavigationLink {
+                                MyProfileView()
+                            } label: {
+                                HubRectButton(icon: "person.crop.circle.fill", title: "My Profile")
+                            }
+
+                            NavigationLink {
+                                HelpView()
+                            } label: {
+                                HubRectButton(icon: "questionmark.circle.fill", title: "Help / How to Post")
+                            }
                         }
 
+                        // Settings button at bottom
                         NavigationLink {
-                            AddDealView()
+                            SettingsView()
                         } label: {
-                            HubRectButton(icon: "tag.fill", title: "Add Deal")
+                            Text("Settings")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color(.systemGray5))
+                                .cornerRadius(12)
                         }
-
-                        NavigationLink {
-                            MyEventsView(mode: .likedOnly)
-                        } label: {
-                            HubRectButton(icon: "heart.fill", title: "Liked Events")
-                        }
-
-                        NavigationLink {
-                            MyEventsView(mode: .submittedOnly)
-                        } label: {
-                            HubRectButton(icon: "calendar.badge.clock", title: "Submitted Events")
-                        }
-
-                        NavigationLink {
-                            MyProfileView()
-                        } label: {
-                            HubRectButton(icon: "person.crop.circle.fill", title: "My Profile")
-                        }
-
-                        NavigationLink {
-                            HelpView()
-                        } label: {
-                            HubRectButton(icon: "questionmark.circle.fill", title: "Help / How to Post")
-                        }
+                        .padding(.bottom, 10)
                     }
                     .padding(.horizontal)
-
-                    Spacer()
-
-                    // Settings button at bottom
-                    NavigationLink {
-                        SettingsView()
-                    } label: {
-                        Text("Settings")
-                            .font(.headline)
-                            .foregroundColor(.primary)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color(.systemGray5))
-                            .cornerRadius(12)
-                    }
-                    .padding(.horizontal)
-                    .padding(.bottom, 30)
+                    .padding(.bottom, 40)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                .scrollIndicators(.hidden)
             }
         }
     }

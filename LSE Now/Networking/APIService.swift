@@ -92,6 +92,7 @@ final class APIService {
             organization: draft.organization,
             category: draft.category,
             contact: draft.contact,
+            link: draft.link,
             latitude: draft.latitude,
             longitude: draft.longitude,
             creator: draft.creator
@@ -188,6 +189,7 @@ final class APIService {
             discount: payload.discount,
             description: payload.description,
             location: payload.location,
+            link: payload.link,
             startDate: payload.startDate,
             endDate: payload.endDate,
             creator: creatorEmail
@@ -485,6 +487,7 @@ private struct EventSubmissionPayload: Encodable {
     let organization: String
     let category: String
     let contact: ContactInfo?
+    let link: String?
     let latitude: Double
     let longitude: Double
     let creator: String
@@ -504,6 +507,7 @@ struct DealSubmissionPayload: Encodable {
     let discount: String
     let description: String
     let location: String?
+    let link: String?
     let startDate: Date
     let endDate: Date?
 }
@@ -514,6 +518,7 @@ private struct DealSubmissionRequest: Encodable {
     let discount: String
     let description: String
     let location: String?
+    let link: String?
     let startDate: Date
     let endDate: Date?
     let creator: String

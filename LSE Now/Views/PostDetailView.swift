@@ -5,6 +5,7 @@ import Combine
 
 struct PostDetailView: View {
     @EnvironmentObject private var authViewModel: AuthViewModel
+    @Environment(\.openURL) private var openURLAction
 
     @ObservedObject private var viewModel: PostListViewModel
     @State private var currentPost: Post
@@ -76,6 +77,17 @@ struct PostDetailView: View {
 
                 if let desc = currentPost.description, !desc.isEmpty {
                     descriptionView(for: desc)
+                }
+
+                if let link = currentPost.link, let url = sanitizedURL(from: link) {
+                    Button {
+                        openURLAction(url)
+                    } label: {
+                        Label("Open Link", systemImage: "link")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color("LSERed"))
                 }
 
                 if let lat = currentPost.latitude, let lon = currentPost.longitude {
@@ -358,6 +370,32 @@ struct PostDetailView: View {
         case "email": return "envelope.fill"
         default: return "person.crop.circle"
         }
+    }
+
+    private func sanitizedURL(from rawLink: String) -> URL? {
+        let trimmed = rawLink.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        if let url = URL(string: trimmed), url.scheme != nil {
+            return url
+        }
+
+        let prefixed = "https://" + trimmed
+        if let url = URL(string: prefixed) {
+            return url
+        }
+
+        let allowed = CharacterSet.urlFragmentAllowed
+            .union(.urlHostAllowed)
+            .union(.urlPathAllowed)
+            .union(.urlQueryAllowed)
+        let encoded = trimmed.addingPercentEncoding(withAllowedCharacters: allowed) ?? trimmed
+
+        if let url = URL(string: encoded), url.scheme != nil {
+            return url
+        }
+
+        return URL(string: "https://" + encoded)
     }
 
     private func instagramURL(from value: String) -> URL? {
